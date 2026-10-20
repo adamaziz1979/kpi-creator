@@ -1,0 +1,77 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ClearCompare: KPI Creator outputs</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">ClearCompare: KPI Creator outputs</label></nav><section id="s0"><p class="src">File: index.md</p><h1 id="s0-top">ClearCompare: KPI Creator outputs</h1>
+<blockquote><b>Test case.</b> ClearCompare is a made-up organisation, and every number comes from seeded sample data. Built with the KPI Creator agent team (Garry, Kewpie, Visalli, Jennifer, coordinated by Ovy).</blockquote>
+<div class="proc" role="list" aria-label="Where we are in the process"><div class="st done" role="listitem"><div class="num">Stage 1</div><div class="nm">Business Requirements</div><div class="ow">Garry</div><div class="nt">Approved 20-Oct-26</div></div><span class="ar" aria-hidden="true">→</span><div class="st done" role="listitem"><div class="num">Stage 2</div><div class="nm">KPI Development</div><div class="ow">Kewpie</div><div class="nt">Approved 21-Oct-26</div></div><span class="ar" aria-hidden="true">→</span><div class="st current" role="listitem"><div class="num">Stage 3</div><div class="nm">Data Visualisation</div><div class="ow">Visalli</div><div class="nt">Standard dashboard and options</div></div><span class="ar" aria-hidden="true">→</span><div class="st next" role="listitem"><div class="num">Stage 4</div><div class="nm">Dashboard Creator</div><div class="ow">Jennifer</div><div class="nt">Standards checked, first draft</div></div><span class="ar" aria-hidden="true">→</span><div class="st next" role="listitem"><div class="num">Stage 5</div><div class="nm">Stakeholder Review and Handover</div><div class="ow">CCO and Adam</div><div class="nt">Walk-through, sign-off, go-live</div></div></div><!--/proc--><div class="toc" role="navigation" aria-label="Contents"><b>In this document</b><ol><li><a href="#s0-h0" data-jump="s0-h0">Stage 1: Business Requirements (approved 20-Oct-26)</a></li><li><a href="#s0-h1" data-jump="s0-h1">Stage 2: KPI Development (approved 21-Oct-26)</a></li><li><a href="#s0-h2" data-jump="s0-h2">Still to come</a></li></ol></div>
+<h2 id="s0-h0">Stage 1: Business Requirements (approved 20-Oct-26)</h2>
+<table><thead><tr><th>#</th><th>Output</th></tr></thead><tbody><tr><td style="white-space:nowrap">01</td><td><a href="stage-1/01-interview-notes.html">Interview Notes (Stage 1, test mode)</a></td></tr><tr><td style="white-space:nowrap">02</td><td><a href="stage-1/02-meeting-script.html">Requirements Meeting Script (Stage 1, simulated)</a></td></tr><tr><td style="white-space:nowrap">03</td><td><a href="stage-1/03-business-requirements.html">Business Requirements</a></td></tr><tr><td style="white-space:nowrap">04</td><td><a href="stage-1/04-business-requirements-with-data-mapping.html">Business Requirements with Data Mapping</a></td></tr><tr><td style="white-space:nowrap">05</td><td><a href="stage-1/05-project-plan.html">Project Plan</a></td></tr><tr><td style="white-space:nowrap">06</td><td><a href="stage-1/06-stage-1-review.html">Stage 1 Review: what changed</a></td></tr></tbody></table>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h1">Stage 2: KPI Development (approved 21-Oct-26)</h2>
+<table><thead><tr><th>#</th><th>Output</th></tr></thead><tbody><tr><td style="white-space:nowrap">07</td><td><a href="stage-2/07-dataset-description.html">Dataset Description</a></td></tr><tr><td style="white-space:nowrap">08</td><td><a href="stage-2/08-calculation-script.html">Kewpie's calculation script</a></td></tr><tr><td style="white-space:nowrap">08</td><td><a href="stage-2/08-kpi-results.html">KPI results (sample data)</a></td></tr><tr><td style="white-space:nowrap">09</td><td><a href="stage-2/09-kpi-calculation-pack.html">KPI Calculation Pack</a></td></tr><tr><td style="white-space:nowrap">10</td><td><a href="stage-2/10-business-requirements.html">Business Requirements</a></td></tr><tr><td style="white-space:nowrap">10</td><td><a href="stage-2/10-business-requirements-with-data-mapping.html">Business Requirements with Data Mapping</a></td></tr><tr><td style="white-space:nowrap">11</td><td><a href="stage-2/11-stage-2-review.html">Stage 2 Review: Kewpie's results (approved)</a></td></tr></tbody></table>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h2">Still to come</h2>
+<p>Stage 3 (Standard dashboard, Visalli), Stage 4 (finished first draft, Jennifer) and Stage 5 (stakeholder sign-off).</p><a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>

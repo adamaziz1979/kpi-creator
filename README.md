@@ -11,3 +11,7 @@ An AI agent team that takes a business problem from first conversation to a fini
 Status: in design, 20-Oct-26. Dashboards for the test cases will be published here.
 
 Built by [Adam Aziz](https://www.linkedin.com/in/adamaziz1979/) with Claude Code.
+
+## ClearCompare test case
+
+Every approved output, stage by stage: https://adamaziz1979.github.io/kpi-creator/clearcompare/

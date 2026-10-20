@@ -1,0 +1,111 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Stage 1 Review: what changed</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">Stage 1 Review: what changed</label></nav><section id="s0"><p class="src">File: stage-1-06-stage-1-review.md</p><h1 id="s0-top">Stage 1 Review: what changed</h1><div class="toc" role="navigation" aria-label="Contents"><b>In this document</b><ol><li><a href="#s0-h0" data-jump="s0-h0">Change 1: The open question now asks about target timing</a></li><li><a href="#s0-h1" data-jump="s0-h1">Change 2: Timing options added to the net revenue per lead target</a></li><li><a href="#s0-h2" data-jump="s0-h2">Change 3: "KPI Requirements Table" is now "Business Requirements with Data Mapping"</a></li><li><a href="#s0-h3" data-jump="s0-h3">Change 4: Gantt chart added to the Project Plan</a></li><li><a href="#s0-h4" data-jump="s0-h4">Change 5: 2x2 RAID grid added to the Project Plan</a></li><li><a href="#s0-h5" data-jump="s0-h5">Change 6: Milestones moved into one lane above the phases</a></li><li><a href="#s0-h6" data-jump="s0-h6">Change 7: "Business Requirements Document" is now "Business Requirements"</a></li><li><a href="#s0-h7" data-jump="s0-h7">Still waiting on you</a></li></ol></div>
+<p><b>ClearCompare (test case)</b> · 20-Oct-26 · Round 2 of changes, for Adam to review</p>
+<p>These are the 7 changes you asked for, shown as Before and After. Use the tabs at the top to see each updated document in full.</p>
+<hr>
+<h2 id="s0-h0">Change 1: The open question now asks about target timing</h2>
+<p>Where: <b>Business Requirements, open questions list</b> (last row)</p>
+<table><thead><tr><th></th><th>Open question</th></tr></thead><tbody><tr class="before"><td><b>Before</b></td><td>"What is the cost to the business if nothing changes in the next 6 months?" · Until it's answered: the problem can't be sized in dollars</td></tr><tr class="after"><td><b>After</b></td><td><b>"When do we need to reach our KPI targets? Do targets need to be met within the next 6, 9 or 12 months?"</b> · Owner: CCO · Until it's answered: targets use 30-Jun-27 (about 8 months away)</td></tr></tbody></table>
+<p><b>Overlap to note:</b> the list already has a similar question, "What are the target dates for each objective?". Should the older one be removed so the CCO is only asked once? I haven't removed it.</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h1">Change 2: Timing options added to the net revenue per lead target</h2>
+<p>Where: <b>Business Requirements, Top 5 KPI "1. Net revenue per lead", Target row</b>, and the same row in Business Requirements with Data Mapping</p>
+<table><thead><tr><th></th><th>Net revenue per lead: target</th></tr></thead><tbody><tr class="before"><td><b>Before</b></td><td>"Back to the April to June 2026 level by 30-Jun-27"</td></tr><tr class="after"><td><b>After</b></td><td>"Back to the April to June 2026 level by 30-Jun-27"<br><b>Timing to confirm with the CCO:</b> within 3, 6 or 9 months, or 1 or 2 quarters<br>· 3 months: by 31-Jan-27<br>· 6 months: by 30-Apr-27<br>· 9 months: by 31-Jul-27<br>· 1 quarter: by 31-Mar-27 (end of the January to March quarter)<br>· 2 quarters: by 30-Jun-27 (end of the April to June quarter)</td></tr></tbody></table>
+<p><b>How the dates are worked out:</b> months are counted from 1-Nov-26. Quarters are full calendar quarters after the current one (October to December 2026). The current proposal, 30-Jun-27, is the same as the 2-quarter option.</p>
+<p><b>Also fixed:</b> Business Requirements with Data Mapping still said "Back to the Q4 FY26 level". It now says "April to June 2026", the same as the Business Requirements.</p>
+<p><b>Question:</b> the other four Top 5 KPIs also use 30-Jun-27. Should they get the same timing options?</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h2">Change 3: "KPI Requirements Table" is now "Business Requirements with Data Mapping"</h2>
+<table><thead><tr><th></th><th>Name</th></tr></thead><tbody><tr class="before"><td><b>Before</b></td><td>"KPI Requirements Table" · file: <code>2026.10.20 - ClearCompare - 01 KPI Requirements Table.md</code></td></tr><tr class="after"><td><b>After</b></td><td><b>"Business Requirements with Data Mapping"</b> · file: <code>2026.10.20 - ClearCompare - 01 Business Requirements with Data Mapping.md</code></td></tr></tbody></table>
+<p>Renamed in 7 files (15 places):</p>
+<ul><li>The KPI Generator Process (now version 1.4)</li><li>The Requirements Interview Guide</li><li>The KPI Creator Design</li><li>Garry's and Kewpie's agent files</li><li>The ClearCompare Business Requirements</li><li>The renamed document itself</li></ul>
+<p>It's also renamed on the Miro diagram.</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h3">Change 4: Gantt chart added to the Project Plan</h2>
+<p>Where: <b>Project Plan, "Milestones and gates" section</b> (open the "ClearCompare: Project Plan" tab)</p>
+<table><thead><tr><th></th><th>Milestones and gates</th></tr></thead><tbody><tr class="before"><td><b>Before</b></td><td>A table of 5 milestones and dates only</td></tr><tr class="after"><td><b>After</b></td><td>A Gantt chart above the table: the 5 project phases as bars, with their dates and owners, the 5 approval gates as ◆ markers, and today's date as a dashed line. Hover over a bar or ◆ to see its dates. The table stays underneath</td></tr></tbody></table>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h4">Change 5: 2x2 RAID grid added to the Project Plan</h2>
+<p>Where: <b>Project Plan, "RAID log" section</b> (open the "ClearCompare: Project Plan" tab)</p>
+<table><thead><tr><th></th><th>RAID log</th></tr></thead><tbody><tr class="before"><td><b>Before</b></td><td>A table only. Short words split across lines ("R- 1", "Op en", "Financ e")</td></tr><tr class="after"><td><b>After</b></td><td>A 2x2 grid above the table: <b>Risks (2)</b>, <b>Assumptions (1)</b>, <b>Issues (2)</b> and <b>Dependencies (1)</b>. Each item shows its impact (High, Medium or Low) as a label, with its owner and action. The table stays underneath, and words no longer split mid-word in any table</td></tr></tbody></table>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h5">Change 6: Milestones moved into one lane above the phases</h2>
+<p>Where: <b>Project Plan, "Milestones and gates" Gantt chart</b></p>
+<table><thead><tr><th></th><th>Gantt chart layout</th></tr></thead><tbody><tr class="before"><td><b>Before</b></td><td>5 phase bars, then 5 separate milestone rows underneath (10 rows)</td></tr><tr class="after"><td><b>After</b></td><td>One shaded <b>Milestones</b> lane across the top, holding all 5 approval gates as ◆ markers with their names and dates. The 5 phase bars sit underneath (6 rows). Labels are spread over 4 levels so none overlap</td></tr></tbody></table>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h6">Change 7: "Business Requirements Document" is now "Business Requirements"</h2>
+<table><thead><tr><th></th><th>Name</th></tr></thead><tbody><tr class="before"><td><b>Before</b></td><td>"Business Requirements Document", shortened everywhere to "BRD" · file: <code>2026.10.20 - ClearCompare - 01 BRD.md</code></td></tr><tr class="after"><td><b>After</b></td><td><b>"Business Requirements"</b> everywhere, with no abbreviation · file: <code>2026.10.20 - ClearCompare - 01 Business Requirements.md</code></td></tr></tbody></table>
+<p>Renamed in 12 files (56 places), including:</p>
+<ul><li>The KPI Generator Process (now version 1.5)</li><li>The guides</li><li>Garry's and Kewpie's agent files</li><li>The Design and Test Results documents</li><li>The Project Plan and its milestone "Stage 1: Business Requirements approved"</li><li>The rule checker</li><li>The Miro diagram</li></ul>
+<p>Grammar was adjusted where needed, for example "The Business Requirements <b>are</b> the checklist".</p>
+<p><b>Note:</b> the two documents now have similar names, "Business Requirements" and "Business Requirements with Data Mapping". The first is the full requirements; the second is the KPI table with how each KPI is measured.</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h7">Still waiting on you</h2>
+<ul><li><b>Approve Stage 1</b> for ClearCompare, so Kewpie can start the calculations</li><li><b>Remove the older timing question</b> ("What are the target dates for each objective?")? Yes or no</li><li><b>Add timing options to the other four Top 5 KPI targets?</b> Yes or no</li></ul><a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>

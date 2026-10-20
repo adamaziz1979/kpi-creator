@@ -1,0 +1,181 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ClearCompare: Requirements Meeting Script (Stage 1, simulated)</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">ClearCompare: Requirements Meeting Script (Stage 1, simulated)</label></nav><section id="s0"><p class="src">File: stage-1-02-meeting-script.md</p><h1 id="s0-top">ClearCompare: Requirements Meeting Script (Stage 1, simulated)</h1><div class="toc" role="navigation" aria-label="Contents"><b>In this document</b><ol><li><a href="#s0-h0" data-jump="s0-h0">Garry's meeting summary</a></li><li><a href="#s0-h1" data-jump="s0-h1">Opening (00:00 to 02:00)</a></li><li><a href="#s0-h2" data-jump="s0-h2">The problem (02:00 to 06:00)</a></li><li><a href="#s0-h3" data-jump="s0-h3">Outcomes and numbers (06:00 to 10:00)</a></li><li><a href="#s0-h4" data-jump="s0-h4">Audience and decisions (10:00 to 13:00)</a></li><li><a href="#s0-h5" data-jump="s0-h5">What they want to know, and what they'd do (13:00 to 18:00)</a></li><li><a href="#s0-h6" data-jump="s0-h6">Targets and dates (18:00 to 20:00)</a></li><li><a href="#s0-h7" data-jump="s0-h7">Data (20:00 to 24:00)</a></li><li><a href="#s0-h8" data-jump="s0-h8">Constraints and chart preferences (24:00 to 26:00)</a></li><li><a href="#s0-h9" data-jump="s0-h9">Playback (26:00 to 29:00)</a></li><li><a href="#s0-h10" data-jump="s0-h10">Close (29:00 to 30:00)</a></li><li><a href="#s0-h11" data-jump="s0-h11">Checklist at close</a></li><li><a href="#s0-h12" data-jump="s0-h12">Change log</a></li></ol></div>
+<blockquote><b>Test case.</b> ClearCompare is a made-up organisation. Priya is played by Ovy, answering only from <code>stakeholder-file.md</code>. Anything not in that file gets "I don't know". Items marked "only if asked" are given only when Garry's question touches them.</blockquote>
+<table><thead><tr><th>Field</th><th>Detail</th></tr></thead><tbody><tr><td style="white-space:nowrap"><b>Date</b></td><td>20-Oct-26</td></tr><tr><td><b>Length</b></td><td>30 minutes (simulated)</td></tr><tr><td><b>Interviewer</b></td><td>Garry, KPI Creator Stage 1</td></tr><tr><td><b>Stakeholder</b></td><td>Priya, Chief Commercial Officer (played by Ovy)</td></tr><tr><td><b>Observer</b></td><td>Adam (acting subject matter expert for sign-off)</td></tr><tr><td><b>Questions used</b></td><td>7 of 7, plus 4 probes</td></tr><tr><td><b>Source record</b></td><td><code>2026.10.20 - ClearCompare - 01 Interview Notes.md</code></td></tr></tbody></table>
+<p><b>How to read this script</b></p>
+<ul><li><b>Bold name:</b> who is speaking</li><li><i>Italic lines in brackets:</i> Garry's private notes, not said out loud</li><li>✅ marks a stopping-checklist line Garry ticks off as it's covered</li></ul>
+<hr>
+<h2 id="s0-h0">Garry's meeting summary</h2>
+<h3>Main points</h3>
+<ul><li><b>The real problem:</b> net revenue per lead fell about 9% last quarter, and nobody can split the fall into its causes. Marketing, sales and finance each argue from their own report</li><li><b>Three objectives:</b> grow net commission revenue profitably; convert leads more efficiently; explain performance changes within a day, not a week</li><li><b>One firm target:</b> health insurance conversion back to 11% (now 9.4%). No dates given</li><li><b>Revenue must be net:</b> partners claw back commission on health and life policies cancelled within 90 days. Today's reporting shows gross revenue, which hides this</li><li><b>Two audiences:</b> the CCO and exec team weekly, at the Monday exec meeting; vertical heads and marketing daily</li><li><b>Data:</b> leads, contacts, sales with clawbacks, marketing spend and complaints, 24 months each, in Snowflake, shown in Tableau. 6% of sales can't be matched to a lead; Manila call outcomes are missing before Mar-25</li><li><b>Must haves on the page:</b> complaints stay visible; no agent-level data on the exec view; a bridge from last quarter to this quarter that adds up</li><li><b>Top 5 measures proposed:</b> net revenue per lead, cost per acquisition by channel, 90-day clawback rate, lead-to-sale conversion by product area, speed to contact</li><li><b>Confirmed by Priya:</b> the problem and the objectives. <b>Not confirmed:</b> every owner, action, date and target except health at 11%. These are Garry's proposals</li></ul>
+<h3>Action items</h3>
+<table><thead><tr><th>#</th><th>Action</th><th>Owner</th><th>Due</th></tr></thead><tbody><tr><td style="white-space:nowrap">1</td><td>Write the Business Requirements Document, the KPI Requirements Table with draft calculations, and the Project Plan</td><td style="white-space:nowrap">Garry</td><td>Before the Monday exec meeting, 26-Oct-26</td></tr><tr><td style="white-space:nowrap">2</td><td>Review and sign off Garry's proposed owners, actions, dates and targets</td><td>Adam (acting subject matter expert)</td><td>At the Stage 1 gate</td></tr><tr><td style="white-space:nowrap">3</td><td>Answer the 4 open questions below</td><td style="white-space:nowrap">Priya</td><td>Before Stage 2 starts</td></tr><tr><td style="white-space:nowrap">4</td><td>Test every draft calculation on the Snowflake data, and set baselines and the pace needed</td><td style="white-space:nowrap">Kewpie</td><td>After Stage 1 sign-off</td></tr></tbody></table>
+<h3>Open questions for Priya</h3>
+<ol><li>What are the target dates for each objective?</li><li>Who acts when each measure goes off track?</li><li>Will the dashboard be used on a screen, a phone or in a printed board pack?</li><li>Should the current quarter's clawbacks be estimated, since they take 90 days to land?</li></ol>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h1">1. Opening (00:00 to 02:00)</h2>
+<p><b>Garry:</b> Thanks for the time, Priya. I'm Garry. My job today is to understand the business problem, then agree with you which measures matter, why, and what someone does when one goes off track. I'll ask up to 7 questions, one or two at a time. At the end I'll play it all back and you tell me if I've got it right.</p>
+<p><b>Priya:</b> Fine. I've got 30 minutes. I want something I can use in the Monday exec meeting.</p>
+<p><b>Garry:</b> Understood. Anything I don't hear today I'll log as an open question rather than guess.</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h2">2. The problem (02:00 to 06:00)</h2>
+<p><b>Garry (Q1, Why / What):</b> What's the business problem, and why does it matter now?</p>
+<p><b>Priya:</b> Revenue per lead dropped 9% last quarter. Marketing blames sales, sales blames lead quality, and finance says it's clawbacks. I need to know which.</p>
+<p><i>(Garry: three competing explanations, three teams, no shared answer. The stated problem is "revenue per lead fell". The real problem looks like "nobody can split a movement into its causes". Check this in the playback, don't lead the witness.)</i></p>
+<p><b>Garry (probe):</b> What happens if nothing changes in the next 6 months?</p>
+<p><b>Priya:</b> I don't know.</p>
+<p><i>(Garry: no cost-of-inaction figure. Log as open. Move on.)</i></p>
+<p>✅ <b>What:</b> problem as stated captured</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h3">3. Outcomes and numbers (06:00 to 10:00)</h2>
+<p><b>Garry (Q2, What):</b> What are the 2 or 3 outcomes the business is trying to achieve? And how would you know each one is happening: any numbers in mind?</p>
+<p><b>Priya:</b> Three things:</p>
+<ul><li>Grow net commission revenue profitably</li><li>Convert leads more efficiently</li><li>Explain performance changes within a day, not a week</li></ul>
+<p><b>Priya:</b> On numbers: cut cost per acquisition on paid search, lift health insurance conversion back to 11% (it's 9.4% now), and reduce 90-day clawbacks.</p>
+<p><i>(Garry: the probe surfaced the three sub-objectives. Only one has a target value: health conversion at 11%. "Net" in the first objective matters: today's reporting may be gross. Ask about revenue rules in Q4.)</i></p>
+<p><b>Garry:</b> So the three objectives, with sub-objectives:</p>
+<ul><li><b>Grow net commission revenue profitably:</b> cut paid search cost per acquisition, reduce 90-day clawbacks</li><li><b>Convert leads more efficiently:</b> health conversion back to 11%</li><li><b>Explain performance changes within a day:</b> no sub-objective</li></ul>
+<p>Have I grouped those correctly?</p>
+<p><b>Priya:</b> Yes.</p>
+<p>✅ <b>What:</b> 3 objectives and 3 sub-objectives</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h4">4. Audience and decisions (10:00 to 13:00)</h2>
+<p><b>Garry (Q3, Who):</b> Who will use this, and what decisions will they make with it?</p>
+<p><b>Priya:</b></p>
+<ul><li>Me and the exec team, weekly, in the Monday exec meeting</li><li>Vertical heads and marketing, daily</li></ul>
+<p><b>Garry (probe):</b> What format: a screen in the meeting, on a phone, or a printed board pack?</p>
+<p><b>Priya:</b> I don't know.</p>
+<p><i>(Garry: two audiences, two rhythms. Exec view weekly, operational view daily. Format unknown: open question. Decisions are implied, not stated: exec decides where to push spend and sales effort; vertical heads and marketing make daily channel and team changes. Label as Strong Inference.)</i></p>
+<p>✅ <b>Who:</b> audience and rhythm · ⚠️ format open</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h5">5. What they want to know, and what they'd do (13:00 to 18:00)</h2>
+<p><i>(Garry: the most valuable question. Ask it per outcome.)</i></p>
+<p><b>Garry (Q4, Why / Action):</b> Take each outcome in turn. What do you want to know, and what would you <b>do</b> if it went off track?</p>
+<p><b>Priya:</b> When a number moves, the dashboard tells me why before anyone asks.</p>
+<p><b>Garry:</b> On revenue specifically: how is commission earned and reported today?</p>
+<p><b>Priya:</b> Partners claw back commission if a health or life policy is cancelled within 90 days. Reporting today shows gross revenue.</p>
+<p><i>(Garry: this is the "only if asked" commission rule. It explains why finance blames clawbacks, and why gross reporting hides it. Net revenue per lead must be net of clawbacks, and the latest 90 days of clawbacks are still landing, so the current quarter is incomplete.)</i></p>
+<p><b>Garry (probe):</b> If revenue per lead or conversion went off track, who would act on it, and what would they do?</p>
+<p><b>Priya:</b> I don't know.</p>
+<p><i>(Garry: no actions or owners given. A KPI without an action and an owner fails the Must Have test. I'll propose actions and owners as Working Hypotheses, clearly labelled, for Adam to sign off as subject matter expert. Never present them as Priya's words.)</i></p>
+<p>✅ <b>Why:</b> why now and why each measure · ⚠️ actions and owners to be proposed</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h6">6. Targets and dates (18:00 to 20:00)</h2>
+<p><b>Garry (Q5, When):</b> What targets and dates are you working to?</p>
+<p><b>Priya:</b> Health conversion back to 11%.</p>
+<p><b>Garry:</b> Any date for that, or targets for the other outcomes?</p>
+<p><b>Priya:</b> I don't know.</p>
+<p><i>(Garry: one target value, no dates. Propose dates and FY26-based targets as Working Hypotheses. Log "target dates" as open.)</i></p>
+<p>⚠️ <b>When:</b> one target, no dates</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h7">7. Data (20:00 to 24:00)</h2>
+<p><b>Garry (Q6, Where):</b> What data exists today, and what do you trust or not trust about it?</p>
+<p><b>Priya:</b> We've got leads, contacts, sales with clawbacks, marketing spend by day and channel, and complaints. 24 months of history. It's all in Snowflake, and we use Tableau.</p>
+<p><b>Garry (probe):</b> Anything you don't trust?</p>
+<p><b>Priya:</b> 6% of sales can't be matched back to a lead, because of manual partner uploads. And Manila call outcomes were in a separate system before March 2025.</p>
+<p>*(Garry: five tables, 24 months each. Two known gaps:</p>
+<ul><li>Unmatched sales (6%) understate conversion and can't be tied to a channel. Keep them in revenue, exclude them from conversion and cost per acquisition, and count them</li><li>Manila outcomes blank before Mar-25. Contact times may still be usable</li></ul>
+<p>Refresh frequency not stated: assume daily from the "daily" audience, label as Working Hypothesis.)*</p>
+<p>✅ <b>Where:</b> sources, grain, history, known gaps</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h8">8. Constraints and chart preferences (24:00 to 26:00)</h2>
+<p><b>Garry (Q7, Constraints):</b> Anything I must or mustn't do: privacy, tools, chart likes and dislikes?</p>
+<p><b>Priya:</b> We're financial services. Complaints and compliance breaches must stay visible.</p>
+<p><b>Priya:</b> Agent-level data is fine for team leaders, but not on the exec view.</p>
+<p><b>Priya:</b> And show me a bridge from last quarter to this quarter. I hate funnels that don't add up.</p>
+<p>*(Garry:</p>
+<ul><li>Complaints must be a measure, not a footnote: complaints per 1,000 sales sits under conversion as a counterweight, so conversion isn't bought with mis-selling</li><li>Agent-level conversion goes to the backlog for the exec view</li><li>The bridge is how "explain within a day" gets met: split the change in net revenue into volume, mix, conversion and clawbacks, and the pieces must add up to the total</li><li>Tools: Tableau and Snowflake noted as constraints)*</li></ul>
+<p>✅ All 7 questions used. Checklist complete or logged as open.</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h9">9. Playback (26:00 to 29:00)</h2>
+<p><b>Garry:</b> Here's what I've heard, in one line:</p>
+<blockquote><b>Net revenue per lead fell about 9% last quarter, and nobody can say whether the mix of leads, sales conversion or cancelled policies caused it. Without one trusted answer, teams argue about the numbers instead of fixing the problem.</b></blockquote>
+<p><b>Garry:</b> In more detail: you want to grow net commission revenue profitably, convert leads more efficiently, and explain any movement within a day. You and the exec team will use this weekly, at the Monday meeting, to decide where to push or pull marketing spend and sales effort. Vertical heads and marketing will use it daily.</p>
+<p><b>Garry:</b> The five measures that drive action are:</p>
+<table><thead><tr><th>Measure</th><th>Objective</th><th>Type</th><th>Proposed owner</th><th>Proposed target</th></tr></thead><tbody><tr><td>Net revenue per lead</td><td>Grow net commission revenue profitably; Explain changes within a day</td><td style="white-space:nowrap">Lagging</td><td style="white-space:nowrap">CCO</td><td>Back to the April to June 2026 level by 30-Jun-27</td></tr><tr><td>Cost per acquisition, by channel</td><td>Grow net commission revenue profitably</td><td style="white-space:nowrap">Lagging</td><td>Head of Marketing</td><td>Paid search 10% below its FY26 average by 30-Jun-27</td></tr><tr><td>90-day clawback rate</td><td>Grow net commission revenue profitably</td><td style="white-space:nowrap">Lagging</td><td>Vertical heads</td><td>Back to the FY26 average by 30-Jun-27</td></tr><tr><td>Lead-to-sale conversion, by product area</td><td>Convert leads more efficiently</td><td style="white-space:nowrap">Leading</td><td>Vertical heads</td><td>Health 11% (your number); others hold FY26 average</td></tr><tr><td>Speed to contact</td><td>Convert leads more efficiently</td><td style="white-space:nowrap">Leading</td><td>Head of Sales Operations</td><td>Median of 10 minutes or less by 31-Mar-27</td></tr></tbody></table>
+<p><b>Garry:</b> Underneath those sit three supporting measures: lead mix by product area (under net revenue per lead), health insurance conversion, and complaints per 1,000 sales (both under lead-to-sale conversion). The revenue bridge from last quarter to this quarter sits next to net revenue per lead and answers "why did it move".</p>
+<p><b>Garry:</b> I've parked 4 Nice to Haves: total leads, revenue by partner, agent-level conversion and website visits. None has an action or owner, or it breaks the exec-view rule.</p>
+<p><b>Garry:</b> To be clear on what came from you and what came from me:</p>
+<ul><li><b>From you:</b> the problem, the three objectives, the sub-objectives, health at 11%, the audiences, the data and gaps, the constraints, the bridge</li><li><b>My proposals:</b> every owner, every action, every date, and every target except health at 11%</li></ul>
+<p><b>Garry:</b> Still open:</p>
+<ol><li>Target dates</li><li>Action owners</li><li>The format: screen, phone or board pack</li><li>Whether the current quarter's clawbacks should be estimated, since they take 90 days to land</li></ol>
+<p><b>Garry:</b> Is this right?</p>
+<p><b>Priya:</b> The problem and the objectives are right. On the owners and dates, I don't know.</p>
+<p><i>(Garry: Priya confirms what's in her file. She can't confirm my proposals. In test mode, those pass to Adam at the Stage 1 gate.)</i></p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h10">10. Close (29:00 to 30:00)</h2>
+<p><b>Garry:</b> Thanks, Priya. Next steps:</p>
+<ol><li>I'll write up the Business Requirements Document, the full measures table with draft calculations, and a project plan</li><li>Adam reviews my proposed owners, actions and targets as subject matter expert</li><li>Once signed off, Kewpie tests every draft calculation against the Snowflake data and sets the baselines</li></ol>
+<p><b>Priya:</b> Good. Get it to me before Monday.</p>
+<hr>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h11">Checklist at close</h2>
+<table><thead><tr><th>Area</th><th>Status</th></tr></thead><tbody><tr><td style="white-space:nowrap"><b>Who</b></td><td>✅ Audiences and rhythm known · ⚠️ format open</td></tr><tr><td style="white-space:nowrap"><b>What</b></td><td>✅ Problem, 3 objectives, 3 sub-objectives</td></tr><tr><td><b>Where</b></td><td>✅ 5 tables, 24 months, 2 known gaps · refresh assumed daily (Working Hypothesis)</td></tr><tr><td style="white-space:nowrap"><b>When</b></td><td>⚠️ One target (health 11%), no dates · dates proposed by Garry</td></tr><tr><td style="white-space:nowrap"><b>Why</b></td><td>✅ Why now and why each measure · ⚠️ actions and owners proposed by Garry for sign-off</td></tr></tbody></table>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h12">Change log</h2>
+<table><thead><tr><th>Version</th><th>Date</th><th>Change</th><th>By</th></tr></thead><tbody><tr><td style="white-space:nowrap">1.0</td><td>20-Oct-26</td><td>Meeting script simulated from the stakeholder file and the Stage 1 interview notes</td><td style="white-space:nowrap">Garry</td></tr></tbody></table><a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>

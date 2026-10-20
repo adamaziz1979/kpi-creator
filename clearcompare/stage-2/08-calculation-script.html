@@ -1,0 +1,345 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ClearCompare: Kewpie&#x27;s calculation script</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">ClearCompare: Kewpie&#x27;s calculation script</label></nav><section id="s0"><p class="src">File: stage-2-08-calculation-script.md</p><h1>ClearCompare: Kewpie's calculation script</h1>
+<blockquote><b>Sample data.</b> Produced by Kewpie at Stage 2 and approved on 21-Oct-26.</blockquote>
+<pre class="code"><code>&quot;&quot;&quot;Kewpie, Stage 2: test Garry&#x27;s draft measures and calculate every Must Have KPI for ClearCompare.
+
+Usage: python -I kewpie_calculations.py &lt;data folder&gt; &lt;output kpi_results.json&gt;
+Sample data only (synthetic). Data cut-off: 30-Sep-26.
+Periods: FY26 = Jul-25 to Jun-26 · &quot;last quarter&quot; = Apr-Jun 26 · &quot;this quarter&quot; = Jul-Sep 26.
+&quot;&quot;&quot;
+import csv
+import json
+import statistics as st
+import sys
+from collections import defaultdict
+from datetime import date, datetime, timedelta
+from pathlib import Path
+
+CUTOFF = date(2026, 9, 30)
+MATURE = CUTOFF - timedelta(days=90)  # sales on or before this date have had 90 days for clawbacks
+CLAWBACK_VERTICALS = {&quot;health&quot;, &quot;life&quot;}
+VERTICALS = [&quot;health&quot;, &quot;home_loans&quot;, &quot;energy&quot;, &quot;life&quot;]
+
+
+def qtr(d):
+    return f&quot;{d.year}-Q{(d.month - 1) // 3 + 1}&quot;
+
+
+def month(d):
+    return f&quot;{d.year}-{d.month:02d}&quot;
+
+
+FY26 = {f&quot;2025-{m:02d}&quot; for m in range(7, 13)} | {f&quot;2026-{m:02d}&quot; for m in range(1, 7)}
+LAST_Q, THIS_Q = &quot;2026-Q2&quot;, &quot;2026-Q3&quot;
+LAST3 = [&quot;2026-06&quot;, &quot;2026-07&quot;, &quot;2026-08&quot;, &quot;2026-09&quot;]  # run rate = average monthly change Jun to Sep
+
+
+def load(folder):
+    rd = lambda n: list(csv.DictReader(open(folder / n, encoding=&quot;utf8&quot;)))
+    leads, contacts, sales, spend, complaints = (rd(n) for n in
+        [&quot;leads.csv&quot;, &quot;contacts.csv&quot;, &quot;sales.csv&quot;, &quot;marketing_spend.csv&quot;, &quot;complaints.csv&quot;])
+    for r in leads:
+        r[&quot;dt&quot;] = datetime.fromisoformat(r[&quot;created_ts&quot;])
+    for r in contacts:
+        r[&quot;dt&quot;] = datetime.fromisoformat(r[&quot;first_contact_ts&quot;])
+    for r in sales:
+        r[&quot;d&quot;] = date.fromisoformat(r[&quot;sale_date&quot;])
+        r[&quot;gross&quot;] = float(r[&quot;gross_commission&quot;])
+        r[&quot;claw&quot;] = float(r[&quot;clawback_amount&quot;] or 0)
+        r[&quot;cbd&quot;] = date.fromisoformat(r[&quot;clawback_date&quot;]) if r[&quot;clawback_date&quot;] else None
+    for r in spend:
+        r[&quot;d&quot;] = date.fromisoformat(r[&quot;date&quot;])
+        r[&quot;cost&quot;] = float(r[&quot;cost&quot;])
+    for r in complaints:
+        r[&quot;d&quot;] = date.fromisoformat(r[&quot;date&quot;])
+    return leads, contacts, sales, spend, complaints
+
+
+def main():
+    folder, out = Path(sys.argv[1]), Path(sys.argv[2])
+    leads, contacts, sales, spend, complaints = load(folder)
+    lead_by_id = {r[&quot;lead_id&quot;]: r for r in leads}
+    R = {&quot;data_cutoff&quot;: str(CUTOFF), &quot;label&quot;: &quot;Sample data (synthetic)&quot;}
+
+    # ---------- Data checks (confirm Garry&#x27;s data mapping) ----------
+    def nulls(rows, f):
+        return sum(1 for r in rows if not str(r.get(f, &quot;&quot;)).strip())
+    unmatched = [s for s in sales if not s[&quot;lead_id&quot;]]
+    manila_blank = sum(1 for c in contacts if c[&quot;agent_team&quot;] == &quot;Manila&quot; and c[&quot;dt&quot;].date() &lt; date(2025, 3, 1) and not c[&quot;outcome&quot;])
+    manila_pre = sum(1 for c in contacts if c[&quot;agent_team&quot;] == &quot;Manila&quot; and c[&quot;dt&quot;].date() &lt; date(2025, 3, 1))
+    contacted = {c[&quot;lead_id&quot;] for c in contacts}
+    R[&quot;data_checks&quot;] = {
+        &quot;rows&quot;: {&quot;leads&quot;: len(leads), &quot;contacts&quot;: len(contacts), &quot;sales&quot;: len(sales), &quot;marketing_spend&quot;: len(spend), &quot;complaints&quot;: len(complaints)},
+        &quot;fields_present&quot;: True,
+        &quot;nulls&quot;: {&quot;leads.vertical&quot;: nulls(leads, &quot;vertical&quot;), &quot;leads.channel&quot;: nulls(leads, &quot;channel&quot;),
+                  &quot;sales.gross_commission&quot;: nulls(sales, &quot;gross_commission&quot;), &quot;sales.vertical&quot;: nulls(sales, &quot;vertical&quot;),
+                  &quot;contacts.first_contact_ts&quot;: nulls(contacts, &quot;first_contact_ts&quot;)},
+        &quot;unmatched_sales&quot;: len(unmatched), &quot;unmatched_sales_pct&quot;: round(100 * len(unmatched) / len(sales), 1),
+        &quot;manila_blank_outcomes_before_mar25&quot;: manila_blank, &quot;manila_contacts_before_mar25&quot;: manila_pre,
+        &quot;leads_never_contacted&quot;: sum(1 for r in leads if r[&quot;lead_id&quot;] not in contacted),
+        &quot;clawbacks_only_health_life&quot;: all(s[&quot;vertical&quot;] in CLAWBACK_VERTICALS for s in sales if s[&quot;claw&quot;]),
+        &quot;clawback_equals_commission&quot;: all(abs(s[&quot;claw&quot;] - s[&quot;gross&quot;]) &lt; 0.01 for s in sales if s[&quot;claw&quot;]),
+        &quot;sales_after_cutoff&quot;: sum(1 for s in sales if s[&quot;d&quot;] &gt; CUTOFF),
+    }
+
+    # ---------- Building blocks ----------
+    leads_m, leads_mv, leads_q, leads_qv = defaultdict(int), defaultdict(int), defaultdict(int), defaultdict(int)
+    for r in leads:
+        d = r[&quot;dt&quot;].date()
+        leads_m[month(d)] += 1; leads_mv[(month(d), r[&quot;vertical&quot;])] += 1
+        leads_q[qtr(d)] += 1; leads_qv[(qtr(d), r[&quot;vertical&quot;])] += 1
+    net_m, net_q, gross_q = defaultdict(float), defaultdict(float), defaultdict(float)
+    sales_mv, sales_qv, net_qv = defaultdict(int), defaultdict(int), defaultdict(float)
+    for s in sales:
+        m, q = month(s[&quot;d&quot;]), qtr(s[&quot;d&quot;])
+        net_m[m] += s[&quot;gross&quot;] - s[&quot;claw&quot;]; net_q[q] += s[&quot;gross&quot;] - s[&quot;claw&quot;]; gross_q[q] += s[&quot;gross&quot;]
+        sales_mv[(m, s[&quot;vertical&quot;])] += 1; sales_qv[(q, s[&quot;vertical&quot;])] += 1; net_qv[(q, s[&quot;vertical&quot;])] += s[&quot;gross&quot;] - s[&quot;claw&quot;]
+    months = sorted(leads_m)
+
+    def pace(current, target, months_left):
+        return (target - current) / months_left
+
+    # ---------- K1 Net revenue per lead ----------
+    k1_m = {m: net_m[m] / leads_m[m] for m in months}
+    k1_q = {q: net_q[q] / leads_q[q] for q in sorted(leads_q)}
+    # Clawback maturity: estimate clawbacks still to land on health and life sales made after MATURE
+    mature_hl = [s for s in sales if s[&quot;vertical&quot;] in CLAWBACK_VERTICALS and date(2026, 4, 1) &lt;= s[&quot;d&quot;] &lt;= MATURE]
+    mature_rate = sum(1 for s in mature_hl if s[&quot;claw&quot;]) / len(mature_hl)
+    immature = [s for s in sales if s[&quot;vertical&quot;] in CLAWBACK_VERTICALS and s[&quot;d&quot;] &gt; MATURE]
+    expected = mature_rate * sum(s[&quot;gross&quot;] for s in immature)
+    observed = sum(s[&quot;claw&quot;] for s in immature)
+    extra_this_q = sum(mature_rate * s[&quot;gross&quot;] for s in immature if qtr(s[&quot;d&quot;]) == THIS_Q) - sum(s[&quot;claw&quot;] for s in immature if qtr(s[&quot;d&quot;]) == THIS_Q)
+    k1_this_est = (net_q[THIS_Q] - extra_this_q) / leads_q[THIS_Q]
+    target_k1 = k1_q[LAST_Q]
+    run_k1 = (k1_m[&quot;2026-09&quot;] - k1_m[&quot;2026-06&quot;]) / 3
+    R[&quot;K1&quot;] = {&quot;by_quarter&quot;: k1_q, &quot;by_month&quot;: k1_m, &quot;baseline&quot;: k1_q[THIS_Q], &quot;baseline_clawback_adjusted&quot;: k1_this_est,
+               &quot;target&quot;: target_k1, &quot;target_by&quot;: &quot;2027-06-30&quot;, &quot;months_to_target&quot;: 9,
+               &quot;pace_needed&quot;: pace(k1_q[THIS_Q], target_k1, 9), &quot;pace_needed_adjusted&quot;: pace(k1_this_est, target_k1, 9),
+               &quot;run_rate&quot;: run_k1, &quot;mature_clawback_rate_apr_jun26&quot;: mature_rate,
+               &quot;clawbacks_still_to_land_estimate&quot;: expected - observed,
+               &quot;by_vertical_this_q&quot;: {v: net_qv[(THIS_Q, v)] / leads_qv[(THIS_Q, v)] for v in VERTICALS}}
+
+    # ---------- K1.1 Lead mix (energy share) ----------
+    share_m = {m: leads_mv[(m, &quot;energy&quot;)] / leads_m[m] for m in months}
+    R[&quot;K1.1&quot;] = {&quot;energy_share_by_month&quot;: share_m, &quot;baseline_month&quot;: &quot;2026-09&quot;, &quot;baseline&quot;: share_m[&quot;2026-09&quot;],
+                 &quot;baseline_quarter&quot;: leads_qv[(THIS_Q, &quot;energy&quot;)] / leads_q[THIS_Q],
+                 &quot;mix_this_q&quot;: {v: leads_qv[(THIS_Q, v)] / leads_q[THIS_Q] for v in VERTICALS},
+                 &quot;mix_last_q&quot;: {v: leads_qv[(LAST_Q, v)] / leads_q[LAST_Q] for v in VERTICALS},
+                 &quot;target&quot;: 0.30, &quot;target_by&quot;: &quot;2027-03-31&quot;, &quot;months_to_target&quot;: 6,
+                 &quot;pace_needed&quot;: pace(share_m[&quot;2026-09&quot;], 0.30, 6),
+                 &quot;run_rate&quot;: (share_m[&quot;2026-09&quot;] - share_m[&quot;2026-06&quot;]) / 3}
+
+    # ---------- K2 Conversion: Garry&#x27;s draft (matched cohort) vs corrected (all sales by vertical) ----------
+    sold_leads = {s[&quot;lead_id&quot;] for s in sales if s[&quot;lead_id&quot;]}
+    open_cut = datetime(2026, 9, 23, 23, 59)  # draft rule: exclude leads under 7 days old
+    def draft_conv(q, v):
+        pool = [r for r in leads if qtr(r[&quot;dt&quot;].date()) == q and r[&quot;vertical&quot;] == v and r[&quot;dt&quot;] &lt;= open_cut]
+        return sum(1 for r in pool if r[&quot;lead_id&quot;] in sold_leads) / len(pool)
+    def corr_conv_q(q, v):
+        return sales_qv[(q, v)] / leads_qv[(q, v)]
+    def corr_conv_fy26(v):
+        return sum(sales_mv[(m, v)] for m in FY26) / sum(leads_mv[(m, v)] for m in FY26)
+    conv_m = {v: {m: sales_mv[(m, v)] / leads_mv[(m, v)] for m in months} for v in VERTICALS}
+    R[&quot;K2&quot;] = {&quot;draft_matched_this_q&quot;: {v: draft_conv(THIS_Q, v) for v in VERTICALS},
+               &quot;corrected_this_q&quot;: {v: corr_conv_q(THIS_Q, v) for v in VERTICALS},
+               &quot;corrected_last_q&quot;: {v: corr_conv_q(LAST_Q, v) for v in VERTICALS},
+               &quot;fy26_average&quot;: {v: corr_conv_fy26(v) for v in VERTICALS},
+               &quot;by_month&quot;: conv_m}
+    R[&quot;K2&quot;][&quot;targets&quot;] = {v: (0.11 if v == &quot;health&quot; else R[&quot;K2&quot;][&quot;fy26_average&quot;][v]) for v in VERTICALS}
+    h = R[&quot;K2&quot;][&quot;corrected_this_q&quot;][&quot;health&quot;]
+    R[&quot;K2.1&quot;] = {&quot;baseline&quot;: h, &quot;draft_matched_baseline&quot;: R[&quot;K2&quot;][&quot;draft_matched_this_q&quot;][&quot;health&quot;], &quot;target&quot;: 0.11,
+                 &quot;target_by&quot;: &quot;2027-06-30&quot;, &quot;months_to_target&quot;: 9, &quot;pace_needed&quot;: pace(h, 0.11, 9),
+                 &quot;run_rate&quot;: (conv_m[&quot;health&quot;][&quot;2026-09&quot;] - conv_m[&quot;health&quot;][&quot;2026-06&quot;]) / 3,
+                 &quot;by_month&quot;: conv_m[&quot;health&quot;]}
+
+    # ---------- K2.2 Complaints per 1,000 sales ----------
+    comp_q, comp_fy = defaultdict(int), 0
+    for c in complaints:
+        comp_q[qtr(c[&quot;d&quot;])] += 1
+        comp_fy += month(c[&quot;d&quot;]) in FY26
+    sales_q = defaultdict(int)
+    for s in sales:
+        sales_q[qtr(s[&quot;d&quot;])] += 1
+    fy_sales = sum(1 for s in sales if month(s[&quot;d&quot;]) in FY26)
+    R[&quot;K2.2&quot;] = {&quot;by_quarter&quot;: {q: 1000 * comp_q[q] / sales_q[q] for q in sorted(sales_q)},
+                 &quot;complaints_by_quarter&quot;: dict(comp_q), &quot;fy26_rate&quot;: 1000 * comp_fy / fy_sales,
+                 &quot;baseline&quot;: 1000 * comp_q[THIS_Q] / sales_q[THIS_Q], &quot;complaints_this_q&quot;: comp_q[THIS_Q],
+                 &quot;target&quot;: 1000 * comp_fy / fy_sales, &quot;target_by&quot;: &quot;2027-06-30&quot;}
+    r12 = {f&quot;2025-{m:02d}&quot; for m in range(10, 13)} | {f&quot;2026-{m:02d}&quot; for m in range(1, 10)}
+    c12 = sum(1 for c in complaints if month(c[&quot;d&quot;]) in r12)
+    s12 = sum(1 for s in sales if month(s[&quot;d&quot;]) in r12)
+    R[&quot;K2.2&quot;].update({&quot;rolling_12m_to&quot;: &quot;2026-09&quot;, &quot;rolling_12m_complaints&quot;: c12, &quot;rolling_12m_sales&quot;: s12,
+                      &quot;rolling_12m_rate&quot;: 1000 * c12 / s12})
+
+    # ---------- K3 Cost per acquisition by channel ----------
+    chans = sorted({r[&quot;channel&quot;] for r in leads})
+    spend_qc, spend_fyc = defaultdict(float), defaultdict(float)
+    for r in spend:
+        spend_qc[(qtr(r[&quot;d&quot;]), r[&quot;channel&quot;])] += r[&quot;cost&quot;]
+        if month(r[&quot;d&quot;]) in FY26:
+            spend_fyc[r[&quot;channel&quot;]] += r[&quot;cost&quot;]
+    net_sales_qc, net_sales_fyc = defaultdict(int), defaultdict(int)
+    for s in sales:
+        if s[&quot;lead_id&quot;] and not s[&quot;claw&quot;]:
+            ch = lead_by_id[s[&quot;lead_id&quot;]][&quot;channel&quot;]
+            net_sales_qc[(qtr(s[&quot;d&quot;]), ch)] += 1
+            if month(s[&quot;d&quot;]) in FY26:
+                net_sales_fyc[ch] += 1
+    netrev_qc, netrev_fyc = defaultdict(float), defaultdict(float)
+    for s in sales:
+        if s[&quot;lead_id&quot;]:
+            ch = lead_by_id[s[&quot;lead_id&quot;]][&quot;channel&quot;]
+            netrev_qc[(qtr(s[&quot;d&quot;]), ch)] += s[&quot;gross&quot;] - s[&quot;claw&quot;]
+            if month(s[&quot;d&quot;]) in FY26:
+                netrev_fyc[ch] += s[&quot;gross&quot;] - s[&quot;claw&quot;]
+    R[&quot;K3_counter&quot;] = {
+        &quot;name&quot;: &quot;Net revenue per marketing dollar&quot;,
+        &quot;this_q&quot;: {c: netrev_qc[(THIS_Q, c)] / spend_qc[(THIS_Q, c)] for c in chans},
+        &quot;last_q&quot;: {c: netrev_qc[(LAST_Q, c)] / spend_qc[(LAST_Q, c)] for c in chans},
+        &quot;fy26_average&quot;: {c: netrev_fyc[c] / spend_fyc[c] for c in chans},
+        &quot;all_channels_this_q&quot;: sum(netrev_qc[(THIS_Q, c)] for c in chans) / sum(spend_qc[(THIS_Q, c)] for c in chans),
+        &quot;all_channels_last_q&quot;: sum(netrev_qc[(LAST_Q, c)] for c in chans) / sum(spend_qc[(LAST_Q, c)] for c in chans),
+        &quot;note&quot;: &quot;Matched sales only (6.1% of sales have no channel)&quot;}
+    cpa_this = {c: spend_qc[(THIS_Q, c)] / net_sales_qc[(THIS_Q, c)] for c in chans}
+    cpa_fy = {c: spend_fyc[c] / net_sales_fyc[c] for c in chans}
+    R[&quot;K3&quot;] = {&quot;this_q&quot;: cpa_this, &quot;last_q&quot;: {c: spend_qc[(LAST_Q, c)] / net_sales_qc[(LAST_Q, c)] for c in chans},
+               &quot;fy26_average&quot;: cpa_fy, &quot;paid_search_target&quot;: 0.9 * cpa_fy[&quot;paid_search&quot;], &quot;target_by&quot;: &quot;2027-06-30&quot;,
+               &quot;pace_needed_paid_search&quot;: pace(cpa_this[&quot;paid_search&quot;], 0.9 * cpa_fy[&quot;paid_search&quot;], 9)}
+
+    # ---------- K4 Speed to contact ----------
+    first = {}
+    for c in contacts:
+        if c[&quot;lead_id&quot;] not in first or c[&quot;dt&quot;] &lt; first[c[&quot;lead_id&quot;]][0]:
+            first[c[&quot;lead_id&quot;]] = (c[&quot;dt&quot;], c[&quot;agent_team&quot;])
+    mins_q, mins_q_team, mins_q_chan, mins_m = defaultdict(list), defaultdict(list), defaultdict(list), defaultdict(list)
+    for r in leads:
+        if r[&quot;lead_id&quot;] in first:
+            mn = (first[r[&quot;lead_id&quot;]][0] - r[&quot;dt&quot;]).total_seconds() / 60
+            q = qtr(r[&quot;dt&quot;].date())
+            mins_q[q].append(mn); mins_m[month(r[&quot;dt&quot;].date())].append(mn)
+            mins_q_team[(q, first[r[&quot;lead_id&quot;]][1])].append(mn); mins_q_chan[(q, r[&quot;channel&quot;])].append(mn)
+    med_m = {m: st.median(v) for m, v in sorted(mins_m.items())}
+    R[&quot;K4&quot;] = {&quot;by_quarter&quot;: {q: st.median(v) for q, v in sorted(mins_q.items())},
+               &quot;baseline&quot;: st.median(mins_q[THIS_Q]),
+               &quot;by_team_this_q&quot;: {t: st.median(mins_q_team[(THIS_Q, t)]) for t in [&quot;Sydney&quot;, &quot;Melbourne&quot;, &quot;Manila&quot;]},
+               &quot;by_channel_this_q&quot;: {c: st.median(mins_q_chan[(THIS_Q, c)]) for c in chans},
+               &quot;share_over_15_min_this_q&quot;: sum(1 for x in mins_q[THIS_Q] if x &gt; 15) / len(mins_q[THIS_Q]),
+               &quot;target&quot;: 10.0, &quot;target_by&quot;: &quot;2027-03-31&quot;, &quot;months_to_target&quot;: 6,
+               &quot;pace_needed&quot;: pace(st.median(mins_q[THIS_Q]), 10.0, 6),
+               &quot;run_rate&quot;: (med_m[&quot;2026-09&quot;] - med_m[&quot;2026-06&quot;]) / 3}
+
+    # ---------- K5 90-day clawback rate (mature cohorts only) ----------
+    def claw_rate(rows):
+        return sum(1 for s in rows if s[&quot;claw&quot;] and (s[&quot;cbd&quot;] - s[&quot;d&quot;]).days &lt;= 90) / len(rows) if rows else None
+    hl = [s for s in sales if s[&quot;vertical&quot;] in CLAWBACK_VERTICALS]
+    by_q = {}
+    for q in sorted({qtr(s[&quot;d&quot;]) for s in hl}):
+        rows = [s for s in hl if qtr(s[&quot;d&quot;]) == q and s[&quot;d&quot;] &lt;= MATURE]
+        by_q[q] = {&quot;rate&quot;: claw_rate(rows), &quot;final&quot;: all(s[&quot;d&quot;] &lt;= MATURE for s in hl if qtr(s[&quot;d&quot;]) == q)}
+    fy_rows = [s for s in hl if month(s[&quot;d&quot;]) in FY26 and s[&quot;d&quot;] &lt;= MATURE]
+    last_mature = [s for s in hl if qtr(s[&quot;d&quot;]) == LAST_Q]
+    R[&quot;K5&quot;] = {&quot;by_quarter&quot;: by_q, &quot;fy26_average&quot;: claw_rate(fy_rows), &quot;baseline_quarter&quot;: LAST_Q,
+               &quot;baseline&quot;: claw_rate(last_mature), &quot;provisional_this_q&quot;: claw_rate([s for s in hl if qtr(s[&quot;d&quot;]) == THIS_Q]),
+               &quot;by_vertical_last_q&quot;: {v: claw_rate([s for s in last_mature if s[&quot;vertical&quot;] == v]) for v in CLAWBACK_VERTICALS},
+               &quot;target&quot;: claw_rate(fy_rows), &quot;target_by&quot;: &quot;2027-06-30&quot;, &quot;months_to_target&quot;: 9,
+               &quot;pace_needed&quot;: pace(claw_rate(last_mature), claw_rate(fy_rows), 9)}
+
+    # ---------- Revenue bridge: last quarter to this quarter ----------
+    def comp(q):
+        L = leads_q[q]
+        return L, {v: (leads_qv[(q, v)] / L, sales_qv[(q, v)] / leads_qv[(q, v)],
+                       (net_qv[(q, v)] / sales_qv[(q, v)]) if sales_qv[(q, v)] else 0) for v in VERTICALS}
+    def rev(L, parts):
+        return sum(L * s * c * n for s, c, n in parts.values())
+    L0, p0 = comp(LAST_Q)
+    L1, p1 = comp(THIS_Q)
+    r0 = rev(L0, p0)
+    step_vol = rev(L1, p0)
+    step_mix = rev(L1, {v: (p1[v][0], p0[v][1], p0[v][2]) for v in VERTICALS})
+    step_conv = rev(L1, {v: (p1[v][0], p1[v][1], p0[v][2]) for v in VERTICALS})
+    r1 = rev(L1, p1)
+    R[&quot;bridge&quot;] = {&quot;last_q_net_revenue&quot;: r0, &quot;this_q_net_revenue&quot;: r1,
+                   &quot;volume&quot;: step_vol - r0, &quot;mix&quot;: step_mix - step_vol, &quot;conversion&quot;: step_conv - step_mix,
+                   &quot;revenue_per_sale_incl_clawbacks&quot;: r1 - step_conv, &quot;total_change&quot;: r1 - r0,
+                   &quot;leads_last_q&quot;: L0, &quot;leads_this_q&quot;: L1,
+                   &quot;per_lead_last_q&quot;: r0 / L0, &quot;per_lead_this_q&quot;: r1 / L1}
+
+    out.write_text(json.dumps(R, indent=2, default=str), encoding=&quot;utf8&quot;)
+    print(json.dumps({k: R[k] for k in [&quot;data_checks&quot;]}, indent=1))
+    for k in [&quot;K1&quot;, &quot;K1.1&quot;, &quot;K2.1&quot;, &quot;K2.2&quot;, &quot;K4&quot;, &quot;K5&quot;]:
+        print(k, {x: (round(y, 4) if isinstance(y, float) else y) for x, y in R[k].items() if not isinstance(y, dict)})
+    print(&quot;K2&quot;, {x: {v: round(y, 4) for v, y in R[&quot;K2&quot;][x].items()} for x in [&quot;draft_matched_this_q&quot;, &quot;corrected_this_q&quot;, &quot;fy26_average&quot;]})
+    print(&quot;K3&quot;, {x: {c: round(y, 2) for c, y in R[&quot;K3&quot;][x].items()} for x in [&quot;this_q&quot;, &quot;fy26_average&quot;]}, round(R[&quot;K3&quot;][&quot;paid_search_target&quot;], 2))
+    print(&quot;bridge&quot;, {k: round(v, 2) for k, v in R[&quot;bridge&quot;].items()})
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>

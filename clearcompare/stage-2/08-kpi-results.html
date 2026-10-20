@@ -1,0 +1,550 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ClearCompare: KPI results (sample data)</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">ClearCompare: KPI results (sample data)</label></nav><section id="s0"><p class="src">File: stage-2-08-kpi-results.md</p><h1>ClearCompare: KPI results (sample data)</h1>
+<blockquote><b>Sample data.</b> Produced by Kewpie at Stage 2 and approved on 21-Oct-26.</blockquote>
+<pre class="code"><code>{
+  &quot;data_cutoff&quot;: &quot;2026-09-30&quot;,
+  &quot;label&quot;: &quot;Sample data (synthetic)&quot;,
+  &quot;data_checks&quot;: {
+    &quot;rows&quot;: {
+      &quot;leads&quot;: 58509,
+      &quot;contacts&quot;: 58509,
+      &quot;sales&quot;: 7647,
+      &quot;marketing_spend&quot;: 13115,
+      &quot;complaints&quot;: 32
+    },
+    &quot;fields_present&quot;: true,
+    &quot;nulls&quot;: {
+      &quot;leads.vertical&quot;: 0,
+      &quot;leads.channel&quot;: 0,
+      &quot;sales.gross_commission&quot;: 0,
+      &quot;sales.vertical&quot;: 0,
+      &quot;contacts.first_contact_ts&quot;: 0
+    },
+    &quot;unmatched_sales&quot;: 464,
+    &quot;unmatched_sales_pct&quot;: 6.1,
+    &quot;manila_blank_outcomes_before_mar25&quot;: 4688,
+    &quot;manila_contacts_before_mar25&quot;: 4688,
+    &quot;leads_never_contacted&quot;: 0,
+    &quot;clawbacks_only_health_life&quot;: true,
+    &quot;clawback_equals_commission&quot;: true,
+    &quot;sales_after_cutoff&quot;: 0
+  },
+  &quot;K1&quot;: {
+    &quot;by_quarter&quot;: {
+      &quot;2024-Q4&quot;: 56.689856248220984,
+      &quot;2025-Q1&quot;: 57.327828304292346,
+      &quot;2025-Q2&quot;: 58.64592639593912,
+      &quot;2025-Q3&quot;: 58.84661740331496,
+      &quot;2025-Q4&quot;: 57.53768653717345,
+      &quot;2026-Q1&quot;: 59.4032851211999,
+      &quot;2026-Q2&quot;: 57.414903666042406,
+      &quot;2026-Q3&quot;: 52.41556336195681
+    },
+    &quot;by_month&quot;: {
+      &quot;2024-10&quot;: 53.31856901646266,
+      &quot;2024-11&quot;: 58.363350739773736,
+      &quot;2024-12&quot;: 58.44521407376006,
+      &quot;2025-01&quot;: 56.1561756993007,
+      &quot;2025-02&quot;: 59.712803418803375,
+      &quot;2025-03&quot;: 56.134862196626884,
+      &quot;2025-04&quot;: 60.40084524810767,
+      &quot;2025-05&quot;: 57.453236301369856,
+      &quot;2025-06&quot;: 58.062632464255664,
+      &quot;2025-07&quot;: 56.919781328847776,
+      &quot;2025-08&quot;: 59.582549598986915,
+      &quot;2025-09&quot;: 59.98524267950258,
+      &quot;2025-10&quot;: 55.34295463669208,
+      &quot;2025-11&quot;: 61.39473075388911,
+      &quot;2025-12&quot;: 55.83418727199032,
+      &quot;2026-01&quot;: 57.83925911251985,
+      &quot;2026-02&quot;: 58.791748251748274,
+      &quot;2026-03&quot;: 61.56660031847131,
+      &quot;2026-04&quot;: 57.77060532687651,
+      &quot;2026-05&quot;: 58.55735803463554,
+      &quot;2026-06&quot;: 55.93534023079983,
+      &quot;2026-07&quot;: 52.35779707856294,
+      &quot;2026-08&quot;: 54.56389124566141,
+      &quot;2026-09&quot;: 50.29669921874999
+    },
+    &quot;baseline&quot;: 52.41556336195681,
+    &quot;baseline_clawback_adjusted&quot;: 51.589251052529754,
+    &quot;target&quot;: 57.414903666042406,
+    &quot;target_by&quot;: &quot;2027-06-30&quot;,
+    &quot;months_to_target&quot;: 9,
+    &quot;pace_needed&quot;: 0.5554822560095103,
+    &quot;pace_needed_adjusted&quot;: 0.6472947348347391,
+    &quot;run_rate&quot;: -1.8795470040166127,
+    &quot;mature_clawback_rate_apr_jun26&quot;: 0.07925407925407925,
+    &quot;clawbacks_still_to_land_estimate&quot;: 6351.036410256411,
+    &quot;by_vertical_this_q&quot;: {
+      &quot;health&quot;: 53.64209596928984,
+      &quot;home_loans&quot;: 141.86595595595597,
+      &quot;energy&quot;: 22.30716167270334,
+      &quot;life&quot;: 51.34681339712919
+    }
+  },
+  &quot;K1.1&quot;: {
+    &quot;energy_share_by_month&quot;: {
+      &quot;2024-10&quot;: 0.2600253271422541,
+      &quot;2024-11&quot;: 0.2597911227154047,
+      &quot;2024-12&quot;: 0.2598558711318355,
+      &quot;2025-01&quot;: 0.26005244755244755,
+      &quot;2025-02&quot;: 0.25982905982905985,
+      &quot;2025-03&quot;: 0.2599753187988482,
+      &quot;2025-04&quot;: 0.25988225399495374,
+      &quot;2025-05&quot;: 0.2598458904109589,
+      &quot;2025-06&quot;: 0.25988225399495374,
+      &quot;2025-07&quot;: 0.25988225399495374,
+      &quot;2025-08&quot;: 0.2600253271422541,
+      &quot;2025-09&quot;: 0.259927797833935,
+      &quot;2025-10&quot;: 0.26013649136892814,
+      &quot;2025-11&quot;: 0.2600717989629039,
+      &quot;2025-12&quot;: 0.25982975273611675,
+      &quot;2026-01&quot;: 0.25990491283676703,
+      &quot;2026-02&quot;: 0.2599753187988482,
+      &quot;2026-03&quot;: 0.25995222929936307,
+      &quot;2026-04&quot;: 0.26997578692493945,
+      &quot;2026-05&quot;: 0.2698348771647201,
+      &quot;2026-06&quot;: 0.27019498607242337,
+      &quot;2026-07&quot;: 0.3600473746545598,
+      &quot;2026-08&quot;: 0.3949093713844967,
+      &quot;2026-09&quot;: 0.430078125
+    },
+    &quot;baseline_month&quot;: &quot;2026-09&quot;,
+    &quot;baseline&quot;: 0.430078125,
+    &quot;baseline_quarter&quot;: 0.39513400988810826,
+    &quot;mix_this_q&quot;: {
+      &quot;health&quot;: 0.338927920895134,
+      &quot;home_loans&quot;: 0.12997658079625293,
+      &quot;energy&quot;: 0.39513400988810826,
+      &quot;life&quot;: 0.13596148842050482
+    },
+    &quot;mix_last_q&quot;: {
+      &quot;health&quot;: 0.41396842386941396,
+      &quot;home_loans&quot;: 0.13005084292213004,
+      &quot;energy&quot;: 0.27000267594327,
+      &quot;life&quot;: 0.185978057265186
+    },
+    &quot;target&quot;: 0.3,
+    &quot;target_by&quot;: &quot;2027-03-31&quot;,
+    &quot;months_to_target&quot;: 6,
+    &quot;pace_needed&quot;: -0.0216796875,
+    &quot;run_rate&quot;: 0.053294379642525536
+  },
+  &quot;K2&quot;: {
+    &quot;draft_matched_this_q&quot;: {
+      &quot;health&quot;: 0.0920016576875259,
+      &quot;home_loans&quot;: 0.06753812636165578,
+      &quot;energy&quot;: 0.22250089573629522,
+      &quot;life&quot;: 0.05687693898655636
+    },
+    &quot;corrected_this_q&quot;: {
+      &quot;health&quot;: 0.09481765834932822,
+      &quot;home_loans&quot;: 0.07107107107107107,
+      &quot;energy&quot;: 0.23510042805400067,
+      &quot;life&quot;: 0.0660287081339713
+    },
+    &quot;corrected_last_q&quot;: {
+      &quot;health&quot;: 0.11021331609566903,
+      &quot;home_loans&quot;: 0.06893004115226338,
+      &quot;energy&quot;: 0.24132804757185333,
+      &quot;life&quot;: 0.05683453237410072
+    },
+    &quot;fy26_average&quot;: {
+      &quot;health&quot;: 0.10978558761889408,
+      &quot;home_loans&quot;: 0.07055771725032425,
+      &quot;energy&quot;: 0.2405551272166538,
+      &quot;life&quot;: 0.059789398536498305
+    },
+    &quot;by_month&quot;: {
+      &quot;health&quot;: {
+        &quot;2024-10&quot;: 0.09849246231155778,
+        &quot;2024-11&quot;: 0.11502590673575129,
+        &quot;2024-12&quot;: 0.10797174571140263,
+        &quot;2025-01&quot;: 0.10613943808532779,
+        &quot;2025-02&quot;: 0.11495422177009156,
+        &quot;2025-03&quot;: 0.09990205680705191,
+        &quot;2025-04&quot;: 0.12112112112112113,
+        &quot;2025-05&quot;: 0.10499490316004077,
+        &quot;2025-06&quot;: 0.11311311311311312,
+        &quot;2025-07&quot;: 0.10810810810810811,
+        &quot;2025-08&quot;: 0.10552763819095477,
+        &quot;2025-09&quot;: 0.11270296084049666,
+        &quot;2025-10&quot;: 0.1147227533460803,
+        &quot;2025-11&quot;: 0.10256410256410256,
+        &quot;2025-12&quot;: 0.10617760617760617,
+        &quot;2026-01&quot;: 0.11509433962264151,
+        &quot;2026-02&quot;: 0.11459353574926542,
+        &quot;2026-03&quot;: 0.10710900473933649,
+        &quot;2026-04&quot;: 0.10916179337231968,
+        &quot;2026-05&quot;: 0.10894941634241245,
+        &quot;2026-06&quot;: 0.1125,
+        &quot;2026-07&quot;: 0.10307017543859649,
+        &quot;2026-08&quot;: 0.09101251422070535,
+        &quot;2026-09&quot;: 0.08968058968058969
+      },
+      &quot;home_loans&quot;: {
+        &quot;2024-10&quot;: 0.06818181818181818,
+        &quot;2024-11&quot;: 0.06354515050167224,
+        &quot;2024-12&quot;: 0.07166123778501629,
+        &quot;2025-01&quot;: 0.06397306397306397,
+        &quot;2025-02&quot;: 0.07236842105263158,
+        &quot;2025-03&quot;: 0.0759493670886076,
+        &quot;2025-04&quot;: 0.06472491909385113,
+        &quot;2025-05&quot;: 0.07236842105263158,
+        &quot;2025-06&quot;: 0.06796116504854369,
+        &quot;2025-07&quot;: 0.06796116504854369,
+        &quot;2025-08&quot;: 0.07467532467532467,
+        &quot;2025-09&quot;: 0.07716049382716049,
+        &quot;2025-10&quot;: 0.05555555555555555,
+        &quot;2025-11&quot;: 0.08895705521472393,
+        &quot;2025-12&quot;: 0.06230529595015576,
+        &quot;2026-01&quot;: 0.06402439024390244,
+        &quot;2026-02&quot;: 0.07278481012658228,
+        &quot;2026-03&quot;: 0.0764525993883792,
+        &quot;2026-04&quot;: 0.06832298136645963,
+        &quot;2026-05&quot;: 0.07120743034055728,
+        &quot;2026-06&quot;: 0.0672782874617737,
+        &quot;2026-07&quot;: 0.06382978723404255,
+        &quot;2026-08&quot;: 0.0830860534124629,
+        &quot;2026-09&quot;: 0.06606606606606606
+      },
+      &quot;energy&quot;: {
+        &quot;2024-10&quot;: 0.22077922077922077,
+        &quot;2024-11&quot;: 0.23618090452261306,
+        &quot;2024-12&quot;: 0.2398042414355628,
+        &quot;2025-01&quot;: 0.24201680672268908,
+        &quot;2025-02&quot;: 0.23026315789473684,
+        &quot;2025-03&quot;: 0.25,
+        &quot;2025-04&quot;: 0.2297734627831715,
+        &quot;2025-05&quot;: 0.2504118616144975,
+        &quot;2025-06&quot;: 0.23786407766990292,
+        &quot;2025-07&quot;: 0.24110032362459546,
+        &quot;2025-08&quot;: 0.23863636363636365,
+        &quot;2025-09&quot;: 0.25,
+        &quot;2025-10&quot;: 0.22685185185185186,
+        &quot;2025-11&quot;: 0.25153374233128833,
+        &quot;2025-12&quot;: 0.23244929797191888,
+        &quot;2026-01&quot;: 0.23780487804878048,
+        &quot;2026-02&quot;: 0.22943037974683544,
+        &quot;2026-03&quot;: 0.2542113323124043,
+        &quot;2026-04&quot;: 0.2436472346786248,
+        &quot;2026-05&quot;: 0.24029850746268658,
+        &quot;2026-06&quot;: 0.24005891016200295,
+        &quot;2026-07&quot;: 0.22916666666666666,
+        &quot;2026-08&quot;: 0.2353515625,
+        &quot;2026-09&quot;: 0.23978201634877383
+      },
+      &quot;life&quot;: {
+        &quot;2024-10&quot;: 0.051111111111111114,
+        &quot;2024-11&quot;: 0.06178489702517163,
+        &quot;2024-12&quot;: 0.0625,
+        &quot;2025-01&quot;: 0.06206896551724138,
+        &quot;2025-02&quot;: 0.060674157303370786,
+        &quot;2025-03&quot;: 0.05411255411255411,
+        &quot;2025-04&quot;: 0.06637168141592921,
+        &quot;2025-05&quot;: 0.05855855855855856,
+        &quot;2025-06&quot;: 0.05530973451327434,
+        &quot;2025-07&quot;: 0.05752212389380531,
+        &quot;2025-08&quot;: 0.07111111111111111,
+        &quot;2025-09&quot;: 0.05485232067510549,
+        &quot;2025-10&quot;: 0.05919661733615222,
+        &quot;2025-11&quot;: 0.0546218487394958,
+        &quot;2025-12&quot;: 0.06609808102345416,
+        &quot;2026-01&quot;: 0.06041666666666667,
+        &quot;2026-02&quot;: 0.05194805194805195,
+        &quot;2026-03&quot;: 0.07127882599580712,
+        &quot;2026-04&quot;: 0.06073752711496746,
+        &quot;2026-05&quot;: 0.06277056277056277,
+        &quot;2026-06&quot;: 0.047109207708779445,
+        &quot;2026-07&quot;: 0.07368421052631578,
+        &quot;2026-08&quot;: 0.059490084985835696,
+        &quot;2026-09&quot;: 0.0641025641025641
+      }
+    },
+    &quot;targets&quot;: {
+      &quot;health&quot;: 0.11,
+      &quot;home_loans&quot;: 0.07055771725032425,
+      &quot;energy&quot;: 0.2405551272166538,
+      &quot;life&quot;: 0.059789398536498305
+    }
+  },
+  &quot;K2.1&quot;: {
+    &quot;baseline&quot;: 0.09481765834932822,
+    &quot;draft_matched_baseline&quot;: 0.0920016576875259,
+    &quot;target&quot;: 0.11,
+    &quot;target_by&quot;: &quot;2027-06-30&quot;,
+    &quot;months_to_target&quot;: 9,
+    &quot;pace_needed&quot;: 0.0016869268500746425,
+    &quot;run_rate&quot;: -0.007606470106470105,
+    &quot;by_month&quot;: {
+      &quot;2024-10&quot;: 0.09849246231155778,
+      &quot;2024-11&quot;: 0.11502590673575129,
+      &quot;2024-12&quot;: 0.10797174571140263,
+      &quot;2025-01&quot;: 0.10613943808532779,
+      &quot;2025-02&quot;: 0.11495422177009156,
+      &quot;2025-03&quot;: 0.09990205680705191,
+      &quot;2025-04&quot;: 0.12112112112112113,
+      &quot;2025-05&quot;: 0.10499490316004077,
+      &quot;2025-06&quot;: 0.11311311311311312,
+      &quot;2025-07&quot;: 0.10810810810810811,
+      &quot;2025-08&quot;: 0.10552763819095477,
+      &quot;2025-09&quot;: 0.11270296084049666,
+      &quot;2025-10&quot;: 0.1147227533460803,
+      &quot;2025-11&quot;: 0.10256410256410256,
+      &quot;2025-12&quot;: 0.10617760617760617,
+      &quot;2026-01&quot;: 0.11509433962264151,
+      &quot;2026-02&quot;: 0.11459353574926542,
+      &quot;2026-03&quot;: 0.10710900473933649,
+      &quot;2026-04&quot;: 0.10916179337231968,
+      &quot;2026-05&quot;: 0.10894941634241245,
+      &quot;2026-06&quot;: 0.1125,
+      &quot;2026-07&quot;: 0.10307017543859649,
+      &quot;2026-08&quot;: 0.09101251422070535,
+      &quot;2026-09&quot;: 0.08968058968058969
+    }
+  },
+  &quot;K2.2&quot;: {
+    &quot;by_quarter&quot;: {
+      &quot;2024-Q4&quot;: 4.545454545454546,
+      &quot;2025-Q1&quot;: 2.2148394241417497,
+      &quot;2025-Q2&quot;: 7.592190889370933,
+      &quot;2025-Q3&quot;: 4.246284501061571,
+      &quot;2025-Q4&quot;: 4.2105263157894735,
+      &quot;2026-Q1&quot;: 0.0,
+      &quot;2026-Q2&quot;: 6.160164271047228,
+      &quot;2026-Q3&quot;: 4.541326067211626
+    },
+    &quot;complaints_by_quarter&quot;: {
+      &quot;2024-Q4&quot;: 4,
+      &quot;2025-Q1&quot;: 2,
+      &quot;2025-Q2&quot;: 7,
+      &quot;2025-Q3&quot;: 4,
+      &quot;2025-Q4&quot;: 4,
+      &quot;2026-Q2&quot;: 6,
+      &quot;2026-Q3&quot;: 5,
+      &quot;2026-Q1&quot;: 0
+    },
+    &quot;fy26_rate&quot;: 3.6448841447539704,
+    &quot;baseline&quot;: 4.541326067211626,
+    &quot;complaints_this_q&quot;: 5,
+    &quot;target&quot;: 3.6448841447539704,
+    &quot;target_by&quot;: &quot;2027-06-30&quot;,
+    &quot;rolling_12m_to&quot;: &quot;2026-09&quot;,
+    &quot;rolling_12m_complaints&quot;: 15,
+    &quot;rolling_12m_sales&quot;: 4000,
+    &quot;rolling_12m_rate&quot;: 3.75
+  },
+  &quot;K3_counter&quot;: {
+    &quot;name&quot;: &quot;Net revenue per marketing dollar&quot;,
+    &quot;this_q&quot;: {
+      &quot;direct&quot;: 101.509974147011,
+      &quot;paid_search&quot;: 3.4927555807411075,
+      &quot;partner_referral&quot;: 8.897968651030844,
+      &quot;seo&quot;: 14.531478722610093,
+      &quot;social&quot;: 4.896648506133722
+    },
+    &quot;last_q&quot;: {
+      &quot;direct&quot;: 78.58548933347299,
+      &quot;paid_search&quot;: 3.6911899523874983,
+      &quot;partner_referral&quot;: 9.442995128887821,
+      &quot;seo&quot;: 21.565500713749167,
+      &quot;social&quot;: 4.377883178085532
+    },
+    &quot;fy26_average&quot;: {
+      &quot;direct&quot;: 101.0535174026899,
+      &quot;paid_search&quot;: 3.8500445983490983,
+      &quot;partner_referral&quot;: 8.288857179979775,
+      &quot;seo&quot;: 19.873362404536348,
+      &quot;social&quot;: 4.99982243191131
+    },
+    &quot;all_channels_this_q&quot;: 5.709608905503814,
+    &quot;all_channels_last_q&quot;: 6.370593111279628,
+    &quot;note&quot;: &quot;Matched sales only (6.1% of sales have no channel)&quot;
+  },
+  &quot;K3&quot;: {
+    &quot;this_q&quot;: {
+      &quot;direct&quot;: 4.177466666666664,
+      &quot;paid_search&quot;: 93.03959821428576,
+      &quot;partner_referral&quot;: 48.31594827586206,
+      &quot;seo&quot;: 25.890504201680677,
+      &quot;social&quot;: 91.02887218045115
+    },
+    &quot;last_q&quot;: {
+      &quot;direct&quot;: 4.938103448275862,
+      &quot;paid_search&quot;: 113.3727405247814,
+      &quot;partner_referral&quot;: 47.64252252252249,
+      &quot;seo&quot;: 24.310750988142306,
+      &quot;social&quot;: 106.87520325203238
+    },
+    &quot;fy26_average&quot;: {
+      &quot;direct&quot;: 4.419438202247187,
+      &quot;paid_search&quot;: 118.55862940275658,
+      &quot;partner_referral&quot;: 54.14623115577886,
+      &quot;seo&quot;: 24.017165200391013,
+      &quot;social&quot;: 99.78674134419555
+    },
+    &quot;paid_search_target&quot;: 106.70276646248092,
+    &quot;target_by&quot;: &quot;2027-06-30&quot;,
+    &quot;pace_needed_paid_search&quot;: 1.518129805355018
+  },
+  &quot;K4&quot;: {
+    &quot;by_quarter&quot;: {
+      &quot;2024-Q4&quot;: 11.0,
+      &quot;2025-Q1&quot;: 11.0,
+      &quot;2025-Q2&quot;: 11.0,
+      &quot;2025-Q3&quot;: 11.0,
+      &quot;2025-Q4&quot;: 11.0,
+      &quot;2026-Q1&quot;: 11.0,
+      &quot;2026-Q2&quot;: 11.0,
+      &quot;2026-Q3&quot;: 11.0
+    },
+    &quot;baseline&quot;: 11.0,
+    &quot;by_team_this_q&quot;: {
+      &quot;Sydney&quot;: 11.0,
+      &quot;Melbourne&quot;: 12.0,
+      &quot;Manila&quot;: 11.0
+    },
+    &quot;by_channel_this_q&quot;: {
+      &quot;direct&quot;: 10.0,
+      &quot;paid_search&quot;: 11.0,
+      &quot;partner_referral&quot;: 10.0,
+      &quot;seo&quot;: 11.0,
+      &quot;social&quot;: 16.0
+    },
+    &quot;share_over_15_min_this_q&quot;: 0.3572729638303409,
+    &quot;target&quot;: 10.0,
+    &quot;target_by&quot;: &quot;2027-03-31&quot;,
+    &quot;months_to_target&quot;: 6,
+    &quot;pace_needed&quot;: -0.16666666666666666,
+    &quot;run_rate&quot;: 0.0
+  },
+  &quot;K5&quot;: {
+    &quot;by_quarter&quot;: {
+      &quot;2024-Q4&quot;: {
+        &quot;rate&quot;: 0.07868020304568528,
+        &quot;final&quot;: true
+      },
+      &quot;2025-Q1&quot;: {
+        &quot;rate&quot;: 0.08333333333333333,
+        &quot;final&quot;: true
+      },
+      &quot;2025-Q2&quot;: {
+        &quot;rate&quot;: 0.07655502392344497,
+        &quot;final&quot;: true
+      },
+      &quot;2025-Q3&quot;: {
+        &quot;rate&quot;: 0.0819277108433735,
+        &quot;final&quot;: true
+      },
+      &quot;2025-Q4&quot;: {
+        &quot;rate&quot;: 0.07328605200945626,
+        &quot;final&quot;: true
+      },
+      &quot;2026-Q1&quot;: {
+        &quot;rate&quot;: 0.07972665148063782,
+        &quot;final&quot;: true
+      },
+      &quot;2026-Q2&quot;: {
+        &quot;rate&quot;: 0.07857142857142857,
+        &quot;final&quot;: true
+      },
+      &quot;2026-Q3&quot;: {
+        &quot;rate&quot;: 0.1111111111111111,
+        &quot;final&quot;: false
+      }
+    },
+    &quot;fy26_average&quot;: 0.07837360047142015,
+    &quot;baseline_quarter&quot;: &quot;2026-Q2&quot;,
+    &quot;baseline&quot;: 0.07857142857142857,
+    &quot;provisional_this_q&quot;: 0.05063291139240506,
+    &quot;by_vertical_last_q&quot;: {
+      &quot;health&quot;: 0.08211143695014662,
+      &quot;life&quot;: 0.06329113924050633
+    },
+    &quot;target&quot;: 0.07837360047142015,
+    &quot;target_by&quot;: &quot;2027-06-30&quot;,
+    &quot;months_to_target&quot;: 9,
+    &quot;pace_needed&quot;: -2.1980900000935038e-05
+  },
+  &quot;bridge&quot;: {
+    &quot;last_q_net_revenue&quot;: 429118.98999999993,
+    &quot;this_q_net_revenue&quot;: 402866.02000000014,
+    &quot;volume&quot;: 12171.959577200934,
+    &quot;mix&quot;: -29658.32220013585,
+    &quot;conversion&quot;: -12185.915492552449,
+    &quot;revenue_per_sale_incl_clawbacks&quot;: 3419.308115487569,
+    &quot;total_change&quot;: -26252.969999999797,
+    &quot;leads_last_q&quot;: 7474,
+    &quot;leads_this_q&quot;: 7686,
+    &quot;per_lead_last_q&quot;: 57.41490366604227,
+    &quot;per_lead_this_q&quot;: 52.41556336195682
+  }
+}</code></pre></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>
