@@ -29,6 +29,10 @@ dl{margin:0;display:grid;grid-template-columns:96px 1fr;gap:6px 10px;font-size:1
 dt{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
 dd{margin:0;overflow-wrap:anywhere}
 details.prompt summary{cursor:pointer;color:var(--accent);font-size:13px}
+details.rules{border-top:1px solid var(--line);padding-top:10px}
+details.rules summary{cursor:pointer;color:var(--accent);font-size:13px;font-weight:600;min-height:32px;display:flex;align-items:center}
+details.rules ul{margin:6px 0 0;padding-left:18px;display:grid;gap:5px;font-size:13.5px}
+details.rules li::marker{color:var(--accent)}
 details.prompt p{font-size:13px;color:var(--muted);margin:8px 0}
 button{font:inherit;font-size:12px;background:transparent;color:var(--accent);border:1px solid var(--line);border-radius:8px;padding:6px 12px;min-height:32px;cursor:pointer}
 button:hover{border-color:var(--accent)}
@@ -49,11 +53,11 @@ button:hover{border-color:var(--accent)}
 </head>
 <body>
 <main>
-<h1>KPI Creator team</h1>
+<h1>Meet the team</h1>
 <p class="sub">Five agents that turn a business problem into a KPI dashboard, each with a persona and a headshot. The headshots are AI-generated in ChatGPT. To regenerate one, open <b>Photo prompt</b> on its card.</p>
 <ol class="flow" id="flow" aria-label="Stage order"></ol>
 <div class="grid" id="cards"></div>
-<p class="foot">Roles follow the KPI Generator Process v1.8 (21-Oct-26). Built: Garry, Kewpie. Not built yet: Ovy, Visalli, Jennifer.</p>
+<p class="foot">Roles and rules follow the KPI Generator Process v1.10 and the agent files (21-Oct-26). Built and run on the ClearCompare test case: Garry, Kewpie, Visalli, Jennifer. Not built yet: Ovy (the /kpi-creator command).</p>
 </main>
 <script>
 const A = [
@@ -66,6 +70,7 @@ const A = [
    "Hands to":"Garry, then Kewpie, then Visalli, then Jennifer.",
    "Won't do":"Publish anywhere. GitHub only on \"create repo\" or \"Update Github\".",
    "Pet peeve":"Being asked to approve something nobody has seen."},
+  rules:["Resumes at the first stage not yet approved, then hands to Garry, Kewpie, Visalli and Jennifer in turn", "Previews every output in the Browser pane, gives a 5-line summary, then waits for a clear yes", "A change re-runs that stage only and marks later stages as stale", "On each approval: saves the approved version to History and updates the Miro outputs flow", "Logs every change in the Business Requirements change log", "Never publishes; GitHub only on \"create repo\" or \"Update Github\""],
   look:{skin:"#7a4a32",hair:"#1a1210",style:"afro",shirt:"#2f7de0",blazer:true,studs:true},
   photo:"poised woman in her late 40s with short natural afro hair and small stud earrings, charcoal blazer over a pale blue shirt, calm assured smile"},
  {id:"garry",name:"Garry",stage:"Stage 1",title:"Business Requirements",built:true,
@@ -77,6 +82,7 @@ const A = [
    "Hands to":"Kewpie: the Business Requirements and the Business Requirements with Data Mapping.",
    "Won't do":"Run calculations on the data, or invent data sources.",
    "Pet peeve":"Vanity metrics on page one."},
+  rules:["Starts with one Problem Statement: 1 or 2 plain sentences every objective helps solve", "Up to 7 interview questions, 1 or 2 at a time, then plays it back and asks \"Is this right?\"", "Owns KPI selection: picks the Top 5 Must Haves from the Why and the Action", "Drafts how each KPI is measured, the data mapping and the filters for Kewpie to test", "Writes the meeting script and its chat view after the playback", "Plain names, never codes, and Before and After in full for any change"],
   look:{skin:"#dcae8a",hair:"#9a9a9a",style:"bald",shirt:"#2f7de0",beard:true,check:true},
   photo:"seasoned man in his mid 50s, bald with a neat grey beard, blue check shirt with sleeves rolled, attentive listening expression"},
  {id:"kewpie",name:"Kewpie",stage:"Stage 2",title:"KPI Development",built:true,
@@ -88,9 +94,10 @@ const A = [
    "Hands to":"Visalli: the Calculation Pack and the full spec.",
    "Won't do":"Add, drop or reprioritise KPIs. That's Garry's call, with SME sign-off.",
    "Pet peeve":"Numbers pasted in by hand."},
+  rules:["Confirms each of Garry's draft measures on the data, or corrects it with a challenge note", "Runs every calculation in a saved script, so every number can be re-run", "Sets the baseline, pace needed and a counter-metric for each Top 5 KPI", "Marks provisional numbers (for example, clawbacks still to land)", "Never adds, drops or reprioritises KPIs: challenges go back to Garry", "Labels test data \"Sample data\""],
   look:{skin:"#e8c39b",hair:"#3f6aa8",style:"straightbob",shirt:"#6aa8f0",glasses:"round"},
   photo:"cheerful Asian Australian woman in her early 30s with a straight jaw-length bob dyed deep navy blue and round wire glasses, light blue cardigan, bright friendly smile"},
- {id:"visalli",name:"Visalli",stage:"Stage 3",title:"Data Visualisation",built:false,
+ {id:"visalli",name:"Visalli",stage:"Stage 3",title:"Data Visualisation",built:true,
   role:"Writes the story and builds the dashboard: headline, Top 5 tiles, drill-down",
   quote:"Headline first. Then the chart that proves it.",
   facts:{Vibe:"Mid 30s. Ex newsroom data journalist and infographic designer.",
@@ -99,9 +106,10 @@ const A = [
    "Hands to":"Jennifer: the HTML file(s) and your chosen version.",
    "Won't do":"Change KPI definitions or calculations.",
    "Pet peeve":"A pie chart with nine slices."},
+  rules:["Story first: headline, what changed, why, what to do", "Under the headline: the top 3 actions as 3 cards (owner, action, target and date)", "First screen at 1280 × 800: headline, action cards and the Top 5 tiles", "Standard KPI tile: number with its sparkline beside it, then target, gap, needs and trend; every row lines up across the tiles", "Every tile and chart shows a one-line \"Why it matters\" on hover, from the Business Requirements", "Monochrome blue by default; 3 or more categories use Charcoal and teal, one colour per category on every chart", "Builds the Standard version first, then 1 or 2 Experimental options"],
   look:{skin:"#d8a47c",hair:"#2c1e16",style:"wavy",shirt:"#225fb0",stubble:true},
   photo:"creative man in his mid 30s with shoulder-length wavy dark brown hair and light stubble, navy crew-neck jumper, curious engaged expression"},
- {id:"jennifer",name:"Jennifer",stage:"Stage 4",title:"Dashboard Creator",built:false,
+ {id:"jennifer",name:"Jennifer",stage:"Stage 4",title:"Dashboard Creator",built:true,
   role:"Styles the dashboard, runs the UX and Web Build standards, validates the finished draft",
   quote:"If it fails on a phone, it fails.",
   facts:{Vibe:"Early 40s. Started in UX design, then moved into front-end development and accessibility auditing.",
@@ -110,6 +118,7 @@ const A = [
    "Hands to":"You, for stakeholder review.",
    "Won't do":"Publish, or change the story, KPIs or charts without sending them back to Visalli or Garry.",
    "Pet peeve":"Sideways scrolling."},
+  rules:["Applies the palette: Monochrome blue, Charcoal and teal for 3 or more categories", "Runs the UX and Web Build standards checks; fixes what's clear-cut", "Anything else goes in a numbered Before and After table for your approval", "Checks 375 to 1600px wide: no sideways scroll, 44px touch targets, no console errors", "Runs the 5-point validation checklist, including the 30-second test", "Story, KPI or chart changes go back to Visalli or Garry; never publishes"],
   look:{skin:"#f2d2b6",hair:"#d9b46a",style:"bun",shirt:"#4f9dff",glasses:"rect",studs:true},
   photo:"polished woman in her early 40s with blonde hair in a neat top bun, slim rectangular glasses and small stud earrings, bright blue blouse, confident focused smile"}
 ];
@@ -178,6 +187,7 @@ document.getElementById("cards").innerHTML=A.map(a=>`<article class="card" id="$
  <p class="role">${a.role}${a.cmd?` · <span style="color:var(--accent)">${a.cmd}</span>`:""}</p></div></div>
  <blockquote>"${esc(a.quote)}"</blockquote>
  <dl>${Object.entries(a.facts).map(([k,v])=>`<dt>${k==="Works"?"How they work":k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+ <details class="rules"><summary>Key working rules (${a.rules.length})</summary><ul>${a.rules.map(r=>`<li>${esc(r)}</li>`).join("")}</ul></details>
  <details class="prompt"><summary>Photo prompt</summary><p>${esc(promptFor(a))}</p><button type="button" data-id="${a.id}">Copy prompt</button></details></article>`).join("");
 document.addEventListener("click",e=>{
  const j=e.target.closest("[data-jump]");if(j){e.preventDefault();document.getElementById(j.dataset.jump).scrollIntoView({behavior:"smooth"});return}
