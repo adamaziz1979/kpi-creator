@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KPI Creator Circle</title>
+<meta name="description" content="A replay of the KPI Creator agents building the ClearCompare dashboard, run from the recorded save and commit times.">
+<style>
+:root{
+  --bg:#0c121a;--card:#141c27;--card2:#18222f;--text:#e8edf3;--muted:#94a1b2;--line:#243042;
+  --accent:#4f9dff;--accent-soft:#16263d;--good:#3fbf7f;--warn:#e0a63a;--bad:#e5675a;
+  --ovy:#bcd9ff;--gary:#8ec0ff;--kewpie:#4f9dff;--visalli:#6aa8f0;--jennifer:#2f7de0;--adam:#e0a63a;
+  --shadow:0 8px 30px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f5f8fc;--card:#ffffff;--card2:#eef3f9;--text:#121a24;--muted:#556273;--line:#dbe3ee;
+    --accent:#1f64c8;--accent-soft:#e3edfb;--good:#1f8a55;--warn:#a86f00;--bad:#c0392b;
+    --ovy:#93bdf2;--gary:#6aa3ec;--kewpie:#1f64c8;--visalli:#3b82e6;--jennifer:#0f3f80;--adam:#a86f00;
+    --shadow:0 8px 24px rgba(18,26,36,.10);color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#f5f8fc;--card:#ffffff;--card2:#eef3f9;--text:#121a24;--muted:#556273;--line:#dbe3ee;
+  --accent:#1f64c8;--accent-soft:#e3edfb;--good:#1f8a55;--warn:#a86f00;--bad:#c0392b;
+  --ovy:#93bdf2;--gary:#6aa3ec;--kewpie:#1f64c8;--visalli:#3b82e6;--jennifer:#0f3f80;--adam:#a86f00;
+  --shadow:0 8px 24px rgba(18,26,36,.10);color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1460px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:clamp(24px,4vw,34px);line-height:1.15;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:18px;margin:0 0 10px}
+h3{font-size:15px;margin:14px 0 6px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+p{margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 18px;max-width:72ch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.muted{color:var(--muted)}
+.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px}
+
+/* top bar: clock + controls */
+.bar{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;margin-bottom:14px}
+.clock{display:flex;flex-direction:column;min-width:200px}
+.clock .day{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.clock .time{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.clock .el{font-size:13px;color:var(--muted)}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+button{font:inherit;color:inherit;background:var(--card2);border:1px solid var(--line);border-radius:10px;min-height:44px;min-width:44px;padding:0 14px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;min-width:104px}
+button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--text)}
+.speed{display:flex;align-items:center;gap:4px;padding:3px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.speed .sl{font-size:12px;font-weight:600;color:var(--muted);padding:0 4px 0 8px;text-transform:uppercase;letter-spacing:.05em}
+.speed button{min-width:52px;border:1px solid var(--line);border-radius:9px;background:var(--card2);font-weight:600;transition:background .15s,border-color .15s,transform .1s}
+.speed button:hover{background:var(--accent-soft);border-color:var(--accent)}
+.speed button:active{transform:scale(.95)}
+.speed button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 2px 8px color-mix(in srgb,var(--accent) 40%,transparent)}
+.stagebar{grid-column:1/-1}
+
+/* scrubber */
+.track{position:relative;height:62px;margin:4px 0 8px}
+.track .tline,.track .tfill{position:absolute;left:2%;top:21px;height:3px;border-radius:2px}
+.track .tline{right:2%;background:var(--line)}
+.track .tfill{width:0;background:var(--accent);transition:width .9s ease}
+.track .tick{position:absolute;top:0;width:22px;min-width:0;height:44px;min-height:0;transform:translateX(-50%);padding:0;border:0;background:none;display:flex;align-items:center;justify-content:center;z-index:1}
+.track .ax{position:absolute;top:42px;transform:translateX(-50%);font-size:11px;color:var(--muted);white-space:nowrap}
+.track .ax::before{content:"";position:absolute;left:50%;top:-6px;height:4px;border-left:1px solid var(--line)}
+.track .axt{position:absolute;right:0;top:42px;font-size:11px;color:var(--muted)}
+.track .tick i{position:relative;width:12px;height:12px;border-radius:50%;background:var(--card);border:2px solid var(--c,var(--muted));transition:transform .2s}
+.track .tick.past i{background:var(--c)}
+.track .tick.now i{transform:scale(1.6);box-shadow:0 0 0 4px var(--accent-soft)}
+body.playing .track .tick.now i{animation:tickpulse 1.4s ease-in-out infinite}
+@keyframes tickpulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 65%,transparent)}50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--accent) 0%,transparent)}}
+
+/* agents row */
+.agents{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}
+.agent{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:center;position:relative;transition:border-color .3s, box-shadow .3s, transform .3s}
+.agent img,.agent .av{width:64px;height:64px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 8px;border:3px solid var(--line);transition:border-color .3s;background:var(--card2)}
+.agent .av{display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;color:var(--adam)}
+.agent .nm{font-weight:700}
+.agent .rl{font-size:12px;color:var(--muted);line-height:1.3;min-height:31px}
+.agent .st{margin-top:8px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;background:var(--card2);color:var(--muted)}
+.agent .cnt{position:absolute;top:8px;right:8px;font-size:12px;font-weight:700;background:var(--card2);border:1px solid var(--line);border-radius:999px;min-width:24px;padding:0 6px;color:var(--muted)}
+.agent.working{border-color:var(--c);box-shadow:0 0 0 1px var(--c),var(--shadow);transform:translateY(-3px)}
+.agent.working img,.agent.working .av{border-color:var(--c)}
+.agent.working .st{background:var(--c);color:#0c121a}
+.agent.done .st{color:var(--good)}
+.agent.done img{border-color:var(--good)}
+.tree{list-style:none;margin:10px 0 0;padding:0 0 0 8px;text-align:left;font-size:11px;line-height:1.35;color:var(--muted)}
+.tree li{position:relative;padding:2px 0 2px 12px;border-left:1px solid var(--line)}
+.tree li:last-child{border-left-color:transparent}
+.tree li::before{content:"";position:absolute;left:-1px;top:0;height:10px;width:9px;border-left:1px solid var(--line);border-bottom:1px solid var(--line)}
+.tree li.new{color:var(--text);animation:rise .4s ease both}
+.dots{display:inline-flex;gap:3px}
+.dots b{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 1s infinite}
+.dots b:nth-child(2){animation-delay:.15s}.dots b:nth-child(3){animation-delay:.3s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+
+/* circle stage */
+.stagewrap{display:grid;grid-template-columns:230px minmax(0,1fr) 270px;gap:20px;align-items:center}
+.stagewrap .log{max-height:560px}
+.stagewrap .nums .stats{grid-template-columns:1fr 1fr}
+.ringstage{position:relative;width:100%;max-width:800px;aspect-ratio:1;margin:-16px auto 36px}
+.ringbox{position:relative;margin:0 auto}
+@media (min-width:701px){.scene{width:800px;height:820px;transform-origin:top left}.ringstage{width:800px;max-width:none;margin:-16px 0 36px}}
+@media (min-width:701px){
+  .nums{padding:12px 14px}
+  .nums h2{font-size:16px;margin-bottom:6px}
+  .nums .stats{gap:6px;margin:6px 0}
+  .nums .stat{padding:7px 9px}
+  .nums .stat b{font-size:18px;white-space:nowrap}
+  .nums .stat span{font-size:11px;line-height:1.3;display:block}
+  .nums h3{margin:8px 0 4px}
+  .nums .rt{margin:2px 0;font-size:12px;grid-template-columns:56px 1fr 30px}
+  .nums p{font-size:11.5px!important;line-height:1.4;margin:6px 0 0}
+}
+.ringstage svg.lines{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1}
+.orbit{fill:none;stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke;stroke-dasharray:3 5}
+.trail{fill:none;stroke:var(--accent);vector-effect:non-scaling-stroke;opacity:.28}
+.trail.hand{stroke:var(--adam);opacity:.55;stroke-dasharray:6 4}
+.livepath{fill:none;stroke:var(--accent);stroke-width:3;vector-effect:non-scaling-stroke;stroke-linecap:round}
+.livepath.hand{stroke:var(--adam)}
+.spoke{stroke:var(--c,var(--accent));stroke-width:2;vector-effect:non-scaling-stroke;stroke-dasharray:4 4;animation:flow .8s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-8}}
+.node{position:absolute;width:104px;transform:translate(-50%,-32px);text-align:center;z-index:3}
+.node .ph{width:64px;height:64px;border-radius:50%;border:3px solid var(--line);margin:0 auto;display:flex;align-items:center;justify-content:center;object-fit:cover;background:var(--card);font-weight:800;font-size:20px;color:var(--adam);transition:border-color .3s,box-shadow .3s}
+.node .nm{font-weight:700;font-size:15px;margin-top:4px;line-height:1.2}
+.node .rl{font-size:11px;color:var(--muted);line-height:1.25}
+.node .st{margin-top:4px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;background:var(--card2);color:var(--muted)}
+.node .cnt{position:absolute;top:-4px;left:calc(50% + 18px);font-size:11px;font-weight:700;background:var(--card2);border:1px solid var(--line);border-radius:999px;min-width:22px;padding:0 5px;color:var(--muted)}
+.node.working .ph{border-color:var(--c);animation:pulse 1.6s ease-in-out infinite}
+.node.working .st{background:var(--c);color:#0c121a}
+.node.done .ph{border-color:var(--good)}
+.node.done .st{color:var(--good)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 45%,transparent)}50%{box-shadow:0 0 0 10px color-mix(in srgb,var(--c) 0%,transparent)}}
+.center{position:absolute;left:31%;top:32%;width:38%;height:37%;z-index:2;background:none;border:0;padding:0 4px;overflow:hidden;font-size:13.5px;display:flex;align-items:center;justify-content:center}
+.center .fit{width:100%;transform-origin:center center;transition:opacity .3s ease}
+.center .fit.fade{opacity:0}
+.center .body{animation:fadein .5s ease both}
+@keyframes fadein{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+.center h3{font-size:11px;margin:8px 0 4px}
+.center .file,.center .more{display:none}
+.center .rw{flex-wrap:nowrap!important;gap:10px!important}
+.center .rw svg{width:96px;height:96px;flex:0 0 auto}
+.center .rw ul{min-width:0!important}
+.center .rw li{font-size:11.5px;padding:4px 0}
+.center .gate{margin-top:10px;padding:7px 10px}
+.center .list li{padding:4px 0;font-size:12px;line-height:1.3}
+.center .own li span:last-child{display:none}
+.center .stats{grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:6px}
+.center .stat{padding:6px 8px}
+.center p{margin-bottom:6px}
+.center .handnote{margin-top:6px;font-size:12.5px}
+.center .ttl{font-size:17px}
+.center .list li{font-size:13px}
+.center .stat b{font-size:18px}
+.center .versions{grid-template-columns:1fr}
+.center .actions3{grid-template-columns:1fr}
+.otree{position:absolute;list-style:none;margin:0;padding:0;font-size:10.5px;line-height:1.3;color:var(--muted);white-space:nowrap;text-align:left;z-index:3}
+.otree:empty{display:none}
+.otree a{color:inherit;text-decoration:none}
+.otree a:hover,.otree a:focus-visible{color:var(--accent);text-decoration:underline}
+.otree li{position:relative;padding:1px 0 1px 11px;border-left:1px solid var(--line)}
+.otree li:last-child{border-left-color:transparent}
+.otree li::before{content:"";position:absolute;left:-1px;top:0;height:8px;width:8px;border-left:1px solid var(--line);border-bottom:1px solid var(--line)}
+.otree li.new{color:var(--text);animation:rise .4s ease both}
+.otree.right{transform:translate(0,-8px)}
+.otree.left{transform:translate(-100%,-8px);text-align:right}
+.otree.left li{padding:1px 11px 1px 0;border-left:0;border-right:1px solid var(--line)}
+.otree.left li:last-child{border-right-color:transparent}
+.otree.left li::before{left:auto;right:-1px;border-left:0;border-right:1px solid var(--line)}
+/* Ovy's tree: outputs alternate right and left of one centre stem, so it stays short */
+.otree.top{transform:translate(-50%,-100%);display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:row dense;width:max-content}
+.otree.top::after{content:"";position:absolute;left:50%;top:0;bottom:-1px;border-left:1px solid var(--line)}
+.otree.top li{grid-column:2;border-left:0;padding:1px 0 1px 11px}
+.otree.top li::before{left:0;border-left:0}
+.otree.top li:nth-child(even){grid-column:1;text-align:right;padding:1px 11px 1px 0}
+.otree.top li:nth-child(even)::before{left:auto;right:0}
+.conn{stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
+.packet2{position:absolute;z-index:4;transform:translate(-50%,-50%);pointer-events:none;background:var(--adam);color:#0c121a;font-size:12px;font-weight:700;padding:5px 9px;border-radius:8px;box-shadow:var(--shadow);white-space:nowrap}
+.below{display:none}
+.legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;font-size:13px;color:var(--muted);margin-top:0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg{display:inline-block;width:24px;height:0;border-top:3px solid var(--accent)}
+.lg.hand{border-top:3px dashed var(--adam)}
+.lg.spoke{border-top:2px dashed var(--muted)}
+@media (max-width:1379px){.stagewrap{grid-template-columns:1fr 1fr;align-items:start}.circlecol{grid-column:1/-1;order:-1}.stagewrap .log{max-height:520px}}
+@media (max-width:700px){.stagewrap{grid-template-columns:1fr}.stagewrap .log{max-height:320px}}
+@media (max-width:700px){
+  .ringstage{margin:8px auto 28px}
+  .node{width:72px;transform:translate(-50%,-22px)}
+  .node .ph{width:44px;height:44px;border-width:2px;font-size:16px}
+  .node .nm{font-size:11px}
+  .node .rl{display:none}
+  .node .st{font-size:9px;padding:1px 5px;margin-top:2px}
+  .node .st .lbl{display:none}
+  .node .cnt,.otree,.conn{display:none}
+  .center{left:26%;top:34%;width:48%;height:33%;padding:10px;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .center .hd{flex-direction:column;gap:6px;margin:0}
+  .center .ttl{font-size:12px;line-height:1.25}
+  .center .who{font-size:11px}
+  .center .hd img{width:32px;height:32px}
+  .below{display:block;margin-bottom:12px}
+  .legend{margin:0 0 12px;gap:8px 12px}
+  .packet2{font-size:10px;padding:3px 6px}
+}
+
+/* main grid */
+.ringstage .center{position:absolute;min-height:0;overflow:hidden}
+.below .hd{display:none}
+.main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+.out{min-height:420px;position:relative;overflow:hidden}
+.out .hd{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.out .hd img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--c)}
+.out .who{font-size:13px;color:var(--muted)}
+.out .ttl{font-size:20px;font-weight:700;line-height:1.25}
+.file{display:inline-flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:4px 8px;margin:0 6px 6px 0;font-size:13px;max-width:100%;overflow-wrap:anywhere}
+.file::before{content:"";width:10px;height:12px;border:1.5px solid var(--muted);border-radius:2px;flex:0 0 auto}
+.body{animation:rise .45s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.quote{border-left:3px solid var(--accent);padding:6px 12px;background:var(--accent-soft);border-radius:0 8px 8px 0;margin:8px 0 12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{font-size:13px;border:1px solid var(--line);background:var(--card2);border-radius:999px;padding:3px 10px}
+.list{margin:6px 0 0;padding:0;list-style:none}
+.list li{display:flex;gap:10px;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.list li:first-child{border-top:0}
+.list li span:last-child{color:var(--muted);text-align:right;flex:0 0 auto;max-width:48%}
+.list.reveal li{animation:rise .4s ease both}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:8px 0}
+.stat{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px}
+.stat b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.gate{display:flex;align-items:center;gap:10px;margin-top:14px;padding:10px 12px;border-radius:10px;border:1px solid var(--adam);background:color-mix(in srgb,var(--adam) 12%,transparent);font-weight:600;animation:rise .4s ease .6s both}
+.gate .av{width:32px;height:32px;border-radius:50%;background:var(--adam);color:#0c121a;display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto}
+.handnote{margin-top:10px;font-size:14px;color:var(--muted);animation:rise .4s ease 1s both}
+.handnote b{color:var(--text)}
+svg text{fill:var(--muted);font-size:11px}
+svg .tx{fill:var(--text)}
+.versions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.ver{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--card2);font-size:13px}
+.ver.pick{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.ver b{display:block;font-size:14px;margin-bottom:2px}
+.actions3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.act{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--card2);font-size:13px;animation:rise .4s ease both}
+.act b{display:block;font-size:13px;color:var(--accent)}
+.meter{height:10px;border-radius:999px;background:var(--card2);border:1px solid var(--line);overflow:hidden;margin:6px 0 4px}
+.meter i{display:block;height:100%;width:0;background:var(--good);transition:width 1.2s ease}
+
+/* log */
+.log{max-height:560px;overflow:auto}
+.log ol{list-style:none;margin:0;padding:0}
+.log li{display:grid;grid-template-columns:62px 10px 1fr;gap:8px;align-items:start;padding:7px 0;border-top:1px solid var(--line);font-size:14px;animation:rise .35s ease both}
+.log li:first-child{border-top:0}
+.log li .t{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
+.log li .d{width:10px;height:10px;border-radius:50%;background:var(--c);margin-top:6px}
+.log li.now{font-weight:600}
+.log li.gateRow .x{color:var(--adam)}
+.log .dayhd{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:10px 0 4px;border-top:0}
+
+/* final */
+.final{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(5,8,12,.72)}
+.final.show{display:flex;animation:rise .3s ease both}
+.final .finalgrid{width:min(1100px,100%,calc((100vh - 170px)*1.6))}
+.final.method .finalgrid{width:min(760px,100%)}
+.final .card{position:relative;max-height:calc(100vh - 48px);overflow:auto}
+.mclose{position:absolute;top:10px;right:10px}
+.viewdash{margin-top:12px}
+.frame{position:relative;width:100%;aspect-ratio:16/10;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.frame iframe{position:absolute;top:0;left:0;width:1280px;height:800px;border:0;transform-origin:0 0}
+.finalgrid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+a{color:var(--accent)}
+a.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:10px;background:var(--accent);color:#fff;text-decoration:none;font-weight:600;margin-top:8px}
+
+/* handover packet */
+.packet{position:fixed;left:0;top:0;z-index:50;pointer-events:none;background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:6px 10px;border-radius:8px;box-shadow:var(--shadow);white-space:nowrap}
+
+.side{display:grid;gap:16px;align-content:start;min-width:0}
+.side .log{max-height:340px}
+.finalgrid{grid-template-columns:1fr!important}
+.nums .stats{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+.rt i::after{transition:width .8s ease}
+body.ended .dots b,body.ended .node .ph,body.ended .spoke{animation:none!important}
+.rt{display:grid;grid-template-columns:64px 1fr 36px;gap:8px;align-items:center;font-size:13px;margin:4px 0}
+.rt i{display:block;height:8px;border-radius:4px;background:var(--line);position:relative;overflow:hidden}
+.rt i::after{content:"";position:absolute;inset:0;width:var(--w);background:var(--c);border-radius:4px}
+.rt b{text-align:right;font-variant-numeric:tabular-nums}
+.method{font-size:14px;color:var(--muted)}
+.method summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--text);font-weight:600}
+.method table{width:100%;border-collapse:collapse;font-size:13px}
+.method td,.method th{border-top:1px solid var(--line);padding:6px 4px;text-align:left;vertical-align:top}
+.method th{color:var(--text)}
+
+@media (max-width:900px){
+  .main,.finalgrid{grid-template-columns:1fr}
+  .log{max-height:320px}
+  .agents{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:600px){
+  .bar{grid-template-columns:1fr}
+  .ctrls{justify-content:flex-start}
+  .agents{grid-template-columns:repeat(6,1fr);gap:4px}
+  .agent{padding:8px 2px;border-radius:10px}
+  .agent img,.agent .av{width:40px;height:40px;margin-bottom:4px;border-width:2px}
+  .agent .av{font-size:15px}
+  .agent .nm{font-size:12px}
+  .agent .rl,.agent .cnt,.agent .tree{display:none}
+  .agent .st{font-size:10px;padding:2px 5px;margin-top:4px}
+  .agent .st .lbl{display:none}
+  .versions,.actions3{grid-template-columns:1fr}
+  .method table{display:block}
+  .method tr{display:block;border-top:1px solid var(--line);padding:6px 0}
+  .method th{display:none}
+  .method td{display:block;border:0;padding:1px 0}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>KPI Creator at work</h1>
+  <p class="sub">The agents at work. Each output appears in the middle as it's made, and a line traces every move of the work between agents. Gold lines are handovers after Human approves a stage.</p>
+
+  <div class="bar">
+    <div class="clock" aria-live="off">
+      <span class="day">Agent time</span>
+      <span class="time" id="time">0m</span>
+      <span class="el" id="el">Saved Tue 20 Oct 2026, 3:45 pm</span>
+    </div>
+    <div></div>
+    <div class="ctrls">
+      <button data-open="method" aria-label="Where the times come from" title="Where the times come from">&#9432;</button>
+      <button id="restart" aria-label="Restart">&#8634;</button>
+      <button id="prev" aria-label="Previous step">&#9664;</button>
+      <button id="play" class="primary">&#9654; Play</button>
+      <button id="next" aria-label="Next step">&#9654;&#9654;</button>
+      <div class="speed" role="group" aria-label="Playback speed"><span class="sl" aria-hidden="true">Speed</span>
+        <button data-s="1" aria-pressed="true">1x</button>
+        <button data-s="2" aria-pressed="false">2x</button>
+        <button data-s="4" aria-pressed="false">4x</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="track" id="track" aria-label="Timeline steps"></div>
+
+  <div class="stagewrap">
+    <section class="card nums" aria-label="The run in numbers">
+      <h2>The run in numbers</h2>
+      <div class="stats">
+        <div class="stat"><b id="n-rt">0m</b><span>agent run time so far, from the session logs</span></div>
+        <div class="stat"><b id="n-st">0 of 5</b><span>stages approved by Human</span></div>
+        <div class="stat"><b id="n-ck">Not run</b><span>standards checks pass</span></div>
+        <div class="stat"><b id="n-kp">0</b><span>Top 5 KPIs, each with an owner and a date</span></div>
+        <div class="stat"><b id="n-ix">0</b><span>Interactions</span></div>
+      </div>
+      <h3>Agent run time</h3>
+      <div id="rtbars"><div class="rt"><span>Ovy</span><i id="rb-ovy" style="--w:0%;--c:var(--ovy)"></i><b id="rv-ovy">0m</b></div><div class="rt"><span>Gary</span><i id="rb-gary" style="--w:0%;--c:var(--gary)"></i><b id="rv-gary">0m</b></div><div class="rt"><span>Kewpie</span><i id="rb-kewpie" style="--w:0%;--c:var(--kewpie)"></i><b id="rv-kewpie">0m</b></div><div class="rt"><span>Visalli</span><i id="rb-visalli" style="--w:0%;--c:var(--visalli)"></i><b id="rv-visalli">0m</b></div><div class="rt"><span>Jennifer</span><i id="rb-jennifer" style="--w:0%;--c:var(--jennifer)"></i><b id="rv-jennifer">0m</b></div></div>
+      <p class="muted" style="font-size:13px;margin-top:6px">Final total 1h 33m. Claude also spent 36m improving the agents and their guides during the run, so 2h 11m of working time in all. Estimates: each step is matched to an agent by the files it touched.</p>
+      <p class="muted" id="n-next" style="font-size:14px;display:none">Next: Stage 5, Stakeholder Review and Handover. The CCO walk-through, sign-off and go-live. Not built yet.</p>
+    </section>
+    <div class="circlecol">
+      <div class="ringbox" id="ringbox"><div class="scene" id="scene">
+      <div class="ringstage" id="ring">
+        <svg class="lines" viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="50" cy="50" r="30" class="orbit"/>
+          <g id="conns"></g><g id="trails"></g><g id="live"></g>
+        </svg>
+        <section class="center out" id="out" aria-live="polite"></section>
+      </div>
+      </div></div>
+      <section class="card below" id="below" aria-live="polite"></section>
+      <div class="legend" id="legend"><span><i class="lg mv"></i>Work moves between agents</span><span><i class="lg hand"></i>Handover after approval</span><span><i class="lg spoke"></i>Output being made</span></div>
+    </div>
+    <section class="card log">
+      <h2>Activity log</h2>
+      <ol id="log"></ol>
+    </section>
+  </div>
+
+  <section class="final" id="final" role="dialog" aria-modal="true" aria-label="Final dashboard">
+    <div class="finalgrid">
+      <div class="card">
+        <button class="mclose" data-close aria-label="Close">&#10005;</button>
+        <h2>The final product: Stage 4 dashboard</h2>
+        <div class="frame" id="frame">
+          <iframe title="ClearCompare Stage 4 dashboard" loading="lazy" tabindex="-1"
+            src="https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/16-dashboard.html"></iframe>
+        </div>
+        <a class="btn" href="https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/16-dashboard.html" target="_blank" rel="noopener">Open the dashboard</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="final method" id="method" role="dialog" aria-modal="true" aria-label="Where the times come from">
+    <div class="finalgrid"><div class="card">
+    <button class="mclose" data-close aria-label="Close">&#10005;</button>
+    <h2>Where the times come from</h2>
+    <p>Times are the recorded save time of each output file in the ClearCompare folder, the approval snapshots in <span class="mono">History/</span>, and the git commit times. A file that was saved again later shows its last save, so a few first drafts started earlier than shown.</p>
+    <table>
+      <thead><tr><th>Source</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td>File save times</td><td>Stakeholder file, interview notes, sample data, calculations, Calculation Pack, tile options, proposed fixes, validation, build scripts, Stage 4 dashboard</td></tr>
+        <tr><td>History snapshots</td><td>Stage 2, 3 and 4 approvals (the moment the approved version was saved)</td></tr>
+        <tr><td>Git commits</td><td>Stage 1 Business Requirements (21:02), meeting script (23:18), Stage 1 and 2 reports (08:25), new agent files (13:03)</td></tr>
+        <tr><td>Session logs</td><td>Agent run time: only the time Claude was working inside a reply, with any single wait over 5 minutes cut to 5. Your reading and review time between replies is left out. Each step goes to the agent whose files it touched; agent instructions, guides and personas count as improving the agents</td></tr>
+        <tr><td>Timeline</td><td>Steps are spaced by agent run time, not clock time, so long breaks and review time take no space. Each step also shows when its output was saved</td></tr>
+        <tr><td>Interactions</td><td>Each message Human typed to the agents in the KPI Creator sessions, counted up to each step. /wrap commands and system notes are left out</td></tr>
+        <tr><td>Assumed</td><td>Who made the 07:42 Business Requirements update: shown as Ovy, who keeps the spec and requirements in step with Kewpie's tested data mapping</td></tr>
+      </tbody>
+    </table>
+    </div></div>
+  </section>
+</div>
+
+<script>
+(function(){
+const AGENTS=[
+  {id:'ovy',name:'Ovy',role:'Orchestrator',img:'personas/ovy-400.jpg'},
+  {id:'gary',name:'Gary',role:'Stage 1 Business Requirements',img:'personas/gary-400.jpg',stage:1},
+  {id:'kewpie',name:'Kewpie',role:'Stage 2 KPI Development',img:'personas/kewpie-400.jpg',stage:2},
+  {id:'visalli',name:'Visalli',role:'Stage 3 Data Visualisation',img:'personas/visalli-400.jpg',stage:3},
+  {id:'jennifer',name:'Jennifer',role:'Stage 4 Dashboard Creator',img:'personas/jennifer-400.jpg',stage:4},
+  {id:'adam',name:'Stage 5',role:'Stakeholder Review and Handover',img:null,stage:5}
+];
+const A=Object.fromEntries(AGENTS.map(a=>[a.id,a]));
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue('--'+n).trim();
+
+/* ---------- small chart builders ---------- */
+const K1M=[53.32,58.36,58.45,56.16,59.71,56.13,60.40,57.45,58.06,56.92,59.58,59.99,55.34,61.39,55.83,57.84,58.79,61.57,57.77,58.56,55.94,52.36,54.56,50.30];
+function tileSVG(){
+  const w=220,h=70,min=48,max=63;
+  const x=i=>6+i*(w-12)/(K1M.length-1), y=v=>h-6-(v-min)/(max-min)*(h-12);
+  const d=K1M.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+  const L=K1M.length-1;
+  return `<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;max-width:440px">
+   <div><div class="muted" style="font-size:12px">Net revenue per lead</div><div style="font-size:33px;font-weight:700;line-height:1.1">$52.42</div></div>
+   <svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="Monthly net revenue per lead, Oct-24 to Sep-26, against the $57.41 target">
+    <line x1="6" x2="${w-6}" y1="${y(57.41)}" y2="${y(57.41)}" stroke="var(--muted)" stroke-dasharray="4 3"/>
+    <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" class="draw"/>
+    <circle cx="${x(L)}" cy="${y(K1M[L])}" r="4" fill="var(--accent)"/>
+   </svg>
+   <div class="muted" style="font-size:12px;flex-basis:100%">Target $57.41 by 30-Jun-27 · Needs +$0.56 a month<br>Trend −$1.88 a month</div></div>`;
+}
+function bridgeSVG(){
+  const steps=[['Last quarter',429119,'t'],['More leads',12172,'d'],['Lead mix',-29658,'d'],['Conversion',-12186,'d'],['Revenue per sale',3419,'d'],['This quarter',402866,'t']];
+  const W=520,H=210,top=18,bot=46,lo=380000,hi=445000;
+  const y=v=>top+(hi-v)/(hi-lo)*(H-top-bot), bw=56, gap=(W-steps.length*bw)/(steps.length+1);
+  let run=0,s='';
+  steps.forEach(([lab,v,k],i)=>{
+    const x=gap+i*(bw+gap); let a,b,col;
+    if(k==='t'){a=v;b=lo;run=v;col='var(--accent)';}
+    else{a=run;b=run+v;run=b;col=v<0?'var(--bad)':'var(--good)';}
+    const y1=y(Math.max(a,b)),y2=y(Math.min(a,b));
+    const val=(k==='t'?'':v<0?'−':'+')+'$'+Math.abs(v).toLocaleString('en-AU');
+    s+=`<rect x="${x}" y="${y1}" width="${bw}" height="${Math.max(2,y2-y1)}" rx="3" fill="${col}" style="animation:rise .4s ease ${i*.18}s both"/>
+        <text x="${x+bw/2}" y="${y1-5}" text-anchor="middle" class="tx">${val}</text>
+        <text x="${x+bw/2}" y="${H-bot+16}" text-anchor="middle">${lab.split(' ')[0]}</text>
+        <text x="${x+bw/2}" y="${H-bot+29}" text-anchor="middle">${lab.split(' ').slice(1).join(' ')}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Revenue bridge from $429,119 last quarter to $402,866 this quarter">${s}
+   <text x="4" y="${H-4}">Axis starts at $380k so the changes are visible</text></svg>`;
+}
+function ringsSVG(){
+  const R=[['Net revenue per lead','$52.42',91],['Health conversion','9.5%',86],['Paid search cost per acquisition','$93.04',100],['Speed to contact','11 min',91],['90-day clawback rate','7.9%',100]];
+  let s='',cx=80,cy=80;
+  R.forEach(([n,v,p],i)=>{const r=72-i*12,c=2*Math.PI*r;
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--line)" stroke-width="8"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${p<90?'var(--warn)':'var(--accent)'}" stroke-width="8" stroke-linecap="round"
+         stroke-dasharray="${c}" stroke-dashoffset="${c}" transform="rotate(-90 ${cx} ${cy})" class="ring" data-off="${c*(1-p/100)}"/>`;});
+  const lab=R.map(([n,v,p])=>`<li><span>${n}</span><span>${v} · ${p}%</span></li>`).join('');
+  return `<div class="rw" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><svg viewBox="0 0 160 160" width="150" height="150" role="img" aria-label="Progress rings, share of target reached">${s}</svg>
+   <ul class="list" style="flex:1;min-width:220px">${lab}</ul></div>`;
+}
+
+/* ---------- the recorded events ---------- */
+const files=(...f)=>f.map(x=>`<span class="file">${x}</span>`).join('');
+const li=(rows,cls='reveal')=>`<ul class="list ${cls}">${rows.map((r,i)=>`<li style="animation-delay:${i*.12}s"><span>${r[0]}</span><span>${r[1]}</span></li>`).join('')}</ul>`;
+const E=[
+ {t:'2026-10-20T15:45',a:'ovy',title:'Sets up the stakeholder for the test',log:'Stakeholder file ready',
+  body:()=>`${files('stakeholder-file.md')}
+   <p>Ovy plays Priya, Chief Commercial Officer at ClearCompare, so Gary has someone to interview in test mode.</p>
+   <div class="quote">"Revenue per lead dropped 9% last quarter. Marketing blames sales, sales blames lead quality, and finance says it's clawbacks."</div>`},
+ {t:'2026-10-20T15:46',a:'gary',title:'Runs the requirements interview',log:'Interview: 7 of 7 questions',
+  body:()=>`${files('01 Interview Notes.md')}
+   <p>Seven questions, each tied to a gap in the requirements checklist.</p>
+   <div class="chips">${['Why and What: the problem','What: 2 or 3 outcomes','Who: users and decisions','Why and Action: off-track actions','When: targets and dates','Where: data and trust','Constraints'].map((c,i)=>`<span class="chip" style="animation:rise .3s ease ${i*.15}s both">${i+1}. ${c}</span>`).join('')}</div>
+   <div class="stats more"><div class="stat"><b>7 of 7</b><span>questions used</span></div><div class="stat"><b>2</b><span>audiences: exec team weekly, vertical heads daily</span></div><div class="stat"><b>5</b><span>data sources named</span></div></div>`},
+ {t:'2026-10-20T21:02',a:'gary',title:'Writes the Business Requirements and Top 5 KPIs',log:'Business Requirements and Project Plan',gate:1,hand:['gary','kewpie','Business Requirements + spec'],
+  body:()=>`${files('01 Business Requirements.md','01 Project Plan.md','Stage 1 Review.html','spec.json')}
+   <h3 class="more">Problem statement</h3>
+   <div class="quote more">Net revenue per lead fell about 9% last quarter, and nobody can say whether the mix of leads, sales conversion or cancelled policies caused it.</div>
+   <h3>Top 5 Must Have KPIs</h3>
+   ${li([['Net revenue per lead, after clawbacks','Chief Commercial Officer'],['Lead-to-sale conversion by vertical (health back to 11%)','Vertical heads'],['Marketing cost for each net sale, by channel','Head of Marketing'],['Minutes from lead to first call','Head of Sales Operations'],['Health and life sales clawed back within 90 days','Vertical heads']],'reveal own')}`},
+ {t:'2026-10-20T22:03',a:'kewpie',title:'Loads the data to test against',log:'Sample data: 5 tables, 24 months',
+  body:()=>`${files('leads.csv','contacts.csv','sales.csv','marketing_spend.csv','complaints.csv')}
+   <p>Synthetic data built from the requirements, Oct-24 to Sep-26, with the known quality problems kept in.</p>
+   <div class="stats"><div class="stat"><b data-n="58509">0</b><span>leads</span></div><div class="stat"><b data-n="58509">0</b><span>first contacts</span></div><div class="stat"><b data-n="7647">0</b><span>sales</span></div><div class="stat"><b data-n="13115">0</b><span>spend rows</span></div><div class="stat"><b data-n="32">0</b><span>complaints</span></div></div>`},
+ {t:'2026-10-20T23:18',a:'gary',title:'Adds the meeting script and chat view',log:'Meeting script (now a Stage 1 output)',
+  body:()=>`${files('01 Meeting Script.md','01 Meeting Script.html')}
+   <p>A 30-minute script for running the real interview, in 10 parts. Process v1.6 makes it a Stage 1 output.</p>
+   <div style="display:flex;height:28px;border-radius:8px;overflow:hidden;border:1px solid var(--line)">${[[2,'Open'],[4,'Problem'],[4,'Outcomes'],[3,'Audience'],[5,'Know and do'],[2,'Targets'],[4,'Data'],[2,'Rules'],[3,'Playback'],[1,'']].map(([m,l],i)=>`<div title="${l} ${m} min" style="flex:${m};background:var(--${['ovy','gary','kewpie','visalli','jennifer'][i%5]});opacity:.85;border-right:1px solid var(--bg);font-size:10px;color:#0c121a;display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap;animation:rise .3s ease ${i*.1}s both">${m>2?l:''}</div>`).join('')}</div>
+   <p class="muted" style="font-size:13px;margin-top:6px">0 to 30 minutes, from opening to close</p>`},
+ {t:'2026-10-21T00:04',a:'kewpie',title:'Runs every calculation on the data',log:'Baselines, targets and pace needed',
+  body:()=>`${files('kewpie_calculations.py','kpi_results.json')}
+   <p>Each Top 5 KPI becomes a working calculation with a baseline, target and the pace needed to hit it.</p>
+   ${li([['Net revenue per lead','$52.42 → $57.41 by 30-Jun-27'],['Health conversion','9.5% → 11% by 30-Jun-27'],['Paid search cost per acquisition','$93.04, target $106.70'],['Minutes to first call (median)','11 → 10 by 31-Mar-27'],['90-day clawback rate','7.86% → 7.84% by 30-Jun-27']])}
+   <p class="muted more" style="font-size:13px;margin-top:8px">Data checks: 6.1% of sales can't be matched to a lead · Manila outcomes blank before Mar-25</p>`},
+ {t:'2026-10-21T00:05',a:'kewpie',title:'Explains the 9% fall and raises challenge notes',log:'KPI Calculation Pack and revenue bridge',
+  body:()=>`${files('02 KPI Calculation Pack.md','Stage 2 Review.html')}
+   <h3>Revenue bridge, last quarter to this quarter</h3>${bridgeSVG()}
+   <h3 class="more">Challenge notes (6)</h3>
+   ${li([['Conversion was understated','corrected'],["This quarter's clawbacks haven't landed yet",'accepted'],['The lead-mix target is a big reversal','accepted'],['Cost per acquisition looks better than it is','accepted'],['Complaint numbers too small for a monthly rate','accepted'],['The 9% headline','noted']],'reveal more')}`},
+ {t:'2026-10-21T07:42',a:'ovy',title:'Keeps the requirements in step',log:'Business Requirements v1.1 with data mapping',
+  body:()=>`${files('01 Business Requirements with Data Mapping.md','spec.json')}
+   <p>Kewpie's tested data mapping and the accepted challenge notes go back into the Business Requirements, so every stage works from one version.</p>
+   <div class="stats"><div class="stat"><b>v1.1</b><span>Business Requirements</span></div><div class="stat"><b>5 of 6</b><span>challenge notes settled</span></div></div>`},
+ {t:'2026-10-21T07:56',a:'ovy',title:'Saves the approved versions',log:'History: Stage 1 and Stage 2 snapshots',gate:2,hand:['kewpie','visalli','Calculation Pack + results'],
+  body:()=>`${files('History/2026.10.20 - Stage 1 approved/','History/2026.10.21 - Stage 2 approved/')}
+   <p>The approved version of each stage is saved, so any document can be compared across stages.</p>`},
+ {t:'2026-10-21T08:25',a:'ovy',title:'Publishes the Stage 1 and 2 reports',log:'Stage 1 and 2 Reports page',
+  body:()=>`${files('Stage 1 and 2 Reports.html')}
+   <p>One page with both stage reviews in tabs, plus the Miro "outputs in order" flow updated.</p>`},
+ {t:'2026-10-21T13:03',a:'ovy',title:'Brings Visalli and Jennifer onto the team',log:'Agent files: Ovy, Visalli, Jennifer',
+  body:()=>`${files('.claude/agents/ovy.md','.claude/agents/visalli.md','.claude/agents/jennifer.md')}
+   <p>All five agents now have their own instructions and persona. Visalli reads the Dashboard Patterns and Data Storytelling guides.</p>`},
+ {t:'2026-10-21T14:47',a:'visalli',title:'Settles the KPI tile design',log:'KPI tile options',
+  body:()=>`${files('KPI Tile Options.html')}
+   <p>Human's pick: number and sparkline side by side, a dashed target line and a dot on the latest value. Detail lines sit underneath.</p>
+   ${tileSVG()}`},
+ {t:'2026-10-21T14:48',a:'visalli',title:'Builds 3 dashboard versions and the story',log:'Standard, Experimental A and B',gate:3,hand:['visalli','jennifer','Experimental A'],
+  body:()=>`${files('03 Dashboard (Standard).html','03 Dashboard (Experimental A).html','03 Dashboard (Experimental B).html')}
+   <div class="versions more"><div class="ver"><b>Standard</b>Headline, tiles, bridge, why charts, actions</div><div class="ver pick"><b>Experimental A ✓</b>Progress rings beside the headline</div><div class="ver"><b>Experimental B</b>Lead mix as a dot swarm</div></div>
+   <div class="quote more">Net revenue per lead fell 8.7% to $52.42 (provisional), and most of the fall is lead mix, not sales.</div>
+   ${ringsSVG()}`},
+ {t:'2026-10-21T14:51',a:'ovy',title:'Saves Stage 3 and sets the house style',log:'History: Stage 3 snapshot',
+  body:()=>`${files('History/2026.10.21 - Stage 3 approved/','Stage 3 Review.md')}
+   ${li([['Colour scheme','Monochrome blue, the dashboard default'],['KPI tile','Number and sparkline side by side'],['Pace and trend','Two lines, not one'],['Progress rings','Same order as the tiles']],'reveal')}`},
+ {t:'2026-10-21T14:55',a:'jennifer',title:'Checks the chosen dashboard and proposes fixes',log:'Proposed fixes draft',
+  body:()=>`${files('04 Dashboard (proposed fixes).html')}
+   ${li([['1. Headline and tiles on the first screen','tiles ended at 930px'],['2. Chart points easy to tap','18 controls under 44px'],["3. Energy's colour the same on every chart",'2 colours in use']])}`},
+ {t:'2026-10-21T15:22',a:'jennifer',title:'Runs the UX and Web Build standards',log:'Standards and validation: 30 of 31',
+  body:()=>`${files('04 Standards and Validation.md')}
+   <div class="stats"><div class="stat"><b>30 of 31</b><span>checks pass</span></div><div class="stat"><b>0</b><span>console errors</span></div><div class="stat"><b>0</b><span>sideways scroll, any size</span></div></div>
+   <div class="meter"><i data-w="96.8"></i></div>
+   <p class="muted" style="font-size:13px">Open: on a phone the second tile needs one scroll</p>`},
+ {t:'2026-10-21T16:29',a:'visalli',title:'Adds the Top 3 actions rule to her build',log:'Build script: Top 3 actions',
+  body:()=>`${files('visalli_build_dashboard.py','visalli_dashboard_template.html')}
+   <p>New rule: under the headline, the 3 actions stakeholders need to know. Applied to all three versions.</p>
+   <div class="actions3">
+    <div class="act"><b>Head of Marketing</b>Energy back to 30% of leads by 31-Mar-27</div>
+    <div class="act" style="animation-delay:.15s"><b>Head of Health</b>Conversion back to 11% by 30-Jun-27</div>
+    <div class="act" style="animation-delay:.3s"><b>Head of Sales Operations</b>10-minute median wait by 31-Mar-27</div>
+   </div>`},
+ {t:'2026-10-21T16:41',a:'jennifer',title:'Finishes the Stage 4 dashboard',log:'04 Dashboard built',
+  body:()=>`${files('jennifer_finish.py','04 Dashboard.html')}
+   ${li([['Fixes 1, 2 and 3','made and re-checked'],['Tiles on a 1280 × 800 screen','end at 799px (was 930px)'],['Controls under 44px on a phone','0 (was 18)'],['"Why it matters" on hover, focus and tap','5 tiles, 11 charts'],['Tile numbers count up','land on the Calculation Pack values']])}`},
+ {t:'2026-10-21T16:42',a:'ovy',title:'Saves Stage 4 and hands over',log:'Stage 4 approved, ready for handover',gate:4,hand:['jennifer','adam','04 Dashboard'],final:true,
+  body:()=>`${files('History/2026.10.21 - Stage 4 approved/','Stage 4 Review.md')}
+   <p>The finished first draft goes to Stage 5: the CCO walk-through, sign-off and go-live.</p>`}
+];
+const OUT=['Stakeholder file','Interview notes','Business Requirements','Sample data','Meeting script','Calculations','Calculation Pack','Requirements v1.1','Stage 1 and 2 snapshots','Stage 1 and 2 reports','Agent files','KPI tile options','3 dashboard versions','Stage 3 snapshot','Proposed fixes','Standards check','Top 3 actions rule','04 Dashboard','Stage 4 snapshot'];
+/* the file each output opens in a new window */
+const OUTF=["", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-1/01-interview-notes.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-1/03-business-requirements.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/07-dataset-description.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-1/02-meeting-chat.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/08-calculation-script.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/09-kpi-calculation-pack.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/10-business-requirements-with-data-mapping.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/11-stage-2-review.html", "https://adamaziz1979.github.io/kpi-creator/team.html", "", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-3/13-experimental-a-progress-rings.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-3/15-stage-3-review.html", "", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/17-standards-and-validation.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/16-dashboard.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/16-dashboard.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/18-stage-4-review.html"];
+E.forEach((e,i)=>{e.d=new Date(e.t+':00+11:00');e.o=OUT[i];e.f=OUTF[i];});
+const olink=(f,t)=>f?`<a href="${f}" target="_blank" rel="noopener" title="Open in a new window">${t}</a>`:t;
+const T0=E[0].d;
+
+/* ---------- build static UI ---------- */
+const $=id=>document.getElementById(id);
+/* circle geometry: Ovy at the top, the stages clockwise */
+const R=30,ANG={},SIDE={ovy:'top',gary:'right',kewpie:'right',visalli:'bottom',jennifer:'left',adam:'left'};
+AGENTS.forEach((a,k)=>{ANG[a.id]=-90+k*60;});
+const pt=(id,r=R)=>{const t=ANG[id]*Math.PI/180;return [50+r*Math.cos(t),50+r*Math.sin(t)];};
+$('ring').insertAdjacentHTML('beforeend',AGENTS.map(a=>{const [x,y]=pt(a.id);return `<div class="node" id="ag-${a.id}" style="left:${x}%;top:${y}%;--c:var(--${a.id})">
+  <span class="cnt" title="Outputs so far">0</span>
+  ${a.img?`<img class="ph" src="${a.img}" alt="">`:`<div class="ph" aria-hidden="true">5</div>`}
+  <div class="nm">${a.name}</div><div class="rl">${a.role}</div>
+  <div class="st"><span class="lbl">Waiting</span></div></div>`;}).join(''));
+/* output trees sit further out, in the direction of each agent from the centre */
+const TR={top:39,bottom:45.5,left:41,right:41};
+AGENTS.forEach(a=>{const sd=SIDE[a.id],[x,y]=pt(a.id,TR[sd]),[x0,y0]=pt(a.id,sd==='bottom'?42.5:R+5);
+  $('ring').insertAdjacentHTML('beforeend',`<ul class="otree ${sd}" id="tr-${a.id}" style="left:${x}%;top:${y}%" aria-label="${a.name}'s outputs"></ul>`);
+  $('conns').insertAdjacentHTML('beforeend',`<line class="conn" id="cn-${a.id}" x1="${x0}" y1="${y0}" x2="${x}" y2="${y}" style="display:none"/>`);});
+/* arc around the circle: clockwise moves ride just outside the orbit, anticlockwise just inside */
+function arc(from,to){
+  let d=((ANG[to]-ANG[from])%360+360)%360; const cw=d<=180, r=cw?R+3.5:R-3;
+  const [x1,y1]=pt(from,r),[x2,y2]=pt(to,r);
+  return `M${x1.toFixed(2)} ${y1.toFixed(2)} A${r} ${r} 0 0 ${cw?1:0} ${x2.toFixed(2)} ${y2.toFixed(2)}`;
+}
+const NS='http://www.w3.org/2000/svg';
+function svgEl(tag,attrs){const el=document.createElementNS(NS,tag);for(const k in attrs)el.setAttribute(k,attrs[k]);return el;}
+let handT=null;
+function drawLines(i,animate){
+  clearTimeout(handT);document.querySelectorAll('.packet2').forEach(x=>x.remove());
+  const trails=$('trails'),live=$('live');trails.innerHTML='';live.innerHTML='';
+  const moves={},hands=[];
+  for(let k=1;k<=i;k++){const a=E[k-1].a,b=E[k].a;if(a!==b&&!(k===i)){moves[a+'>'+b]=(moves[a+'>'+b]||0)+1;}}
+  for(let k=0;k<=i;k++){if(E[k].hand&&k!==i)hands.push(E[k].hand);}
+  Object.entries(moves).forEach(([key,n])=>{const [a,b]=key.split('>');trails.appendChild(svgEl('path',{d:arc(a,b),class:'trail','stroke-width':1.5+n}));});
+  hands.forEach(([a,b])=>trails.appendChild(svgEl('path',{d:arc(a,b),class:'trail hand','stroke-width':2.5})));
+  const e=E[i];
+  // spoke: the working agent feeding the output in the middle
+  const [sx,sy]=pt(e.a,R-4.5),[cx,cy]=pt(e.a,22);
+  if(i<E.length-1)live.appendChild(svgEl('line',{x1:sx,y1:sy,x2:cx,y2:cy,class:'spoke',style:`--c:var(--${e.a})`}));
+  if(i>0&&E[i-1].a!==e.a){
+    const p=svgEl('path',{d:arc(E[i-1].a,e.a),class:'livepath'});live.appendChild(p);
+    if(animate&&!reduce){const L=p.getTotalLength();p.style.strokeDasharray=L;p.style.strokeDashoffset=L;
+      p.animate([{strokeDashoffset:L},{strokeDashoffset:0}],{duration:900/speed,easing:'ease-out',fill:'forwards'});}
+  }
+  if(e.hand){
+    const p=svgEl('path',{d:arc(e.hand[0],e.hand[1]),class:'livepath hand'});
+    live.appendChild(p);
+    if(animate&&!reduce){const len=p.getTotalLength();p.style.strokeDasharray=len;p.style.strokeDashoffset=len;
+      handT=setTimeout(()=>{p.animate([{strokeDashoffset:len},{strokeDashoffset:0}],{duration:1600/speed,easing:'ease-in-out',fill:'forwards'});fly(p,e.hand[2],e.hand[1]);},1200/speed);}
+  }
+}
+function fly(path,label,to){
+  const len=path.getTotalLength(),pk=document.createElement('div');pk.className='packet2';pk.textContent='📄 '+label;$('ring').appendChild(pk);
+  const dur=1600/speed,s=performance.now();
+  const step=n=>{const k=Math.min(1,(n-s)/dur),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2,p=path.getPointAtLength(len*e);
+    pk.style.left=p.x+'%';pk.style.top=p.y+'%';pk.style.opacity=k>.9?(1-k)*10:1;
+    if(!pk.isConnected)return;
+    if(k<1)requestAnimationFrame(step);else{pk.remove();$('ag-'+to).querySelector('.ph').animate([{transform:'scale(1)'},{transform:'scale(1.12)'},{transform:'scale(1)'}],{duration:400});}};
+  requestAnimationFrame(step);
+}
+const narrow=matchMedia('(max-width:700px)');
+
+/* timeline spaced by agent run time (minutes, cumulative at each step, from the session logs) */
+const AGT=[5,6,19,23,30,35,35,40,44,48,57,70,71,72,77,79,83,89,93],AGMAX=93;
+const tx=m=>2+m/AGMAX*96;
+let th='<div class="tline"></div><div class="tfill" id="tfill"></div>',lastX=-9;
+[0,15,30,45,60,75,90].forEach(m=>{th+=`<span class="ax" style="left:${tx(m)}%">${m?(m>=60?`${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m`:`${m}m`):'0'}</span>`;});
+E.forEach((e,i)=>{
+  let x=tx(AGT[i]);if(x-lastX<1.1)x=lastX+1.1;lastX=x;
+  th+=`<button class="tick" data-i="${i}" style="left:${x}%;--c:var(--${e.a})" aria-label="${AGT[i]} minutes of agent time, saved ${fmtTime(e.d)}: ${A[e.a].name}, ${e.log}"><i></i></button>`;
+});
+$('track').innerHTML=th;
+$('track').addEventListener('click',ev=>{const b=ev.target.closest?.('.tick');if(b){stop();go(+b.dataset.i,true);}});
+
+function fmtTime(d){return d.toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:'Australia/Sydney'}).replace(/\s?(am|pm)/i,' $1').toLowerCase();}
+function fmtDay(d){return d.toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric',timeZone:'Australia/Sydney'}).replace(/,/g,'');}
+function fmtDur(min){min=Math.round(min);const h=Math.floor(min/60),m=min%60;return h?`${h}h ${String(m).padStart(2,'0')}m`:`${m}m`;}
+
+/* ---------- state ---------- */
+let idx=-1,playing=false,speed=1,timer=null,clockRaf=null,shownClock=T0;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let shownAgt=0;
+function setClock(d,m){
+  shownClock=d;shownAgt=m;
+  $('time').textContent=m>=60?`${Math.floor(m/60)}h ${String(Math.round(m)%60).padStart(2,'0')}m`:`${Math.round(m)}m`;
+  $('el').textContent=`Saved ${fmtDay(d)}, ${fmtTime(d)}`;
+}
+function tweenClock(to,m,ms){
+  cancelAnimationFrame(clockRaf);
+  const from=shownAgt,span=m-from;
+  if(reduce||ms<=0||span===0){setClock(to,m);return;}
+  const s=performance.now();
+  const step=n=>{const k=Math.min(1,(n-s)/ms),e=1-Math.pow(1-k,3);setClock(to,from+span*e);if(k<1)clockRaf=requestAnimationFrame(step);};
+  clockRaf=requestAnimationFrame(step);
+}
+
+function render(i,animate){
+  const e=E[i];
+  const approved=new Set(E.slice(0,i+1).filter(x=>x.gate).map(x=>x.gate));
+  // agents
+  AGENTS.forEach(a=>{
+    const el=$('ag-'+a.id),st=el.querySelector('.st'),n=E.slice(0,i+1).filter(x=>x.a===a.id).length;
+    el.querySelector('.cnt').textContent=n;
+    const tr=$('tr-'+a.id);tr.innerHTML=E.slice(0,i+1).map((x,k)=>x.a===a.id?`<li class="${k===i?'new':''}">${olink(x.f,x.o)}</li>`:'').join('')
+      +(a.id==='adam'&&approved.has(4)?`<li class="${i===E.length-1?'new':''}">${olink(OUTF[17],'04 Dashboard to review')}</li>`:'');
+    $('cn-'+a.id).style.display=tr.children.length?'':'none';
+    el.classList.remove('working','done');
+    let html;
+    if(a.id===e.a&&i===E.length-1){el.classList.add('done');html=`✓<span class="lbl"> Done</span>`;}
+    else if(a.id===e.a){el.classList.add('working');html=`<span class="dots"><b></b><b></b><b></b></span><span class="lbl">Working</span>`;}
+    else if(a.stage&&approved.has(a.stage)){el.classList.add('done');html=`✓<span class="lbl"> Approved</span>`;}
+    else if(a.id==='adam'&&approved.has(4)){el.classList.add('working');html=`<span class="lbl">Up next</span>`;el.style.setProperty('--c','var(--adam)');}
+    else if(a.id==='ovy'){html=`<span class="lbl">${n?'Running':'Waiting'}</span>`;}
+    else if(a.stage&&(approved.has(a.stage-1)||(a.stage===1&&i>=1))){html=`<span class="lbl">On stage</span>`;}
+    else html=`<span class="lbl">Waiting</span>`;
+    st.innerHTML=html;
+  });
+  updateNums(i,animate);
+  document.body.classList.toggle('ended',i===E.length-1);
+  // track
+  $('tfill').style.width=(AGT[i]/AGMAX*96)+'%';
+  document.querySelectorAll('.tick').forEach(b=>{const k=+b.dataset.i;b.classList.toggle('past',k<=i);b.classList.toggle('now',k===i);});
+  // output
+  const ag=A[e.a];
+  $('out').style.setProperty('--c',`var(--${e.a})`);
+  const head=`<div class="hd"><img src="${ag.img}" alt=""><div><div class="who">${ag.name} · ${fmtTime(e.d)}</div><div class="ttl">${e.title}</div></div></div>`;
+  const rest=`${e.body()}${i===E.length-1?`<button class="primary viewdash" data-open="final">View the final dashboard</button>`:''}
+    ${e.gate?`<div class="gate"><span class="av">H</span><span>Human approves Stage ${e.gate}${e.gate===4?'':' and the work moves on'}</span></div>`:''}
+    ${e.hand?`<div class="handnote">Handover: <b>${e.hand[2]}</b> from ${A[e.hand[0]].name} to ${A[e.hand[1]].name==='Stage 5'?'Stage 5 (CCO and Human)':A[e.hand[1]].name}</div>`:''}`;
+  $('out').style.setProperty('--c',`var(--${e.a})`);$('below').style.setProperty('--c',`var(--${e.a})`);
+  $('below').innerHTML=narrow.matches?`<div class="body bodyz">${rest}</div>`:'';
+  swapCenter(narrow.matches?`<div class="body">${head}</div>`:`<div class="body bodyz">${head}${rest}</div>`,animate);
+  drawLines(i,animate);
+  // log
+  let last='',lh='';
+  E.slice(0,i+1).forEach((x,k)=>{
+    const dy=fmtDay(x.d);if(dy!==last){lh+=`<li class="dayhd">${dy}</li>`;last=dy;}
+    lh+=`<li class="${k===i?'now':''}" style="--c:var(--${x.a})"><span class="t">${fmtTime(x.d)}</span><span class="d"></span><span><b>${A[x.a].name}</b>: ${x.log}</span></li>`;
+    if(x.gate)lh+=`<li class="gateRow" style="--c:var(--adam)"><span class="t"></span><span class="d"></span><span class="x">Human approves Stage ${x.gate}</span></li>`;
+  });
+  $('log').innerHTML=lh;
+  const lg=$('log').parentElement;lg.scrollTop=lg.scrollHeight;
+  // final
+
+}
+/* the run in numbers, as at each step (run time per agent from the session logs) */
+const RTM=[[1, 1, 3, 0, 0], [1, 1, 4, 0, 0], [7, 3, 7, 1, 1], [7, 4, 10, 1, 1], [7, 8, 12, 1, 2], [7, 10, 15, 1, 2], [7, 10, 15, 1, 2], [8, 11, 17, 2, 2], [9, 12, 18, 2, 3], [11, 12, 20, 2, 3], [15, 14, 22, 2, 4], [15, 14, 23, 14, 4], [15, 14, 23, 15, 4], [15, 14, 23, 15, 5], [16, 15, 23, 15, 8], [16, 15, 23, 15, 10], [16, 15, 23, 16, 13], [16, 15, 23, 17, 18], [17, 15, 23, 17, 21]], RTA=['ovy','gary','kewpie','visalli','jennifer'];
+const IXM=[1,1,10,19,23,32,32,38,40,44,49,58,59,60,60,61,66,72,74];
+const numNow={rt:0,st:0,ck:0,kp:0,ix:0};
+const fmtMin=m=>m>=60?`${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m`:`${m}m`;
+const NF={rt:fmtMin,st:v=>`${v} of 5`,ck:v=>v?`${v} of 31`:'Not run',kp:v=>`${v}`,ix:v=>`${v}`};
+function updateNums(i,animate){
+  const want={rt:RTM[i].reduce((a,b)=>a+b,0),st:E.slice(0,i+1).filter(x=>x.gate).length,ck:i>=15?30:0,kp:i>=2?5:0,ix:IXM[i]};
+  Object.keys(want).forEach(k=>{
+    const el=$('n-'+k),from=numNow[k],to=want[k];numNow[k]=to;
+    if(!animate||reduce||from===to){el.textContent=NF[k](to);return;}
+    const s=performance.now(),d=900;
+    const step=n=>{const q=Math.min(1,(n-s)/d),v=Math.round(from+(to-from)*(1-Math.pow(1-q,3)));el.textContent=NF[k](v);if(q<1)requestAnimationFrame(step);};
+    requestAnimationFrame(step);
+  });
+  RTA.forEach((a,k)=>{const m=RTM[i][k];$('rb-'+a).style.setProperty('--w',(m/23*100)+'%');$('rv-'+a).textContent=m+'m';});
+  $('n-next').style.display=i===E.length-1?'':'none';
+}
+function runBodyAnims(){
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.bodyz .ring').forEach(c=>{c.style.transition=reduce?'none':'stroke-dashoffset 1.4s ease';c.style.strokeDashoffset=c.dataset.off;});
+    document.querySelectorAll('.bodyz .meter i').forEach(m=>m.style.width=m.dataset.w+'%');
+    document.querySelectorAll('.bodyz [data-n]').forEach(b=>{
+      const n=+b.dataset.n;if(reduce){b.textContent=n.toLocaleString('en-AU');return;}
+      const s=performance.now();const st=t=>{const k=Math.min(1,(t-s)/900);b.textContent=Math.round(n*(1-Math.pow(1-k,3))).toLocaleString('en-AU');if(k<1)requestAnimationFrame(st);};requestAnimationFrame(st);
+    });
+  });
+}
+function fitFrame(){const f=$('frame');const ifr=f.querySelector('iframe');ifr.style.transform=`scale(${f.clientWidth/1280})`;}
+addEventListener('resize',()=>{fitScene();fitFrame();fitCenter();});
+/* pop-ups: final dashboard and method notes */
+function openPop(id){const m=$(id);m.classList.add('show');if(id==='final')fitFrame();m.querySelector('.mclose').focus();}
+function closePops(){document.querySelectorAll('.final.show').forEach(m=>m.classList.remove('show'));}
+document.addEventListener('click',ev=>{
+  const o=ev.target.closest?.('[data-open]');if(o){stop();openPop(o.dataset.open);return;}
+  if(ev.target.closest?.('[data-close]')||ev.target.classList.contains('final'))closePops();
+});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closePops();});
+/* fit the circle to the screen: the scene is drawn at 800px and scaled */
+const small=matchMedia('(max-width:700px)');
+function fitScene(){
+  const box=$('ringbox'),sc=$('scene');
+  if(small.matches){box.style.width=box.style.height='';sc.style.transform='';return;}
+  const k=Math.min(1,box.parentElement.clientWidth/800);
+  box.style.width=800*k+'px';box.style.height=820*k+'px';sc.style.transform=`scale(${k})`;
+}
+fitScene();
+/* centre: no scrolling. The old step fades out, the new one fades in, scaled down if it would overflow */
+let swapT=null;
+function swapCenter(html,animate){
+  const out=$('out'),old=out.querySelector('.fit');clearTimeout(swapT);
+  const put=()=>{out.innerHTML=`<div class="fit">${html}</div>`;fitCenter();runBodyAnims();};
+  if(animate&&old&&!reduce){old.classList.add('fade');swapT=setTimeout(put,300/speed);}else put();
+}
+function fitCenter(){
+  const out=$('out'),f=out.querySelector('.fit');if(!f)return;
+  f.style.transform='';const k=Math.min(1,out.clientHeight/f.scrollHeight,out.clientWidth/f.scrollWidth);
+  if(k<1)f.style.transform=`scale(${k})`;
+}
+narrow.addEventListener('change',()=>{if(idx>=0)render(idx,false);});
+
+/* ---------- playback ---------- */
+function go(i,animate){
+  i=Math.max(0,Math.min(E.length-1,i));
+  const prev=idx;idx=i;
+  tweenClock(E[i].d,AGT[i],animate&&prev===i-1?900/speed:0);
+  render(i,animate&&prev===i-1);
+}
+function dwell(i){const e=E[i];return (e.gate?7200:5600)/speed;}
+function tick(){
+  if(!playing)return;
+  if(idx>=E.length-1){stop();return;}
+  go(idx+1,true);
+  timer=setTimeout(tick,dwell(idx));
+}
+function play(){
+  if(idx>=E.length-1)idx=-1;
+  playing=true;document.body.classList.add('playing');$('play').innerHTML='&#10074;&#10074; Pause';
+  if(idx<0){go(0,true);timer=setTimeout(tick,dwell(0));}else tick();
+}
+function stop(){playing=false;document.body.classList.remove('playing');clearTimeout(timer);$('play').innerHTML='&#9654; '+(idx>=E.length-1?'Replay':'Play');}
+$('play').onclick=()=>playing?stop():play();
+$('next').onclick=()=>{stop();go(idx+1,true);};
+$('prev').onclick=()=>{stop();go(idx-1,false);};
+$('restart').onclick=()=>{stop();idx=-1;setClock(T0,0);play();};
+document.querySelectorAll('.speed button').forEach(b=>b.onclick=()=>{
+  speed=+b.dataset.s;document.querySelectorAll('.speed button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  if(playing){clearTimeout(timer);timer=setTimeout(tick,dwell(idx));}
+});
+document.addEventListener('keydown',ev=>{
+  if(ev.target.closest?.('button,a,summary'))return;
+  if(ev.key===' '){ev.preventDefault();playing?stop():play();}
+  if(ev.key==='ArrowRight'){stop();go(idx+1,true);}
+  if(ev.key==='ArrowLeft'){stop();go(idx-1,false);}
+});
+
+go(0,false);
+setTimeout(play,reduce?0:700);
+})();
+</script>
+</body>
+</html>
