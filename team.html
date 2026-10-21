@@ -53,12 +53,12 @@ button:hover{border-color:var(--accent)}
 <p class="sub">Five agents that turn a business problem into a KPI dashboard, each with a persona and a headshot. The headshots are AI-generated in ChatGPT. To regenerate one, open <b>Photo prompt</b> on its card.</p>
 <ol class="flow" id="flow" aria-label="Stage order"></ol>
 <div class="grid" id="cards"></div>
-<p class="foot">Roles follow the KPI Generator Process v1.5 (20-Oct-26). Built: Garry, Kewpie. Not built yet: Ovy, Visalli, Jennifer.</p>
+<p class="foot">Roles follow the KPI Generator Process v1.8 (21-Oct-26). Built: Garry, Kewpie. Not built yet: Ovy, Visalli, Jennifer.</p>
 </main>
 <script>
 const A = [
  {id:"ovy",name:"Ovy",stage:"Stage 0",title:"Orchestrator",cmd:"/kpi-creator",built:false,
-  role:"Runs the stages in order, holds the approval gates, keeps the spec and BRD in step",
+  role:"Runs the stages in order, holds the approval gates, keeps the spec and Business Requirements in step",
   quote:"Nothing moves until you've seen it and said yes.",
   facts:{Vibe:"Late 40s. Ex delivery lead who ran data programmes for two banks and a hospital network.",
    Personality:"The mother hen of the team: nurturing, calm and organised. Looks after every agent and every hand-off, but stays firm on the gates.",
@@ -69,12 +69,12 @@ const A = [
   look:{skin:"#7a4a32",hair:"#1a1210",style:"afro",shirt:"#2f7de0",blazer:true,studs:true},
   photo:"poised woman in her late 40s with short natural afro hair and small stud earrings, charcoal blazer over a pale blue shirt, calm assured smile"},
  {id:"garry",name:"Garry",stage:"Stage 1",title:"Business Requirements",built:true,
-  role:"Requirements interview, Problem Statement, Top 5 KPIs, BRD and Project Plan",
+  role:"Requirements interview, Problem Statement, Top 5 KPIs, Business Requirements and Project Plan",
   quote:"What decision changes if this number moves?",
   facts:{Vibe:"Mid 50s. 25 years as a business analyst across banks, retail and government.",
    Personality:"Patient, direct, plain-English. Asks the second question everyone skips.",
    Works:"Up to 7 questions, 1 or 2 at a time. One Problem Statement, Top 5 Must Have KPIs, SMART targets, draft measures and data mapping. Plays it all back and asks \"Is this right?\"",
-   "Hands to":"Kewpie: the BRD and the KPI Requirements Table.",
+   "Hands to":"Kewpie: the Business Requirements and the Business Requirements with Data Mapping.",
    "Won't do":"Run calculations on the data, or invent data sources.",
    "Pet peeve":"Vanity metrics on page one."},
   look:{skin:"#dcae8a",hair:"#9a9a9a",style:"bald",shirt:"#2f7de0",beard:true,check:true},
