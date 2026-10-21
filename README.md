@@ -15,3 +15,8 @@ Built by [Adam Aziz](https://www.linkedin.com/in/adamaziz1979/) with Claude Code
 ## ClearCompare test case
 
 Every approved output, stage by stage: https://adamaziz1979.github.io/kpi-creator/clearcompare/
+
+## The process and the team
+
+- KPI Generator Process: https://adamaziz1979.github.io/kpi-creator/process.html
+- Meet the team: https://adamaziz1979.github.io/kpi-creator/team.html
