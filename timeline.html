@@ -323,7 +323,7 @@ body.ended .dots b,body.ended .node .ph,body.ended .spoke{animation:none!importa
 <body>
 <div class="wrap">
   <h1>KPI Creator at work</h1>
-  <p class="sub">The agents at work. Each output appears in the middle as it's made, and a line traces every move of the work between agents. Gold lines are handovers after Human approves a stage.</p>
+  <p class="sub">Five AI agents at work with a human in the loop carrying the end-to-end KPI development process on a generated company test case. Each output appears in the middle as it's made, and a line traces every move of the work between agents. Gold lines are handovers after Human approves a stage.</p>
 
   <div class="bar">
     <div class="clock" aria-live="off">
@@ -335,9 +335,9 @@ body.ended .dots b,body.ended .node .ph,body.ended .spoke{animation:none!importa
     <div class="ctrls">
       <button data-open="method" aria-label="Where the times come from" title="Where the times come from">&#9432;</button>
       <button id="restart" aria-label="Restart">&#8634;</button>
-      <button id="prev" aria-label="Previous step">&#9664;</button>
+      <button id="prev" aria-label="Back one step" title="Back one step">&#9664; 1 step</button>
       <button id="play" class="primary">&#9654; Play</button>
-      <button id="next" aria-label="Next step">&#9654;&#9654;</button>
+      <button id="next" aria-label="Forward one step" title="Forward one step">1 step &#9654;</button>
       <div class="speed" role="group" aria-label="Playback speed"><span class="sl" aria-hidden="true">Speed</span>
         <button data-s="1" aria-pressed="true">1x</button>
         <button data-s="2" aria-pressed="false">2x</button>
@@ -483,7 +483,7 @@ const li=(rows,cls='reveal')=>`<ul class="list ${cls}">${rows.map((r,i)=>`<li st
 const E=[
  {t:'2026-10-20T15:45',a:'ovy',title:'Sets up the stakeholder for the test',log:'Stakeholder file ready',
   body:()=>`${files('stakeholder-file.md')}
-   <p>Ovy plays Priya, Chief Commercial Officer at ClearCompare, so Gary has someone to interview in test mode.</p>
+   <p>Ovy introduces Priya, Chief Commercial Officer at ClearCompare, so Gary has someone to interview in test mode.</p>
    <div class="quote">"Revenue per lead dropped 9% last quarter. Marketing blames sales, sales blames lead quality, and finance says it's clawbacks."</div>`},
  {t:'2026-10-20T15:46',a:'gary',title:'Runs the requirements interview',log:'Interview: 7 of 7 questions',
   body:()=>`${files('01 Interview Notes.md')}

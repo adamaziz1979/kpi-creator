@@ -547,7 +547,7 @@ body.ended .dots b,body.ended .node .ph,body.ended .spoke{animation:none!importa
 &lt;body&gt;
 &lt;div class=&quot;wrap&quot;&gt;
   &lt;h1&gt;KPI Creator at work&lt;/h1&gt;
-  &lt;p class=&quot;sub&quot;&gt;The agents at work. Each output appears in the middle as it&#x27;s made, and a line traces every move of the work between agents. Gold lines are handovers after Human approves a stage.&lt;/p&gt;
+  &lt;p class=&quot;sub&quot;&gt;Five AI agents at work with a human in the loop carrying the end-to-end KPI development process on a generated company test case. Each output appears in the middle as it&#x27;s made, and a line traces every move of the work between agents. Gold lines are handovers after Human approves a stage.&lt;/p&gt;
 
   &lt;div class=&quot;bar&quot;&gt;
     &lt;div class=&quot;clock&quot; aria-live=&quot;off&quot;&gt;
@@ -559,9 +559,9 @@ body.ended .dots b,body.ended .node .ph,body.ended .spoke{animation:none!importa
     &lt;div class=&quot;ctrls&quot;&gt;
       &lt;button data-open=&quot;method&quot; aria-label=&quot;Where the times come from&quot; title=&quot;Where the times come from&quot;&gt;&amp;#9432;&lt;/button&gt;
       &lt;button id=&quot;restart&quot; aria-label=&quot;Restart&quot;&gt;&amp;#8634;&lt;/button&gt;
-      &lt;button id=&quot;prev&quot; aria-label=&quot;Previous step&quot;&gt;&amp;#9664;&lt;/button&gt;
+      &lt;button id=&quot;prev&quot; aria-label=&quot;Back one step&quot; title=&quot;Back one step&quot;&gt;&amp;#9664; 1 step&lt;/button&gt;
       &lt;button id=&quot;play&quot; class=&quot;primary&quot;&gt;&amp;#9654; Play&lt;/button&gt;
-      &lt;button id=&quot;next&quot; aria-label=&quot;Next step&quot;&gt;&amp;#9654;&amp;#9654;&lt;/button&gt;
+      &lt;button id=&quot;next&quot; aria-label=&quot;Forward one step&quot; title=&quot;Forward one step&quot;&gt;1 step &amp;#9654;&lt;/button&gt;
       &lt;div class=&quot;speed&quot; role=&quot;group&quot; aria-label=&quot;Playback speed&quot;&gt;&lt;span class=&quot;sl&quot; aria-hidden=&quot;true&quot;&gt;Speed&lt;/span&gt;
         &lt;button data-s=&quot;1&quot; aria-pressed=&quot;true&quot;&gt;1x&lt;/button&gt;
         &lt;button data-s=&quot;2&quot; aria-pressed=&quot;false&quot;&gt;2x&lt;/button&gt;
@@ -707,7 +707,7 @@ const li=(rows,cls=&#x27;reveal&#x27;)=&gt;`&lt;ul class=&quot;list ${cls}&quot;
 const E=[
  {t:&#x27;2026-10-20T15:45&#x27;,a:&#x27;ovy&#x27;,title:&#x27;Sets up the stakeholder for the test&#x27;,log:&#x27;Stakeholder file ready&#x27;,
   body:()=&gt;`${files(&#x27;stakeholder-file.md&#x27;)}
-   &lt;p&gt;Ovy plays Priya, Chief Commercial Officer at ClearCompare, so Gary has someone to interview in test mode.&lt;/p&gt;
+   &lt;p&gt;Ovy introduces Priya, Chief Commercial Officer at ClearCompare, so Gary has someone to interview in test mode.&lt;/p&gt;
    &lt;div class=&quot;quote&quot;&gt;&quot;Revenue per lead dropped 9% last quarter. Marketing blames sales, sales blames lead quality, and finance says it&#x27;s clawbacks.&quot;&lt;/div&gt;`},
  {t:&#x27;2026-10-20T15:46&#x27;,a:&#x27;gary&#x27;,title:&#x27;Runs the requirements interview&#x27;,log:&#x27;Interview: 7 of 7 questions&#x27;,
   body:()=&gt;`${files(&#x27;01 Interview Notes.md&#x27;)}
