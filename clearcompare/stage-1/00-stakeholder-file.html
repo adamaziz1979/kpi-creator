@@ -1,0 +1,79 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ClearCompare: Stakeholder File (test mode)</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">ClearCompare: Stakeholder File (test mode)</label></nav><section id="s0"><p class="src">File: stage-1-00-stakeholder-file.md</p><h1>ClearCompare: Stakeholder File (test mode)</h1>
+<p><b>Used by:</b> Ovy, playing the stakeholder. Answer only from this file; anything else is "I don't know". Give an "only if asked" item only when Gary's question touches it. <b>Not here on purpose:</b> traps and answer key (they stay in the test cases file, for marking only).</p>
+<p><b>Context:</b></p>
+<ul><li>Comparison and broking business across health insurance, home loans, energy and life insurance</li><li>520 staff in Sydney, Melbourne and Manila</li><li>$96M commission revenue</li><li>About 1.4M leads a year, worked by a sales team of 180 agents onshore and offshore</li></ul>
+<p><b>Stakeholder:</b> Priya, Chief Commercial Officer. Sharp, commercial, wants answers in the Monday exec meeting.</p>
+<h3>Stakeholder file</h3>
+<ul><li><b>Problem as stated:</b> "Revenue per lead dropped 9% last quarter. Marketing blames sales, sales blames lead quality, and finance says it's clawbacks. I need to know which."</li><li><b>Real problem (Gary should find this):</b> nobody can split a revenue movement into its drivers. The 9% drop is mostly mix: energy leads grew fast and pay a lower commission. Clawbacks are a smaller second cause. Today each team argues from its own report</li><li><b>Objectives:</b><ul><li>O1: grow net commission revenue profitably</li><li>O2: convert leads more efficiently</li><li>O3: explain performance changes within a day, not a week</li></ul></li><li><b>Sub-objectives (only if asked):</b><ul><li>Cut cost per acquisition on paid search</li><li>Lift health insurance conversion back to 11% (now 9.4%)</li><li>Reduce 90-day clawbacks</li></ul></li><li><b>Commission rules (only if asked about revenue):</b><ul><li>Partners claw back commission if a health or life policy is cancelled within 90 days</li><li>Reporting today shows gross revenue</li></ul></li><li><b>Audience:</b><ul><li>CCO and exec team, weekly</li><li>Vertical heads and marketing, daily</li></ul></li><li><b>Constraints:</b><ul><li>Financial services: complaints and compliance breaches must stay visible</li><li>Agent-level data is fine for team leaders but not on the exec view</li><li>The company uses Tableau and Snowflake</li></ul></li><li><b>Chart likes and dislikes:</b> "Show me a bridge from last quarter to this quarter. I hate funnels that don't add up."</li><li><b>Success:</b> "When a number moves, the dashboard tells me why before anyone asks."</li></ul>
+<h3>Data shape</h3>
+<table><thead><tr><th>Table</th><th>Grain</th><th>Key fields</th><th>History</th></tr></thead><tbody><tr><td style="white-space:nowrap">leads</td><td style="white-space:nowrap">lead</td><td>lead_id, vertical, channel, campaign, created_ts, state</td><td>24 months</td></tr><tr><td style="white-space:nowrap">contacts</td><td style="white-space:nowrap">call</td><td>lead_id, agent_team, first_contact_ts, outcome</td><td>24 months</td></tr><tr><td style="white-space:nowrap">sales</td><td style="white-space:nowrap">sale</td><td>lead_id, vertical, partner, gross_commission, sale_date, clawback_date (nullable), clawback_amount</td><td>24 months</td></tr><tr><td>marketing_spend</td><td>day × channel</td><td>channel, vertical, cost</td><td>24 months</td></tr><tr><td>complaints</td><td>complaint</td><td>lead_id, vertical, category, date</td><td>24 months</td></tr></tbody></table>
+<p><b>Known gaps:</b></p>
+<ul><li>6% of sales can't be matched back to a lead (manual partner uploads)</li><li>Manila call outcomes are entered in a separate system before Mar-25</li></ul></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>
