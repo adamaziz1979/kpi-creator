@@ -68,7 +68,7 @@ pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;
 .chip.high{color:var(--ink);border-color:var(--ink)}
 #t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">ClearCompare: Kewpie&#x27;s calculation script</label></nav><section id="s0"><p class="src">File: stage-2-08-calculation-script.md</p><h1>ClearCompare: Kewpie's calculation script</h1>
 <blockquote><b>Sample data.</b> Produced by Kewpie at Stage 2 and approved on 21-Oct-26.</blockquote>
-<pre class="code"><code>&quot;&quot;&quot;Kewpie, Stage 2: test Garry&#x27;s draft measures and calculate every Must Have KPI for ClearCompare.
+<pre class="code"><code>&quot;&quot;&quot;Kewpie, Stage 2: test Gary&#x27;s draft measures and calculate every Must Have KPI for ClearCompare.
 
 Usage: python -I kewpie_calculations.py &lt;data folder&gt; &lt;output kpi_results.json&gt;
 Sample data only (synthetic). Data cut-off: 30-Sep-26.
@@ -128,7 +128,7 @@ def main():
     lead_by_id = {r[&quot;lead_id&quot;]: r for r in leads}
     R = {&quot;data_cutoff&quot;: str(CUTOFF), &quot;label&quot;: &quot;Sample data (synthetic)&quot;}
 
-    # ---------- Data checks (confirm Garry&#x27;s data mapping) ----------
+    # ---------- Data checks (confirm Gary&#x27;s data mapping) ----------
     def nulls(rows, f):
         return sum(1 for r in rows if not str(r.get(f, &quot;&quot;)).strip())
     unmatched = [s for s in sales if not s[&quot;lead_id&quot;]]
@@ -196,7 +196,7 @@ def main():
                  &quot;pace_needed&quot;: pace(share_m[&quot;2026-09&quot;], 0.30, 6),
                  &quot;run_rate&quot;: (share_m[&quot;2026-09&quot;] - share_m[&quot;2026-06&quot;]) / 3}
 
-    # ---------- K2 Conversion: Garry&#x27;s draft (matched cohort) vs corrected (all sales by vertical) ----------
+    # ---------- K2 Conversion: Gary&#x27;s draft (matched cohort) vs corrected (all sales by vertical) ----------
     sold_leads = {s[&quot;lead_id&quot;] for s in sales if s[&quot;lead_id&quot;]}
     open_cut = datetime(2026, 9, 23, 23, 59)  # draft rule: exclude leads under 7 days old
     def draft_conv(q, v):
