@@ -150,6 +150,12 @@ blockquote{margin:8px 0 0;padding:6px 12px;border-left:3px solid var(--accent);b
 .mframe.anim.play .mdown{animation:mLane .3s ease-out forwards;animation-delay:calc(var(--i)*110ms - 60ms)}
 .mframe.anim.play .mcard,.mframe.anim.play .mgate{animation:mIn .45s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--i)*110ms + 80ms)}
 @media (prefers-reduced-motion:reduce){.mframe.anim .mlane,.mframe.anim .mcard,.mframe.anim .mgate,.mframe.anim .mdown{opacity:1;animation:none!important}}
+/* The process plays in the same way: stages left to right, then the gates, the two thread cards and the principles */
+.pr-anim .pr-i{opacity:0}
+.pr-anim.play .pr-i{animation:mIn .45s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--i)*110ms)}
+.pr-anim .flow li::after{opacity:0;transition:opacity .3s}
+.pr-anim.play .flow li::after{opacity:1;transition-delay:calc(var(--i)*110ms + 300ms)}
+@media (prefers-reduced-motion:reduce){.pr-anim .pr-i,.pr-anim .flow li::after{opacity:1;animation:none!important;transition:none}}
 /* Final product */
 .cta{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
 .btn{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 20px;border-radius:10px;background:var(--accent);color:#0c121a;font-weight:600;text-decoration:none}
@@ -1213,6 +1219,11 @@ function openSec(el){const f=folds.find(f=>f.sec===el||f.sec.contains(el));if(f)
 /* Every section starts collapsed; a link to #section opens that one */
 folds.forEach(f=>f.set(false));syncAll();
 if(location.hash){const t=document.querySelector(location.hash);if(t){openSec(t);setTimeout(()=>t.scrollIntoView({block:'start'}),50)}}
+/* KPI Creator process: hidden until first seen, then plays once, in reading order */
+const pr=document.getElementById('fb-process');
+if(pr&&'IntersectionObserver' in window&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+ pr.querySelectorAll('.flow li, p.gate, .thread .card, h3, .grid3 .card').forEach((el,k)=>{el.classList.add('pr-i');el.style.setProperty('--i',k)});pr.classList.add('pr-anim');
+ const po=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){pr.classList.add('play');po.disconnect()}},{threshold:.1});po.observe(pr)}
 /* Outputs board: hidden until first seen, then plays once (no motion: shows straight away) */
 const mf=document.querySelector('.mframe');
 if(mf&&'IntersectionObserver' in window&&!matchMedia('(prefers-reduced-motion: reduce)').matches){mf.classList.add('anim');
