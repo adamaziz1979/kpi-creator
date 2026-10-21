@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="ClearCompare KPI dashboard (Experimental A: progress rings): why net revenue per lead fell. Test case, sample data.">
+<title>ClearCompare KPI Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+/* Monochrome blue (dark by default). JS swaps the values for light mode. */
+:root{--bg:#0c121a;--surface:#141c27;--fg:#e8edf3;--muted:#94a1b2;--line:#243042;--accent:#4f9dff;--accent-soft:#16263d;
+ --c1:#225fb0;--c2:#bcd9ff;--c3:#4f9dff;--c4:#8ec0ff;--grey:#8b96a5;--pos:#bcd9ff;--neg:#4f9dff;
+ --s-ok:#5fd38d;--s-warn:#f2a65a;--s-bad:#f87171;
+ --font-body:"Lexend",Arial,sans-serif;--font-mono:"IBM Plex Mono",Consolas,monospace;color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-weight:300;font-size:15px;line-height:1.55}
+.wrap{max-width:1360px;margin:0 auto;padding-block:0 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:24px}
+h1,h2,h3{text-wrap:balance;margin:0;font-weight:600;letter-spacing:-0.01em}
+h1{font-size:clamp(1.25rem,2.6vw,1.6rem)}
+h2{font-size:1.15rem}
+h3{font-size:1rem}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0}
+
+/* A. Header (sticky) */
+.top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 0;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
+.top .meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--font-mono);font-size:.72rem;color:var(--muted)}
+.tag{display:inline-block;font-family:var(--font-mono);font-size:.68rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:6px;border:1px solid var(--line);color:var(--fg)}
+.tag.prov{border-color:var(--s-warn);color:var(--s-warn)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{font:inherit;font-size:.84rem;font-weight:400;color:var(--muted);background:none;border:0;min-height:44px;padding:0 14px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{color:var(--fg);background:var(--accent-soft);font-weight:500}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+/* B. Headline */
+.headline{display:grid;gap:8px;padding-top:6px}
+.headline p.big{margin:0;font-size:clamp(1.2rem,2.5vw,1.65rem);font-weight:500;line-height:1.35;max-width:62ch}
+.headline p.big b{color:var(--accent);font-weight:600}
+.headline p.sub{margin:0;color:var(--muted);max-width:80ch}
+
+/* C. Top 5 tiles */
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.stat{background:var(--surface);padding:16px 16px 12px;display:grid;gap:4px;align-content:start;min-width:0}
+.stat .nm{font-size:.84rem;color:var(--muted);line-height:1.3}
+/* Standard tile: the number and its sparkline side by side, detail lines underneath */
+.stat .tile-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:end}
+.stat .act{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.stat .act b{font-size:clamp(1.6rem,2.2vw,2rem);font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat .tag.prov{width:max-content}
+.stat .ln{font-family:var(--font-mono);font-size:.7rem;color:var(--muted);line-height:1.45}
+.stat .ln b{color:var(--fg);font-weight:500}
+.stat .ln.trend[data-s="bad"]{color:var(--s-bad)}
+.stat .note{font-size:.74rem;color:var(--muted);line-height:1.35}
+.spk{position:relative;min-width:60px}
+.spark{display:block;width:100%;height:40px}
+.spark path{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.spark path.dash{stroke-dasharray:3 3}
+.spark .area{fill:var(--accent);fill-opacity:.1;stroke:none}
+.spark .tgt-s{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.spk .end{position:absolute;right:-4px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:.74rem;font-weight:500;padding:3px 8px;border-radius:6px;border:1px solid var(--line);border-left:4px solid var(--sc);color:var(--fg);white-space:nowrap;width:max-content;margin-top:2px}
+.st .ic{color:var(--sc);font-weight:600}
+.st[data-s="ok"]{--sc:var(--s-ok)} .st[data-s="warn"]{--sc:var(--s-warn)} .st[data-s="bad"]{--sc:var(--s-bad)}
+@media (max-width:1100px){.stats{grid-template-columns:repeat(6,minmax(0,1fr))}.stat{grid-column:span 2}.stat:nth-child(-n+2){grid-column:span 3}}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat,.stat:nth-child(-n+2){grid-column:span 1}.stat:first-child{grid-column:1/-1}}
+
+/* Cards */
+.zone{display:grid;gap:12px}
+.zone>h2{display:flex;align-items:baseline;gap:10px}
+.zone>h2 small{font-family:var(--font-mono);font-size:.7rem;font-weight:400;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:stretch}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 16px 12px;display:grid;grid-template-rows:auto 1fr auto auto auto;gap:10px;min-width:0}
+.card h3{font-size:1rem}
+.subt{margin:-6px 0 0;font-size:.76rem;color:var(--muted)}
+.chart{min-width:0;align-self:start}
+.chart.replay{cursor:pointer}
+.chart svg{display:block;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.76rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:2px;background:var(--c);display:inline-block}
+.legend i.ln{height:2px;width:14px;border-radius:1px}
+.cap{margin:0;color:var(--muted);font-size:.74rem;line-height:1.45}
+details.data>summary{cursor:pointer;font-size:.78rem;color:var(--accent);width:max-content;min-height:44px;display:flex;align-items:center;list-style:none}
+details.data>summary::-webkit-details-marker{display:none}
+details.data>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+table.t{width:100%;table-layout:fixed;border-collapse:collapse;font-size:.78rem;margin-top:6px}
+table.t th,table.t td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);overflow-wrap:break-word;vertical-align:top}
+table.t th{font-family:var(--font-mono);font-weight:500;font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+table.t td{font-variant-numeric:tabular-nums}
+
+/* SVG parts */
+.grid-l{stroke:var(--line);stroke-width:1}
+.ax{fill:var(--muted);font-family:var(--font-mono);font-size:11px}
+.lab{fill:var(--fg);font-family:var(--font-body);font-size:12px}
+.lab .b{font-weight:600}
+.dot{stroke:var(--surface);stroke-width:2}
+.hit{fill:transparent}
+.cross{stroke:var(--muted);stroke-width:1}
+.tgt{stroke:var(--fg);stroke-width:1.5;stroke-dasharray:4 4;opacity:.8}
+
+/* Horizontal bars */
+.hb{display:grid;gap:8px}
+.hb-r{display:grid;grid-template-columns:130px minmax(0,1fr) 88px;gap:12px;align-items:center;font-size:.88rem;min-height:32px}
+.hb-r small{display:block;color:var(--muted);font-size:.7rem}
+.hb-t{position:relative;height:14px}
+.hb-t::before{content:"";position:absolute;left:0;top:50%;width:100%;height:1px;background:var(--line)}
+.hb-f{position:absolute;left:0;top:1px;height:12px;background:var(--grey);border-radius:0 4px 4px 0;transform-origin:left center}
+.hb-f.hi{background:var(--accent)}
+.hb-k{position:absolute;top:-4px;width:2px;height:22px;background:var(--fg);margin-left:-1px}
+.hb-v{text-align:right;font-family:var(--font-mono);font-size:.8rem}
+.hb-v small{font-family:var(--font-body)}
+@media (max-width:460px){.hb-r{grid-template-columns:96px minmax(0,1fr) 78px;gap:8px}}
+
+/* Diverging */
+.dv{display:grid;gap:10px}
+.dv-r{display:grid;grid-template-columns:110px minmax(0,1fr) 120px;gap:12px;align-items:center;font-size:.86rem}
+.dv-t{position:relative;height:26px}
+.dv-t::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--muted)}
+.dv-b{position:absolute;top:7px;height:12px}
+.dv-b.p{left:50%;background:var(--pos);border-radius:0 4px 4px 0;transform-origin:left center}
+.dv-b.n{right:50%;background:var(--neg);border-radius:4px 0 0 4px;transform-origin:right center}
+.dv-l{position:absolute;top:3px;font-family:var(--font-mono);font-size:.74rem;color:var(--fg);white-space:nowrap}
+.dv-v{font-family:var(--font-mono);font-size:.76rem;color:var(--muted);text-align:right}
+.dv-ax{display:grid;grid-template-columns:110px minmax(0,1fr) 120px;gap:12px}
+.dv-ax div{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.68rem;color:var(--muted)}
+@media (max-width:520px){.dv-r,.dv-ax{grid-template-columns:84px minmax(0,1fr);}.dv-v{grid-column:2;text-align:left}.dv-ax>span:last-child{display:none}}
+
+/* F. Actions */
+.acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}
+.acts li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;align-content:start}
+.acts .own{font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
+.acts p{margin:0;font-size:.92rem}
+.acts small{color:var(--muted);font-size:.74rem}
+@media (max-width:900px){.acts{grid-template-columns:minmax(0,1fr)}}
+
+/* G and H. Collapsed detail */
+details.sec{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+details.sec>summary{list-style:none;cursor:pointer;padding:12px 16px;min-height:48px;display:flex;align-items:center;gap:10px;font-weight:500}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:10px}
+details.sec>summary .cnt{font-family:var(--font-mono);font-size:.7rem;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 6px}
+.chev{width:7px;height:7px;flex:none;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s}
+details[open]>summary .chev{transform:rotate(45deg)}
+details.sec .body{padding:0 16px 16px;display:grid;gap:12px}
+.mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.mini{grid-template-columns:minmax(0,1fr)}}
+.box{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:4px}
+.box b{font-size:1.4rem;font-weight:600}
+.box span{font-size:.78rem;color:var(--muted)}
+dl.defs{margin:0;display:grid;grid-template-columns:200px minmax(0,1fr);gap:8px 16px;font-size:.86rem}
+dl.defs dt{font-weight:500}
+dl.defs dd{margin:0;color:var(--muted)}
+@media (max-width:640px){dl.defs{grid-template-columns:minmax(0,1fr)}dl.defs dd{margin-bottom:6px}}
+footer{color:var(--muted);font-size:.74rem;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:4px}
+
+/* Tooltip */
+#tip{position:fixed;z-index:50;pointer-events:none;max-width:260px;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.28);font-size:.78rem;line-height:1.45;opacity:0;transition:opacity .1s}
+#tip.on{opacity:1}
+#tip .tr{display:flex;justify-content:space-between;gap:12px;font-family:var(--font-mono);font-size:.72rem;color:var(--muted)}
+#tip .tr b{color:var(--fg);font-weight:500}
+
+/* Motion: play on first view, click to replay, nothing moves with reduced motion */
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes growy{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.play .draw{stroke-dasharray:1;animation:draw 1.6s ease-out both}
+.play .fade{animation:fadein .4s ease-out both;animation-delay:var(--d,0s)}
+.play .hb-f,.play .dv-b{animation:grow .9s ease-out both;animation-delay:var(--d,0s)}
+.play .col{transform-box:fill-box;transform-origin:bottom;animation:growy .7s ease-out both;animation-delay:var(--d,0s)}
+@media (prefers-reduced-motion:reduce){.play *{animation:none!important}.chev,#tip{transition:none}}
+@media print{.top{position:static}.seg{display:none}details.sec{break-inside:avoid}}
+
+/* Experimental A: headline and progress rings side by side */
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:center}
+.hero .card{padding-bottom:10px;grid-template-rows:none;align-content:start}
+.rings svg{width:100%;max-width:400px;height:auto;display:block;margin:0 auto}
+@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+ <div>
+  <p class="eyebrow">KPI Creator · Stage 3 · Experimental A: progress rings</p>
+  <h1>ClearCompare: why net revenue per lead fell</h1>
+  <div class="meta"><span class="tag">Sample data</span><span>This quarter: Jul to Sep 26, against Apr to Jun 26</span><span>Data to 30-Sep-26</span><span>Business Requirements v1.1</span></div>
+ </div>
+ <div class="seg" id="mode" role="group" aria-label="Colour mode"><button type="button" data-m="dark" aria-pressed="true">Dark</button><button type="button" data-m="light" aria-pressed="false">Light</button></div>
+</header>
+
+<main class="wrap" style="padding:0">
+
+<div class="hero">
+<section class="headline" aria-label="Headline">
+ <p class="big">Net revenue per lead fell <b>8.7%</b> to <b>$52.42</b> <span class="tag prov">Provisional</span>, and most of the fall is lead mix, not sales.</p>
+ <p class="sub" id="subhead"></p>
+</section>
+<article class="card" aria-labelledby="t-rings">
+ <h3 id="t-rings"></h3>
+ <p class="subt">How far each Top 5 KPI is towards its target. Actual as a share of target, or target as a share of actual where lower is better. Capped at 100%.</p>
+ <div class="chart replay rings" data-c="radial"></div>
+ <p class="cap"><b>Experimental: radial bars.</b> Bends the rule on honest length: an outer ring is drawn longer than an inner ring at the same %. The tiles below keep every number.</p>
+ <div data-t="radial"></div>
+</article>
+</div>
+
+<section class="stats" id="tiles" aria-label="Top 5 KPIs"></section>
+
+<section class="zone" aria-labelledby="z-changed">
+ <h2 id="z-changed">What changed <small>Net revenue, last quarter to this quarter</small></h2>
+ <article class="card">
+  <h3>Lead mix cost $29.7k and conversion cost $12.2k; more leads won back $12.2k</h3>
+  <p class="subt">Net commission revenue (after clawbacks), Apr to Jun 26 to Jul to Sep 26. Each effect changes one driver at a time; the four effects add up to the total change.</p>
+  <div class="chart replay" data-c="bridge"></div>
+  <div class="legend"><span><i style="--c:var(--grey)"></i>Quarter total</span><span><i style="--c:var(--pos)"></i>Raised revenue</span><span><i style="--c:var(--neg)"></i>Lowered revenue</span></div>
+  <p class="cap">The axis starts at $380k so the effects can be read. "Revenue per sale" is mostly timing: this quarter's clawbacks haven't all landed. Click the chart to replay.</p>
+  <div data-t="bridge"></div>
+ </article>
+</section>
+
+<section class="zone" aria-labelledby="z-why">
+ <h2 id="z-why">Why <small>The two causes, largest first</small></h2>
+ <div class="grid">
+  <article class="card">
+   <h3 id="t-energy"></h3>
+   <p class="subt">Energy leads as a share of all leads, by month, Oct-24 to Sep-26.</p>
+   <div class="chart replay" data-c="energy"></div>
+   <div class="legend"><span><i class="ln" style="--c:var(--accent)"></i>Energy share of leads</span><span><i class="ln" style="--c:var(--fg)"></i>Target 30% by 31-Mar-27</span></div>
+   <p class="cap">Hover for each month.</p>
+   <div data-t="energy"></div>
+  </article>
+  <article class="card">
+   <h3>Energy earns $22 per lead; home loans earn $142</h3>
+   <p class="subt">Net revenue per lead by product area, Jul to Sep 26, with commission per sale. A shift towards energy pulls the average down.</p>
+   <div class="chart replay" data-c="perlead"></div>
+   <div class="legend"></div>
+   <p class="cap">Energy is highlighted because it is the product area growing fastest.</p>
+   <div data-t="perlead"></div>
+  </article>
+  <article class="card">
+   <h3>Lead mix moved 12.5 points into energy in one quarter</h3>
+   <p class="subt">Share of leads by product area, Apr to Jun 26 against Jul to Sep 26.</p>
+   <div class="chart replay" data-c="mix" data-ink></div>
+   <div class="legend" id="lg-mix"></div>
+   <p class="cap">Colours follow the product area and stay the same on every chart.</p>
+   <div data-t="mix"></div>
+  </article>
+  <article class="card">
+   <h3 id="t-health"></h3>
+   <p class="subt">Health insurance lead-to-sale conversion, by month, Oct-24 to Sep-26.</p>
+   <div class="chart replay" data-c="health"></div>
+   <div class="legend"><span><i class="ln" style="--c:var(--accent)"></i>Health conversion</span><span><i class="ln" style="--c:var(--fg)"></i>Target 11% by 30-Jun-27</span></div>
+   <p class="cap" id="cap-health"></p>
+   <div data-t="health"></div>
+  </article>
+ </div>
+</section>
+
+<section class="zone" aria-labelledby="z-do">
+ <h2 id="z-do">What to do <small>Owners signed off at Stage 1 (acting subject matter expert)</small></h2>
+ <ul class="acts">
+  <li><span class="own">Head of Marketing</span><p>Reviews campaign targeting so that energy falls back to <b>30% of leads by 31-Mar-27</b>.</p><small id="a1"></small></li>
+  <li><span class="own">Head of Health</span><p>Runs a weekly conversion review so that health conversion returns to <b>11% by 30-Jun-27</b>.</p><small id="a2"></small></li>
+  <li><span class="own">Head of Sales Operations</span><p>Re-rosters across Sydney, Melbourne and Manila so that the typical wait falls to <b>10 minutes by 31-Mar-27</b>.</p><small id="a3"></small></li>
+ </ul>
+</section>
+
+<section class="zone" aria-labelledby="z-detail">
+ <h2 id="z-detail">Detail <small>Select a section to open it</small></h2>
+
+ <details class="sec"><summary><span class="chev"></span>Lead-to-sale conversion by product area <span class="cnt">4 areas</span></summary><div class="body">
+  <h3>Health is 1.5 points below target; the other areas are within a point</h3>
+  <p class="subt" style="margin:0">Conversion this quarter against each area's target (health 11%; others hold their July 2025 to June 2026 average).</p>
+  <div class="chart replay" data-c="conv"></div>
+  <div class="legend"><span><i style="--c:var(--neg)"></i>Below target</span><span><i style="--c:var(--pos)"></i>Above target</span></div>
+  <div data-t="conv"></div>
+ </div></details>
+
+ <details class="sec"><summary><span class="chev"></span>Cost per acquisition by channel, with net revenue per marketing dollar <span class="cnt">5 channels</span></summary><div class="body">
+  <h3>Paid search costs less per sale, but each dollar spent now earns less</h3>
+  <p class="subt" style="margin:0">Marketing spend ÷ net sales, Jul to Sep 26. The counter-metric beside it is net revenue ÷ marketing spend.</p>
+  <div class="chart replay" data-c="cpa"></div>
+  <p class="cap" id="cap-cpa"></p>
+  <div data-t="cpa"></div>
+ </div></details>
+
+ <details class="sec"><summary><span class="chev"></span>Speed to contact by channel and team <span class="cnt">5 channels · 3 teams</span></summary><div class="body">
+  <h3 id="t-speed"></h3>
+  <p class="subt" style="margin:0">Median minutes from a lead arriving to the first call, Jul to Sep 26. Target 10 minutes or less.</p>
+  <div class="chart replay" data-c="speed"></div>
+  <div class="legend"><span><i style="--c:var(--accent)"></i>Slowest channel</span><span><i style="--c:var(--fg);width:2px;height:12px"></i>Target 10 min</span></div>
+  <div data-t="speed"></div>
+ </div></details>
+
+ <details class="sec"><summary><span class="chev"></span>Complaints and clawbacks <span class="cnt">2 measures</span></summary><div class="body">
+  <div class="mini" id="cc"></div>
+  <h3>The clawback rate has held near 8% on every complete quarter</h3>
+  <p class="subt" style="margin:0">Health and life sales clawed back within 90 days, by quarter of sale. Only quarters whose sales are all 90 days old are shown.</p>
+  <div class="chart replay" data-c="claw"></div>
+  <div class="legend"><span><i style="--c:var(--accent)"></i>Clawback rate</span><span><i class="ln" style="--c:var(--fg)"></i>Target 7.8%</span></div>
+  <div data-t="claw"></div>
+ </div></details>
+
+ <details class="sec"><summary><span class="chev"></span>Definitions <span class="cnt">7 measures</span></summary><div class="body">
+  <dl class="defs">
+   <dt>Net revenue per lead</dt><dd>Net commission (gross minus clawbacks) ÷ leads created. The latest quarter is provisional until its clawbacks have had 90 days to land.</dd>
+   <dt>Lead-to-sale conversion</dt><dd>All sales in a product area ÷ leads created in that area, in the same month. Includes the 6.1% of sales with no lead attached.</dd>
+   <dt>Cost per acquisition</dt><dd>Marketing spend ÷ net sales (sales not clawed back), by channel. Counter-metric: net revenue per marketing dollar.</dd>
+   <dt>Speed to contact</dt><dd>Median minutes from a lead arriving to the first call.</dd>
+   <dt>90-day clawback rate</dt><dd>Health and life sales clawed back within 90 days ÷ all health and life sales, by quarter of sale. Final quarters only.</dd>
+   <dt>Lead mix</dt><dd>Leads in each product area ÷ all leads, by month.</dd>
+   <dt>Complaints per 1,000 sales</dt><dd>Complaints ÷ sales × 1,000 over the last 12 months.</dd>
+  </dl>
+ </div></details>
+</section>
+
+<footer>
+ <span>Built by Visalli from the Business Requirements v1.1 and the KPI Calculation Pack (Stage 2, approved 21-Oct-26). Every number matches the Calculation Pack.</span>
+ <span>ClearCompare is a made-up organisation. Sample data (synthetic), data to 30-Sep-26.</span>
+</footer>
+</main>
+</div>
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script>
+const D={"months": ["Oct-24", "Nov-24", "Dec-24", "Jan-25", "Feb-25", "Mar-25", "Apr-25", "May-25", "Jun-25", "Jul-25", "Aug-25", "Sep-25", "Oct-25", "Nov-25", "Dec-25", "Jan-26", "Feb-26", "Mar-26", "Apr-26", "May-26", "Jun-26", "Jul-26", "Aug-26", "Sep-26"], "k1m": [53.32, 58.36, 58.45, 56.16, 59.71, 56.13, 60.4, 57.45, 58.06, 56.92, 59.58, 59.99, 55.34, 61.39, 55.83, 57.84, 58.79, 61.57, 57.77, 58.56, 55.94, 52.36, 54.56, 50.3], "energy": [26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 26.0, 27.0, 27.0, 27.0, 36.0, 39.5, 43.0], "health": [9.85, 11.5, 10.8, 10.61, 11.5, 9.99, 12.11, 10.5, 11.31, 10.81, 10.55, 11.27, 11.47, 10.26, 10.62, 11.51, 11.46, 10.71, 10.92, 10.89, 11.25, 10.31, 9.1, 8.97], "tiles": [{"n": "Net revenue per lead", "v": "$52.42", "prov": true, "t": "Target $57.41 by 30-Jun-27", "gap": "\u2212$4.99 (\u22128.7%)", "pace": "Needs +$0.56 a month \u00b7 trend \u2212$1.88 a month", "s": "bad", "note": "About $51.59 once clawbacks land", "spark": "k1m", "dashTail": 3, "tgt": 57.41}, {"n": "Lead-to-sale conversion: health", "v": "9.5%", "t": "Target 11% by 30-Jun-27", "gap": "\u22121.5 points", "pace": "Needs +0.17 points a month \u00b7 trend \u22120.76 points a month", "s": "bad", "spark": "health", "tgt": 11}, {"n": "Cost per acquisition: paid search", "v": "$93.04", "t": "Target $106.70 by 30-Jun-27", "gap": "$13.66 under target", "pace": "Already under target \u00b7 cost falling", "s": "ok", "note": "But net revenue per $ spent fell to $3.49"}, {"n": "Speed to contact", "v": "11 min", "t": "Target 10 min or less by 31-Mar-27", "gap": "+1 min", "pace": "Needs \u22120.17 min a month \u00b7 trend flat", "s": "warn", "note": "Social leads wait 16 min"}, {"n": "90-day clawback rate", "v": "7.9%", "t": "Target 7.8% by 30-Jun-27", "gap": "At target", "pace": "Holding \u00b7 Apr to Jun 26 sales, the latest complete quarter", "s": "ok", "note": "Jul to Sep 26 is 5.1% so far, final on 29-Dec-26"}], "bridge": {"start": 429119, "end": 402866, "steps": [["More leads", 12172], ["Lead mix", -29658], ["Conversion", -12186], ["Revenue per sale", 3419]], "leads0": 7474, "leads1": 7686, "pl0": 57.41, "pl1": 52.42}, "mix": {"Apr to Jun 26": {"Health": 41.4, "Home loans": 13.0, "Energy": 27.0, "Life": 18.6}, "Jul to Sep 26": {"Health": 33.9, "Home loans": 13.0, "Energy": 39.5, "Life": 13.6}}, "perLead": [["Home loans", 141.87, 1996.11], ["Health", 53.64, 596.92], ["Life", 51.35, 812.51], ["Energy", 22.31, 94.88]], "conv": [["Health", 9.48, 11.0, 11.02], ["Home loans", 7.11, 7.06, 6.89], ["Energy", 23.51, 24.06, 24.13], ["Life", 6.6, 5.98, 5.68]], "cpa": [["Paid search", 93.04, 113.37, 118.56, 3.49, 3.69], ["Social", 91.03, 106.88, 99.79, 4.9, 4.38], ["Partner referral", 48.32, 47.64, 54.15, 8.9, 9.44], ["SEO", 25.89, 24.31, 24.02, 14.53, 21.57], ["Direct", 4.18, 4.94, 4.42, 101.51, 78.59]], "nrpd": [6.37, 5.71], "speed": [["Social", 16.0], ["Paid search", 11.0], ["SEO", 11.0], ["Direct", 10.0], ["Partner referral", 10.0]], "team": [["Sydney", 11.0], ["Melbourne", 12.0], ["Manila", 11.0]], "over15": 35.7, "claw": [["Oct to Dec 24", 7.87], ["Jan to Mar 25", 8.33], ["Apr to Jun 25", 7.66], ["Jul to Sep 25", 8.19], ["Oct to Dec 25", 7.33], ["Jan to Mar 26", 7.97], ["Apr to Jun 26", 7.86]], "complaints": {"rate12": 3.75, "target": 3.64, "n12": 15, "s12": 4000, "byq": [["Oct to Dec 24", 4], ["Jan to Mar 25", 2], ["Apr to Jun 25", 7], ["Jul to Sep 25", 4], ["Oct to Dec 25", 4], ["Jan to Mar 26", 0], ["Apr to Jun 26", 6], ["Jul to Sep 26", 5]]}, "energyNow": 43.0, "energyQ": 39.5, "rings": [{"n": "Net revenue per lead", "v": "$52.42", "t": "Target $57.41 by 30-Jun-27", "p": 91}, {"n": "Lead-to-sale conversion: health", "v": "9.5%", "t": "Target 11% by 30-Jun-27", "p": 86}, {"n": "Cost per acquisition: paid search", "v": "$93.04", "t": "Target $106.70 by 30-Jun-27", "p": 100}, {"n": "Speed to contact", "v": "11 min", "t": "Target 10 min or less by 31-Mar-27", "p": 91}, {"n": "90-day clawback rate", "v": "7.9%", "t": "Target 7.8% by 30-Jun-27", "p": 100}]};
+const PAL={dark:{bg:'#0c121a',surface:'#141c27',fg:'#e8edf3',muted:'#94a1b2',line:'#243042',accent:'#4f9dff',soft:'#16263d',cats:['#225fb0','#bcd9ff','#4f9dff','#8ec0ff'],grey:'#8b96a5',pos:'#bcd9ff',neg:'#4f9dff'},
+ light:{bg:'#f5f8fc',surface:'#ffffff',fg:'#121a24',muted:'#556273',line:'#dbe3ee',accent:'#1f64c8',soft:'#e3eefc',cats:['#6aa3ec','#0f3f80','#93bdf2','#3b82e6'],grey:'#6b7685',pos:'#93bdf2',neg:'#1f64c8'}};
+const STATUS={dark:{ok:'#5fd38d',warn:'#f2a65a',bad:'#f87171'},light:{ok:'#15803d',warn:'#b45309',bad:'#b91c1c'}};
+let mode='dark';try{const m=localStorage.getItem('ccDashMode');if(m==='light'||m==='dark')mode=m}catch(e){}
+function applyMode(){const t=PAL[mode],s=STATUS[mode],r=document.documentElement.style;document.documentElement.dataset.theme=mode;
+ const set={bg:t.bg,surface:t.surface,fg:t.fg,muted:t.muted,line:t.line,accent:t.accent,'accent-soft':t.soft,grey:t.grey,pos:t.pos,neg:t.neg,'s-ok':s.ok,'s-warn':s.warn,'s-bad':s.bad};
+ t.cats.forEach((c,i)=>set['c'+(i+1)]=c);for(const k in set)r.setProperty('--'+k,set[k]);
+ document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));try{localStorage.setItem('ccDashMode',mode)}catch(e){}
+ try{document.querySelectorAll('.chart[data-ink]').forEach(el=>{if(el.offsetParent!==null)R[el.dataset.c](el)})}catch(e){}}
+document.getElementById('mode').addEventListener('click',e=>{const b=e.target.closest('button');if(b){mode=b.dataset.m;applyMode()}});
+
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=v=>'$'+v.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});
+const about=v=>v<200?Math.round(v/5)*5:Math.round(v/50)*50;
+const k=v=>(v<0?'−':'')+'$'+(Math.abs(v)/1000).toFixed(1)+'k';
+const sk=v=>(v>=0?'+':'−')+'$'+(Math.abs(v)/1000).toFixed(1)+'k';
+const ICON={ok:'✓',warn:'!',bad:'×'},WORD={ok:'On track',warn:'Behind',bad:'Off track'};
+const AREA_C={'Health':'--c1','Energy':'--c2','Home loans':'--c3','Life':'--c4'};
+/* Dark or white label text, whichever reads on the fill colour */
+const inkOn=v=>{const h=getComputedStyle(document.documentElement).getPropertyValue(v).trim().replace('#',''),[r,g,b]=[0,2,4].map(i=>parseInt(h.substr(i,2),16)/255).map(c=>c<=.03928?c/12.92:((c+.055)/1.055)**2.4);return .2126*r+.7152*g+.0722*b>.35?'#0c121a':'#fff'};
+const table=(head,rows)=>`<details class="data"><summary>See data</summary><table class="t"><thead><tr>${head.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></details>`;
+const svgOpen=(w,h,label)=>`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">`;
+
+/* ---------- Words that come from the numbers ---------- */
+const e0=D.mix['Apr to Jun 26'].Energy,e1=D.mix['Jul to Sep 26'].Energy;
+const hNow=D.conv.find(r=>r[0]==='Health'),hLast=hNow[3];
+document.getElementById('subhead').textContent=`Energy leads rose from ${e0}% to ${e1}% of all leads, and each energy sale earns about $${about(D.perLead.find(r=>r[0]==='Energy')[2])} against about $${about(D.perLead.find(r=>r[0]==='Health')[2])} for health. Health conversion slipping from ${hLast.toFixed(1)}% to ${hNow[1].toFixed(1)}% is the second hit.`;
+document.getElementById('t-energy').textContent=`Energy rose from ${e0}% to ${e1}% of leads, and reached ${D.energyNow}% in September`;
+document.getElementById('t-health').textContent=`Health conversion fell from ${hLast.toFixed(1)}% to ${hNow[1].toFixed(1)}%, against an 11% target`;
+const slow=D.speed[0];
+document.getElementById('t-speed').textContent=`${slow[0]} leads wait ${slow[1]} minutes; ${D.over15}% of all leads wait over 15`;
+{const H=D.health,before=Math.min(...H.slice(0,-2));document.getElementById('cap-health').textContent=`Monthly values move around. August (${H.at(-2).toFixed(1)}%) and September (${H.at(-1).toFixed(1)}%) are the lowest in two years; the lowest before them was ${before.toFixed(1)}%.`}
+document.getElementById('a1').textContent=`Energy is ${D.energyNow}% of leads now. Needs −2.2 points a month; trend +5.3.`;
+document.getElementById('a2').textContent=`Health is ${hNow[1].toFixed(1)}% now. Needs +0.17 points a month; trend −0.76.`;
+document.getElementById('a3').textContent=`Typical wait is 11 minutes; ${slow[0].toLowerCase()} leads wait ${slow[1]}.`;
+
+/* ---------- C. Tiles ---------- */
+function spark(vals,dashTail,tgt){const w=100,h=40,all=tgt==null?vals:[...vals,tgt],mx=Math.max(...all),mn=Math.min(...all),Y=v=>h-3-(v-mn)/((mx-mn)||1)*(h-6);const P=vals.map((v,i)=>[i*w/(vals.length-1),Y(v)]);
+ const path=a=>'M'+a.map(p=>p.map(n=>n.toFixed(1)).join(',')).join('L');const cut=dashTail?vals.length-dashTail-1:vals.length-1;
+ const solid=P.slice(0,cut+1),dash=P.slice(cut),end=P.at(-1)[1]/h*100;
+ return `<div class="spk"><svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path class="area" d="${path(P)}L${w},${h}L0,${h}Z"/>${tgt==null?'':`<line class="tgt-s" x1="0" x2="${w}" y1="${Y(tgt)}" y2="${Y(tgt)}"/>`}<path d="${path(solid)}"/>${dashTail?`<path class="dash" d="${path(dash)}"/>`:''}</svg><span class="end" style="top:calc(${end.toFixed(1)}% - 4px)"></span></div>`}
+const SP={k1m:D.k1m,health:D.health};
+const cap1=x=>x.charAt(0).toUpperCase()+x.slice(1);
+document.getElementById('tiles').innerHTML=D.tiles.map(t=>{const [need,trend]=t.pace.split(' · ');return `<div class="stat">
+ <span class="nm">${t.n}</span>
+ <div class="tile-top"><div class="act"><b>${t.v}</b></div>${t.spark?spark(SP[t.spark],t.dashTail,t.tgt):''}</div>
+ ${t.prov?'<span class="tag prov">Provisional</span>':''}
+ <span class="ln">${t.t}</span>
+ <span class="ln">Gap <b>${t.gap}</b></span>
+ <span class="ln">${need}</span>
+ ${trend?`<span class="ln trend" data-s="${t.s}">${cap1(trend)}</span>`:''}
+ <span class="st" data-s="${t.s}"><span class="ic" aria-hidden="true">${ICON[t.s]}</span>${WORD[t.s]}</span>
+ ${t.note?`<span class="note">${t.note}</span>`:''}</div>`}).join('');
+
+/* ---------- Charts ---------- */
+const R={},T={};
+function yGrid(m,w,Y,ticks,fmt){return ticks.map(t=>`<line class="grid-l" x1="${m.l}" x2="${w-m.r}" y1="${Y(t)}" y2="${Y(t)}"/><text class="ax" x="${m.l-8}" y="${Y(t)+4}" text-anchor="end">${fmt(t)}</text>`).join('')}
+
+R.bridge=el=>{const w=el.clientWidth,h=300,m={l:58,r:12,t:28,b:48};const b=D.bridge;
+ const items=[['Apr to Jun 26',b.start,'total']];let run=b.start;b.steps.forEach(([n,v])=>{items.push([n,v,v>=0?'up':'down',run]);run+=v});items.push(['Jul to Sep 26',b.end,'total']);
+ const lo=380000,hi=440000,band=(w-m.l-m.r)/items.length,bw=Math.min(70,band*.56),Y=v=>m.t+(h-m.t-m.b)*(1-(v-lo)/(hi-lo)),X=i=>m.l+band*i+band/2;
+ let s=svgOpen(w,h,`Revenue bridge: ${k(b.start)} last quarter to ${k(b.end)} this quarter. `+b.steps.map(([n,v])=>`${n} ${sk(v)}`).join(', '))+yGrid(m,w,Y,[380000,400000,420000,440000],v=>'$'+v/1000+'k');
+ let prev=null;
+ items.forEach((it,i)=>{const [n,v,kind,base]=it;let top,bot,fill,lab;
+  if(kind==='total'){top=Y(v);bot=Y(lo);fill='--grey';lab=k(v)}else{const a=base,z=base+v;top=Y(Math.max(a,z));bot=Y(Math.min(a,z));fill=v>=0?'--pos':'--neg';lab=sk(v)}
+  const x=X(i)-bw/2,hh=Math.max(2,bot-top);
+  if(prev!==null)s+=`<line x1="${X(i-1)+bw/2}" x2="${x}" y1="${prev}" y2="${prev}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>`;
+  s+=`<g class="col" style="--d:${i*0.12}s"><rect x="${x}" y="${top}" width="${bw}" height="${hh}" rx="3" style="fill:var(${fill})"/></g>`;
+  s+=`<text class="lab fade" style="--d:${0.5+i*0.12}s" x="${X(i)}" y="${top-8}" text-anchor="middle"><tspan class="b">${lab}</tspan></text>`;
+  const words=n.split(' '),l1=words.length>2?words.slice(0,2).join(' '):words[0],l2=words.length>2?words.slice(2).join(' '):words.slice(1).join(' ');
+  s+=`<text class="ax" x="${X(i)}" y="${h-28}" text-anchor="middle">${l1}</text><text class="ax" x="${X(i)}" y="${h-14}" text-anchor="middle">${l2}</text>`;
+  s+=`<rect class="hit" x="${X(i)-band/2+2}" y="${m.t}" width="${band-4}" height="${h-m.t-m.b}" data-tip="<b>${n}</b><div class='tr'><span>${kind==='total'?'Net revenue':'Effect'}</span><b>${kind==='total'?money(v):sk(v)}</b></div>"/>`;
+  prev=kind==='total'?Y(v):Y(base+v);});
+ el.innerHTML=s+'</svg>'};
+T.bridge=()=>table(['Step','Net revenue or effect'],[['Apr to Jun 26 net revenue',money(D.bridge.start)],...D.bridge.steps.map(([n,v])=>[n,sk(v)]),['Jul to Sep 26 net revenue',money(D.bridge.end)],['Leads',`${D.bridge.leads0.toLocaleString('en-AU')} to ${D.bridge.leads1.toLocaleString('en-AU')}`],['Net revenue per lead',`${money(D.bridge.pl0)} to ${money(D.bridge.pl1)}`]]);
+
+function lineChart(el,{vals,fmt,lo,hi,ticks,target,tName,label,annot,unit}){const w=el.clientWidth,h=240,m={l:44,r:56,t:18,b:28},n=vals.length;
+ const X=i=>m.l+(w-m.l-m.r)*i/(n-1),Y=v=>m.t+(h-m.t-m.b)*(1-(v-lo)/(hi-lo));
+ let s=svgOpen(w,h,label)+yGrid(m,w,Y,ticks,fmt);
+ D.months.forEach((mo,i)=>{if(i%3===2||i===n-1)s+=`<text class="ax" x="${X(i)}" y="${h-8}" text-anchor="middle">${mo}</text>`});
+ const d='M'+vals.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join('L');
+ s+=`<path class="fade" style="--d:1.2s;fill:var(--accent);fill-opacity:.1" d="${d}L${X(n-1)},${Y(lo)}L${X(0)},${Y(lo)}Z"/>`;
+ s+=`<line class="tgt" x1="${m.l}" x2="${w-m.r}" y1="${Y(target)}" y2="${Y(target)}"/><text class="ax" x="${m.l+6}" y="${Y(target)-6}">${tName}</text>`;
+ s+=`<path class="draw" pathLength="1" d="${d}" style="fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round"/>`;
+ if(annot){const i=annot.i;s+=`<g class="fade" style="--d:1.4s"><line x1="${X(i)}" x2="${X(i)}" y1="${m.t}" y2="${h-m.b}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/><text class="ax" x="${X(i)-6}" y="${m.t+10}" text-anchor="end">${annot.text}</text></g>`}
+ const lv=vals[n-1];s+=`<g class="fade" style="--d:1.6s"><circle class="dot" cx="${X(n-1)}" cy="${Y(lv)}" r="4.5" style="fill:var(--accent)"/><text class="lab" x="${X(n-1)+8}" y="${Y(lv)+4}"><tspan class="b">${fmt(lv)}</tspan></text></g>`;
+ s+=`<line class="cross" x1="0" x2="0" y1="${m.t}" y2="${h-m.b}" visibility="hidden"/><g class="xd"></g><rect class="hit xr" x="${m.l}" y="${m.t}" width="${w-m.l-m.r}" height="${h-m.t-m.b}"/>`;
+ el.innerHTML=s+'</svg>';
+ const r=el.querySelector('.xr'),xh=el.querySelector('.cross'),xd=el.querySelector('.xd');
+ r.addEventListener('pointermove',e=>{const bx=el.querySelector('svg').getBoundingClientRect();const i=Math.max(0,Math.min(n-1,Math.round((e.clientX-bx.left-m.l)/((w-m.l-m.r)/(n-1)))));
+  xh.setAttribute('x1',X(i));xh.setAttribute('x2',X(i));xh.setAttribute('visibility','visible');xd.innerHTML=`<circle class="dot" cx="${X(i)}" cy="${Y(vals[i])}" r="5" style="fill:var(--accent)"/>`;
+  showTip(`<b>${D.months[i]}</b><div class='tr'><span>${unit}</span><b>${fmt(vals[i])}</b></div><div class='tr'><span>Target</span><b>${fmt(target)}</b></div>`,e.clientX,e.clientY)});
+ r.addEventListener('pointerleave',()=>{xh.setAttribute('visibility','hidden');xd.innerHTML='';hideTip()})}
+R.energy=el=>lineChart(el,{vals:D.energy,fmt:v=>v.toFixed(0)+'%',lo:20,hi:45,ticks:[20,30,40],target:30,tName:'Target 30%',unit:'Energy share',
+ label:`Energy share of leads by month: about 26% until June 2026, then ${D.energy.slice(-3).join('%, ')}% in July to September 2026.`,annot:{i:D.months.indexOf('Jul-26'),text:'Jul-26 jump'}});
+R.health=el=>lineChart(el,{vals:D.health,fmt:v=>v.toFixed(1)+'%',lo:8,hi:13,ticks:[8,9,10,11,12,13],target:11,tName:'Target 11%',unit:'Health conversion',
+ label:`Health conversion by month, ending at ${D.health.at(-1).toFixed(1)}% in September 2026 against an 11% target.`});
+T.energy=()=>table(['Month','Energy share of leads'],D.months.map((m,i)=>[m,D.energy[i]+'%']));
+T.health=()=>table(['Month','Health conversion'],D.months.map((m,i)=>[m,D.health[i].toFixed(2)+'%']));
+
+function hbars(rows,{max,fmt,hi,target,tName,extra}){return '<div class="hb">'+rows.map((r,i)=>`<div class="hb-r"><span>${r[0]}${extra?`<small>${extra(r)}</small>`:''}</span>
+ <span class="hb-t" data-tip="<b>${esc(r[0])}</b><div class='tr'><span>Value</span><b>${fmt(r[1])}</b></div>${extra?`<div class='tr'><span>${esc(extra(r))}</span></div>`:''}" tabindex="0" role="img" aria-label="${esc(r[0])}: ${fmt(r[1])}"><span class="hb-f${hi(r)?' hi':''}" style="width:${(r[1]/max*100).toFixed(1)}%;--d:${i*0.08}s"></span>${target?`<span class="hb-k" style="left:${(target/max*100).toFixed(1)}%" title="${tName}"></span>`:''}</span>
+ <span class="hb-v">${fmt(r[1])}</span></div>`).join('')+'</div>'}
+R.perlead=el=>{if(el.dataset.done)return;el.dataset.done=1;el.innerHTML=hbars(D.perLead,{max:Math.max(...D.perLead.map(r=>r[1])),fmt:money,hi:r=>r[0]==='Energy',extra:r=>`${money(r[2])} a sale`})};
+T.perlead=()=>table(['Product area','Net revenue per lead','Commission per sale'],D.perLead.map(r=>[r[0],money(r[1]),money(r[2])]));
+
+R.mix=el=>{const w=el.clientWidth,bh=26,gap=2,rows=Object.entries(D.mix),lw=Math.min(110,w*.28),h=rows.length*48+6;const areas=['Health','Home loans','Energy','Life'];
+ let s=svgOpen(w,h,'Share of leads by product area: '+rows.map(([q,v])=>`${q}: `+areas.map(a=>`${a} ${v[a]}%`).join(', ')).join('; '));
+ rows.forEach(([q,v],ri)=>{const y=ri*48+12;s+=`<text class="ax" x="0" y="${y+bh/2+4}">${q}</text>`;let x=lw;const bw=w-lw;
+  s+=`<g class="fade" style="--d:${ri*0.25}s">`;areas.forEach((a,ai)=>{const cw=bw*v[a]/100,ww=cw-(ai<areas.length-1?gap:0);
+   s+=`<rect x="${x}" y="${y}" width="${Math.max(0,ww)}" height="${bh}" rx="3" style="fill:var(${AREA_C[a]})" data-tip="<b>${a}</b><div class='tr'><span>${q}</span><b>${v[a]}%</b></div>"/>`;
+   if(ww>34)s+=`<text x="${x+ww/2}" y="${y+bh/2+4}" text-anchor="middle" style="fill:${inkOn(AREA_C[a])};font:500 11px var(--font-mono);pointer-events:none">${Math.round(v[a])}%</text>`;x+=cw});s+='</g>'});
+ el.innerHTML=s+'</svg>';
+ document.getElementById('lg-mix').innerHTML=areas.map(a=>`<span><i style="--c:var(${AREA_C[a]})"></i>${a}</span>`).join('')};
+T.mix=()=>table(['Product area','Apr to Jun 26','Jul to Sep 26'],['Health','Home loans','Energy','Life'].map(a=>[a,D.mix['Apr to Jun 26'][a]+'%',D.mix['Jul to Sep 26'][a]+'%']));
+
+R.conv=el=>{if(el.dataset.done)return;el.dataset.done=1;const mx=2;
+ el.innerHTML='<div class="dv">'+D.conv.map((r,i)=>{const g=r[1]-r[2],pct=Math.min(1,Math.abs(g)/mx)*50,pos=g>=0,sg=(pos?'+':'−')+Math.abs(g).toFixed(2)+' pts';
+  return `<div class="dv-r"><span>${r[0]}</span><div class="dv-t" tabindex="0" role="img" aria-label="${r[0]}: ${sg} against target" data-tip="<b>${r[0]}</b><div class='tr'><span>Actual</span><b>${r[1].toFixed(2)}%</b></div><div class='tr'><span>Target</span><b>${r[2].toFixed(2)}%</b></div>">
+   <span class="dv-b ${pos?'p':'n'}" style="width:${pct}%;--d:${i*0.08}s"></span><span class="dv-l" style="${pos?`left:calc(${50+pct}% + 6px)`:`right:calc(${50+pct}% + 6px)`}">${sg}</span></div>
+   <span class="dv-v">${r[1].toFixed(1)}% vs ${r[2].toFixed(1)}%</span></div>`}).join('')+'<div class="dv-ax"><span></span><div><span>−2 pts</span><span>On target</span><span>+2 pts</span></div><span></span></div></div>'};
+T.conv=()=>table(['Product area','This quarter','Target','Last quarter'],D.conv.map(r=>[r[0],r[1].toFixed(2)+'%',r[2].toFixed(2)+'%',r[3].toFixed(2)+'%']));
+
+R.cpa=el=>{if(el.dataset.done)return;el.dataset.done=1;el.innerHTML=hbars(D.cpa,{max:Math.max(...D.cpa.map(r=>r[1])),fmt:money,hi:r=>r[0]==='Paid search',extra:r=>`Net revenue per $: ${money(r[4])}, was ${money(r[5])}`});
+ document.getElementById('cap-cpa').textContent=`All channels: net revenue per marketing dollar fell from ${money(D.nrpd[0])} to ${money(D.nrpd[1])}. 6.1% of sales can't be tied to a channel, so cost per acquisition is overstated by about 6%.`};
+T.cpa=()=>table(['Channel','Cost per sale','Last quarter','Jul 25 to Jun 26 average','Net revenue per $','Last quarter'],D.cpa.map(r=>[r[0],money(r[1]),money(r[2]),money(r[3]),money(r[4]),money(r[5])]));
+
+R.speed=el=>{if(el.dataset.done)return;el.dataset.done=1;const mx=Math.max(...D.speed.map(r=>r[1]))*1.1;
+ el.innerHTML=hbars(D.speed,{max:mx,fmt:v=>v+' min',hi:r=>r===D.speed[0],target:10,tName:'Target 10 min'})+`<p class="cap" style="margin-top:10px">By team: ${D.team.map(t=>`${t[0]} ${t[1]} min`).join(' · ')}</p>`};
+T.speed=()=>table(['Channel or team','Median minutes'],[...D.speed.map(r=>['Channel: '+r[0],r[1]]),...D.team.map(r=>['Team: '+r[0],r[1]])]);
+
+R.claw=el=>{const w=el.clientWidth,h=200,m={l:40,r:16,t:24,b:40},n=D.claw.length,lo=0,hi=10;const band=(w-m.l-m.r)/n,bw=Math.min(24,band*.5),X=i=>m.l+band*i+band/2,Y=v=>m.t+(h-m.t-m.b)*(1-(v-lo)/(hi-lo));
+ let s=svgOpen(w,h,'90-day clawback rate by quarter: '+D.claw.map(c=>`${c[0]} ${c[1]}%`).join(', '))+yGrid(m,w,Y,[0,5,10],v=>v+'%');
+ D.claw.forEach((c,i)=>{const t=Y(c[1]);s+=`<g class="col" style="--d:${i*0.08}s"><path d="M${X(i)-bw/2},${Y(0)}V${t+4}Q${X(i)-bw/2},${t} ${X(i)-bw/2+4},${t}H${X(i)+bw/2-4}Q${X(i)+bw/2},${t} ${X(i)+bw/2},${t+4}V${Y(0)}Z" style="fill:var(--accent)"/></g>`;
+  if(i===n-1)s+=`<text class="lab fade" style="--d:.8s" x="${X(i)}" y="${t-8}" text-anchor="middle"><tspan class="b">${c[1].toFixed(1)}%</tspan></text>`;
+  const p=c[0].split(' ');s+=`<text class="ax" x="${X(i)}" y="${h-22}" text-anchor="middle">${p.slice(0,3).join(' ')}</text><text class="ax" x="${X(i)}" y="${h-8}" text-anchor="middle">${p.slice(3).join(' ')}</text>`;
+  s+=`<rect class="hit" x="${X(i)-band/2+2}" y="${m.t}" width="${band-4}" height="${h-m.t-m.b}" data-tip="<b>${c[0]}</b><div class='tr'><span>Clawback rate</span><b>${c[1].toFixed(2)}%</b></div>"/>`});
+ s+=`<line class="tgt" x1="${m.l}" x2="${w-m.r}" y1="${Y(7.84)}" y2="${Y(7.84)}"/><text class="ax" x="${m.l+6}" y="${Y(7.84)-6}">Target 7.8%</text>`;
+ el.innerHTML=s+'</svg>'};
+T.claw=()=>table(['Quarter of sale','Clawback rate'],D.claw.map(c=>[c[0],c[1].toFixed(2)+'%']));
+
+const C=D.complaints;
+document.getElementById('cc').innerHTML=`<div class="box"><span>Complaints per 1,000 sales, last 12 months</span><b>${C.rate12.toFixed(2)}</b><span>${C.n12} complaints from ${C.s12.toLocaleString('en-AU')} sales · target ${C.target.toFixed(2)}</span><span class="st" data-s="warn"><span class="ic" aria-hidden="true">!</span>Behind</span></div>
+ <div class="box"><span>Complaints by quarter</span><b>${C.byq.at(-1)[1]}</b><span>this quarter. Only 32 in 24 months, so read the 12-month rate, not the quarter</span></div>
+ <div class="box"><span>90-day clawback rate, latest complete quarter</span><b>${D.claw.at(-1)[1].toFixed(1)}%</b><span>Apr to Jun 26 sales · target 7.8% · Jul to Sep 26 is provisional</span><span class="st" data-s="ok"><span class="ic" aria-hidden="true">✓</span>On track</span></div>`;
+
+/* ---------- Experimental A: progress rings ---------- */
+R.radial=el=>{const W=440,H=330,rows=D.rings,th=14,gp=8,R0=150,cx=W-R0-12,cy=H/2,low=Math.min(...rows.map(r=>r.p));
+ const pt=(r,a)=>[cx+r*Math.cos(a-Math.PI/2),cy+r*Math.sin(a-Math.PI/2)].map(n=>n.toFixed(1)).join(',');
+ const arc=(r,f)=>{const a=1.5*Math.PI*f;return `M${pt(r,0)}A${r},${r} 0 ${a>Math.PI?1:0} 1 ${pt(r,a)}`};
+ let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc('Progress to target: '+rows.map(r=>`${r.n} ${r.p}%`).join(', '))}">`;
+ rows.forEach((r,i)=>{const rad=R0-i*(th+gp),hi=r.p===low;
+  s+=`<path d="${arc(rad,1)}" style="fill:none;stroke:var(--line);stroke-width:${th};stroke-linecap:round"/>`;
+  s+=`<path class="draw" pathLength="1" d="${arc(rad,r.p/100)}" style="fill:none;stroke:${hi?'var(--accent)':'var(--grey)'};stroke-opacity:${hi?1:.8};stroke-width:${th};stroke-linecap:round;animation-delay:${i*0.12}s" data-tip="<b>${esc(r.n)}</b><div class='tr'><span>Progress to target</span><b>${r.p}%</b></div><div class='tr'><span>Actual</span><b>${esc(r.v)}</b></div><div class='tr'><span>${esc(r.t)}</span></div>"/>`;
+  s+=`<text class="lab" x="${cx-12}" y="${cy-rad+4}" text-anchor="end" style="font-size:14px${hi?';fill:var(--accent)':''}">${esc(r.n)} <tspan class="b">${r.p}%</tspan></text>`});
+ el.innerHTML=s+'</svg>'};
+T.radial=()=>table(['KPI','Actual','Target','Progress to target'],D.rings.map(r=>[r.n,r.v,r.t.replace('Target ',''),r.p+'%']));
+{const lo=[...D.rings].sort((a,b)=>a.p-b.p)[0];document.getElementById('t-rings').textContent=`${lo.n} is furthest from target, ${lo.p}% of the way there`}
+
+/* ---------- Render, replay and tooltips ---------- */
+document.querySelectorAll('[data-t]').forEach(n=>n.innerHTML=T[n.dataset.t]());
+const charts=[...document.querySelectorAll('.chart')];
+const draw=el=>{if(el.offsetParent!==null||el.closest('details[open]'))R[el.dataset.c](el)};
+charts.forEach(draw);
+document.querySelectorAll('details.sec').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)d.querySelectorAll('.chart').forEach(el=>{R[el.dataset.c](el);play(el)})}));
+let rw=null;new ResizeObserver(()=>{clearTimeout(rw);rw=setTimeout(()=>charts.forEach(el=>{if(!el.dataset.done&&el.offsetParent!==null)R[el.dataset.c](el)}),120)}).observe(document.body);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function play(el){if(reduce)return;el.classList.remove('play');void el.offsetWidth;el.classList.add('play')}
+if('IntersectionObserver' in window&&!reduce){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){play(e.target);io.unobserve(e.target)}}),{threshold:.3});charts.forEach(el=>io.observe(el))}
+charts.forEach(el=>el.addEventListener('click',()=>{if(el.classList.contains('replay'))play(el)}));
+const tip=document.getElementById('tip');
+function showTip(html,x,y){tip.innerHTML=html;tip.classList.add('on');const r=tip.getBoundingClientRect();let l=x+14,t=y+14;if(l+r.width>innerWidth-8)l=x-r.width-14;if(t+r.height>innerHeight-8)t=y-r.height-14;tip.style.left=Math.max(8,l)+'px';tip.style.top=Math.max(8,t)+'px'}
+function hideTip(){tip.classList.remove('on')}
+document.addEventListener('pointermove',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t.dataset.tip,e.clientX,e.clientY);else if(!(e.target.closest&&e.target.closest('.xr')))hideTip()});
+document.addEventListener('focusin',e=>{const t=e.target.closest('[data-tip]');if(t){const b=t.getBoundingClientRect();showTip(t.dataset.tip,b.right,b.top)}});
+document.addEventListener('focusout',hideTip);
+document.querySelectorAll('.dv-t').forEach(n=>n.tabIndex=0);
+applyMode();
+</script>
+</body>
+</html>

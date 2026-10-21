@@ -1,0 +1,79 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Standards and Validation: ClearCompare dashboard, first draft</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">Standards and Validation: ClearCompare dashboard, first draft</label></nav><section id="s0"><p class="src">File: stage-4-17-standards-and-validation.md</p><h1 id="s0-top">Standards and Validation: ClearCompare dashboard, first draft</h1><div class="toc" role="navigation" aria-label="Contents"><b>In this document</b><ol><li><a href="#s0-h0" data-jump="s0-h0">Fixed already (clear-cut)</a></li><li><a href="#s0-h1" data-jump="s0-h1">Check that still fails</a></li><li><a href="#s0-h2" data-jump="s0-h2">Checks that pass</a></li><li><a href="#s0-h3" data-jump="s0-h3">Validation checklist</a></li></ol></div>
+<p><b>Checked by:</b> Jennifer (Stage 4) · 21-Oct-26 <b>File checked:</b> <code>02 - Deliverables/2026.10.21 - ClearCompare - 04 Dashboard.html</code> (Experimental A with the Stage 4 fixes) <b>Verdict:</b> passes 30 of 31 checks. Adam approved changes 1 to 3 on 21-Oct-26, and the clawback rate stays "On track". One phone layout item remains (below).</p>
+<h2 id="s0-h0">Fixed already (clear-cut)</h2>
+<table><thead><tr><th>Fix</th><th>Before</th><th>After</th><th>Standard</th></tr></thead><tbody><tr><td>Category colours</td><td>Lead-mix chart: 4 product areas in shades of blue</td><td>Charcoal and teal category colours (health teal, energy orange, home loans blue, life pink)</td><td>Process: any chart with 3 or more categories uses the colourblind-safe palette</td></tr><tr><td>Heading order</td><td>Rings card title was an h3 straight after the h1</td><td>Now an h2, same size on screen</td><td>Web Build Standards: headings in order, no level skipped</td></tr><tr><td>Stage label</td><td>"Stage 3 · Experimental A: progress rings"</td><td>"Stage 4 · First draft for stakeholder review"</td><td>Shared outputs show what the audience needs</td></tr><tr><td>Spec version</td><td>spec.json said Business Requirements v1.0</td><td>v1.1, matching the document and the footer</td><td>Validation checklist, item 5</td></tr><tr><td>First screen (approved)</td><td>Rings card 527px; tiles end at 930px on 1280 × 800; phone tiles start at 1,062px</td><td>Rings card 397px, internal caption removed; tiles end at 799px; phone tiles start at 517px</td><td>Dashboard Patterns: first screen; 30-second test</td></tr><tr><td>Touch (approved)</td><td>18 chart data points under 44px</td><td>0 under 44px on touch screens</td><td>UX Standards: 44px touch targets</td></tr><tr><td>Energy colour (approved)</td><td>Energy blue in one chart, orange in another</td><td>Orange in both</td><td>One colour per product area</td></tr></tbody></table>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h1">Check that still fails</h2>
+<table><thead><tr><th>Area</th><th>Check</th><th>Evidence</th><th>Fix</th></tr></thead><tbody><tr><td><b>Layout</b></td><td>Phone shows the headline and two tiles before any scroll</td><td>The headline and first tile show; the second tile starts below the 812px screen. The header takes about 230px</td><td>A shorter phone header, if Adam wants it</td></tr></tbody></table>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h2">Checks that pass</h2>
+<table><thead><tr><th>Area</th><th>Check</th><th>Evidence</th></tr></thead><tbody><tr><td style="white-space:nowrap">HTML</td><td>Doctype, lang, charset, viewport, title</td><td><code>en-AU</code>, <code>viewport-fit=cover</code>, title "ClearCompare KPI Dashboard"</td></tr><tr><td style="white-space:nowrap">HTML</td><td>One h1, unique ids, no unnamed buttons or links</td><td>1 h1, 0 duplicate ids, 0 unnamed controls</td></tr><tr><td style="white-space:nowrap">HTML</td><td>Collapsibles use details and summary</td><td>All 5 detail sections and every "See data"</td></tr><tr><td>Accessibility</td><td>Text contrast, dark mode</td><td>Main text 14.56, muted 6.53, accent 6.20, status colours 6.20 to 9.13 (all above 4.5)</td></tr><tr><td>Accessibility</td><td>Text contrast, light mode</td><td>Main text 17.52, muted 5.83, accent 5.65, status 5.02 to 6.47, grey 4.61 (all above 4.5)</td></tr><tr><td>Accessibility</td><td>Charts have text versions</td><td>Every chart has an aria-label and a "See data" table</td></tr><tr><td>Accessibility</td><td>Status never by colour alone</td><td>Each status chip has an icon and a word (✓ On track, ! Behind, × Off track)</td></tr><tr><td>Accessibility</td><td>Reduced motion</td><td>Animations off under <code>prefers-reduced-motion</code></td></tr><tr><td style="white-space:nowrap">Touch</td><td>Every control on a touch phone</td><td>0 under 44px (mode toggle, section headers and chart rows)</td></tr><tr><td style="white-space:nowrap">Layout</td><td>First screen at 1280 × 800</td><td>Headline, rings and all 5 tiles; tiles end at 799px</td></tr><tr><td style="white-space:nowrap">Visual</td><td>One colour per product area</td><td>Energy orange in both charts</td></tr><tr><td style="white-space:nowrap">Layout</td><td>No sideways scroll</td><td>0 at 375 × 812, 740 × 360, 568 × 320, 768 and 1280</td></tr><tr><td>JavaScript</td><td>Console errors</td><td>0 on load, after opening every section and after switching modes</td></tr><tr><td>JavaScript</td><td>Storage wrapped, no popups</td><td>localStorage in try/catch; no alert or confirm</td></tr><tr><td style="white-space:nowrap">Security</td><td>No secrets, external links</td><td>0 keys or tokens; no external links</td></tr><tr><td style="white-space:nowrap">Data</td><td>Sample data labelled</td><td>"Sample data" tag in the header</td></tr></tbody></table>
+<p><b>Not tested:</b> keyboard-only pass and 200% zoom (not run this round); Core Web Vitals (not measured: local file). Screenshots were taken in the Browser pane but not saved as files.</p>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h3">Validation checklist</h2>
+<table><thead><tr><th>Check</th><th>Result</th><th>Evidence</th></tr></thead><tbody><tr><td>Every Must Have KPI is on the dashboard, calculated as documented</td><td style="white-space:nowrap"><b>Pass</b></td><td>All 8 KPIs and sub-KPIs mapped in spec.json; every number comes from kpi_results.json</td></tr><tr><td>Every business objective shows its progress</td><td style="white-space:nowrap"><b>Pass</b></td><td>Revenue and conversion objectives: tiles with actual, target, gap and pace. "Explain changes within a day": the revenue bridge</td></tr><tr><td>Every action owner sees their KPI's status at a glance</td><td style="white-space:nowrap"><b>Pass</b></td><td>Three action cards, each with the current value, pace needed and trend</td></tr><tr><td>The 30-second test</td><td style="white-space:nowrap"><b>Pass</b></td><td>At 1280 × 800 the first screen shows the headline, the rings and all 5 tiles (actual, target, gap, pace, status). On a phone, the headline and first tile</td></tr><tr><td>Business Requirements version in the footer matches the latest</td><td style="white-space:nowrap"><b>Pass</b></td><td>v1.1 in the header, footer and spec.json</td></tr></tbody></table><a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>
