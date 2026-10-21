@@ -124,12 +124,13 @@ blockquote{margin:8px 0 0;padding:6px 12px;border-left:3px solid var(--accent);b
 /* Timeline simulation */
 /* Thumbnail: the real timeline, scaled down and not clickable, with one play link over it */
 .tl-thumb{position:relative;aspect-ratio:16/9;max-height:440px;width:100%;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg)}
-.tl-thumb iframe{position:absolute;top:0;left:0;width:1440px;height:810px;border:0;transform-origin:0 0;pointer-events:none}
-.tl-play{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:8px;text-decoration:none;background:linear-gradient(180deg,rgba(12,18,26,.15),rgba(12,18,26,.55))}
+.tl-thumb iframe{position:absolute;top:0;left:0;width:1440px;height:810px;border:0;transform-origin:0 0;pointer-events:none;opacity:.38;filter:saturate(.7)}
+.tl-play{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:8px;text-decoration:none;background:radial-gradient(ellipse at center,color-mix(in srgb,var(--bg) 55%,transparent),color-mix(in srgb,var(--bg) 20%,transparent) 70%)}
+.tl-thumb.dash{max-height:380px}
 .tl-play .pill{display:inline-flex;align-items:center;gap:12px;min-height:56px;padding:0 26px;border-radius:999px;background:var(--accent);color:#0c121a;font-weight:600;font-size:1.05rem;box-shadow:0 8px 30px rgba(0,0,0,.35);transition:transform .15s}
 :root[data-theme="light"] .tl-play .pill{color:#fff}
 .tl-play .tri{width:0;height:0;border-left:14px solid currentColor;border-top:9px solid transparent;border-bottom:9px solid transparent}
-.tl-play .note{font-size:.8rem;color:#e8edf3;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.tl-play .note{font-size:.8rem;color:var(--fg);text-shadow:0 1px 6px var(--bg)}
 .tl-play:hover .pill,.tl-play:focus-visible .pill{transform:scale(1.04)}
 .tl-play:focus-visible{outline:3px solid var(--accent);outline-offset:-3px;border-radius:14px}
 @media (prefers-reduced-motion:reduce){.tl-play .pill{transition:none}}
@@ -1175,8 +1176,10 @@ setTimeout(play,reduce?0:700);
   <article class="card"><span class="own">Head of Health</span><p>Runs a weekly conversion review</p><p><b>Health conversion back to 11% by 30-Jun-27</b></p></article>
   <article class="card"><span class="own">Head of Sales Operations</span><p>Re-rosters the three sites</p><p><b>Typical wait down to 10 minutes by 31-Mar-27</b></p></article>
  </div>
- <div class="cta"><a class="btn" href="https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/16-dashboard.html" target="_blank" rel="noopener">See the full KPI Dashboard <span aria-hidden="true">↗</span></a>
-  <span class="small" style="margin:0">The finished first draft, approved at Stage 4 on 21-Oct-26. Opens in a new tab.</span></div>
+ <div class="tl-thumb dash">
+  <iframe src="https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/16-dashboard.html" title="Preview of the KPI dashboard" tabindex="-1" aria-hidden="true" loading="lazy"></iframe>
+  <a class="tl-play" href="https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/16-dashboard.html" target="_blank" rel="noopener"><span class="pill">See the full KPI Dashboard <span aria-hidden="true">↗</span></span><span class="note">The finished first draft, approved at Stage 4 on 21-Oct-26. Opens in a new tab</span></a>
+ </div>
  <p class="small">Next: Stage 5, Stakeholder Review and Handover with the CCO and Adam. Every output from every stage: <a href="https://adamaziz1979.github.io/kpi-creator/clearcompare/" target="_blank" rel="noopener">ClearCompare outputs ↗</a> · The full process: <a href="https://adamaziz1979.github.io/kpi-creator/process.html" target="_blank" rel="noopener">KPI Generator Process ↗</a> · <a href="https://adamaziz1979.github.io/kpi-creator/team.html" target="_blank" rel="noopener">Meet the team ↗</a></p>
 </section>
 
@@ -1199,9 +1202,13 @@ const fa=document.getElementById('fold-all');fa.hidden=false;
 function syncAll(){const anyOpen=folds.some(f=>f.b.getAttribute('aria-expanded')==='true');fa.textContent=anyOpen?'Collapse all sections':'Expand all sections'}
 fa.addEventListener('click',()=>{const open=fa.textContent.startsWith('Expand');folds.forEach(f=>f.set(open));syncAll()});
 function openSec(el){const f=folds.find(f=>f.sec===el||f.sec.contains(el));if(f)f.set(true);syncAll()}
+/* Every section starts collapsed; a link to #section opens that one */
+folds.forEach(f=>f.set(false));syncAll();
+if(location.hash){const t=document.querySelector(location.hash);if(t){openSec(t);setTimeout(()=>t.scrollIntoView({block:'start'}),50)}}
 /* The timeline follows Dark or Light when the browser lets this page reach it */
 const tl=document.querySelector('.tl-thumb iframe');
-function tlFit(){if(tl)tl.style.transform='scale('+(tl.parentElement.clientWidth/1440)+')'}tlFit();if(window.ResizeObserver&&tl)new ResizeObserver(tlFit).observe(tl.parentElement);
+const thumbs=[...document.querySelectorAll('.tl-thumb iframe')];
+function tlFit(){thumbs.forEach(f=>f.style.transform='scale('+(f.parentElement.clientWidth/1440)+')')}tlFit();if(window.ResizeObserver)thumbs.forEach(f=>new ResizeObserver(tlFit).observe(f.parentElement));
 function tlTheme(){try{tl.contentDocument.documentElement.dataset.theme=mode}catch(e){}}
 if(tl)tl.addEventListener('load',tlTheme);tlTheme();
 document.querySelector('.seg').addEventListener('click',tlTheme);
