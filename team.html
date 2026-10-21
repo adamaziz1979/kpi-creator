@@ -57,7 +57,7 @@ button:hover{border-color:var(--accent)}
 <p class="sub">Five agents that turn a business problem into a KPI dashboard, each with a persona and a headshot. The headshots are AI-generated in ChatGPT. To regenerate one, open <b>Photo prompt</b> on its card.</p>
 <ol class="flow" id="flow" aria-label="Stage order"></ol>
 <div class="grid" id="cards"></div>
-<p class="foot">Roles and rules follow the KPI Generator Process v1.10 and the agent files (21-Oct-26). Built and run on the ClearCompare test case: Gary, Kewpie, Visalli, Jennifer. Not built yet: Ovy (the /kpi-creator command).</p>
+<p class="foot">Roles and rules follow the KPI Generator Process v1.12 and the agent files (21-Oct-26). Built and run on the ClearCompare test case: Gary, Kewpie, Visalli, Jennifer. Not built yet: Ovy (the /kpi-creator command).</p>
 </main>
 <script>
 const A = [
@@ -66,11 +66,11 @@ const A = [
   quote:"Nothing moves until you've seen it and said yes.",
   facts:{Vibe:"Late 40s. Ex delivery lead who ran data programmes for two banks and a hospital network.",
    Personality:"The mother hen of the team: nurturing, calm and organised. Looks after every agent and every hand-off, but stays firm on the gates.",
-   Works:"Opens the engagement, resumes at the first unapproved stage, previews every output, then a 5-line summary and waits for a clear yes. A change re-runs that stage and marks later ones stale.",
-   "Hands to":"Gary, then Kewpie, then Visalli, then Jennifer.",
+   Works:"Opens the engagement, resumes at the first unapproved stage, previews every output, then a 5-line summary and waits for a clear yes. A change re-runs that stage and marks later ones stale. Before Stage 5, checks the final output against the Stakeholder Brief.",
+   "Hands to":"Gary, then Kewpie, then Visalli, then Jennifer, then Stage 5 with the coverage check.",
    "Won't do":"Publish anywhere. GitHub only on \"create repo\" or \"Update Github\".",
    "Pet peeve":"Being asked to approve something nobody has seen."},
-  rules:["Resumes at the first stage not yet approved, then hands to Gary, Kewpie, Visalli and Jennifer in turn", "Previews every output in the Browser pane, gives a 5-line summary, then waits for a clear yes", "A change re-runs that stage only and marks later stages as stale", "On each approval: saves the approved version to History and updates the Miro outputs flow", "Logs every change in the Business Requirements change log", "Never publishes; GitHub only on \"create repo\" or \"Update Github\""],
+  rules:["Resumes at the first stage not yet approved, then hands to Gary, Kewpie, Visalli and Jennifer in turn", "Previews every output in the Browser pane, gives a 5-line summary, then waits for a clear yes", "A change re-runs that stage only and marks later stages as stale", "On each approval: saves the approved version to History and updates the Miro outputs flow", "Before Stage 5: checks the final output against the Stakeholder Brief, item by item, and proposes next steps for each gap. Never makes the fixes", "Logs every change in the Business Requirements change log", "Never publishes; GitHub only on \"create repo\" or \"Update Github\""],
   look:{skin:"#7a4a32",hair:"#1a1210",style:"afro",shirt:"#2f7de0",blazer:true,studs:true},
   photo:"poised woman in her late 40s with short natural afro hair and small stud earrings, charcoal blazer over a pale blue shirt, calm assured smile"},
  {id:"gary",name:"Gary",stage:"Stage 1",title:"Business Requirements",built:true,

@@ -1,0 +1,91 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Stakeholder Brief Coverage Check</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">Stakeholder Brief Coverage Check</label></nav><section id="s0"><p class="src">File: stage-5-19-stakeholder-brief-coverage-check.md</p><h1 id="s0-top">Stakeholder Brief Coverage Check</h1><div class="toc" role="navigation" aria-label="Contents"><b>In this document</b><ol><li><a href="#s0-h0" data-jump="s0-h0">The answer</a></li><li><a href="#s0-h1" data-jump="s0-h1">Item by item</a></li><li><a href="#s0-h2" data-jump="s0-h2">Proposed next steps, for Stage 5</a></li></ol></div>
+<p><b>Checked by:</b> Ovy · 22-Oct-26 <b>Question:</b> does the final output answer everything in the Stakeholder Brief? <b>Checked against:</b> the Stage 4 dashboard (<code>04 Dashboard.html</code>, approved 21-Oct-26) and the Business Requirements v1.1</p>
+<h2 id="s0-h0">The answer</h2>
+<p><b>15 of 22 items are addressed, 6 partly, and 1 is not addressed.</b> The big question Priya asked is answered: the dashboard shows the fall is mostly lead mix, not sales, and the bridge splits it so it adds up exactly. The gaps are what sits around the exec view: the daily view, compliance, the clawback target and the Tableau handover.</p>
+<table><thead><tr><th>Result</th><th>Items</th></tr></thead><tbody><tr><td>✓ Addressed</td><td style="white-space:nowrap">15</td></tr><tr><td>! Partly</td><td style="white-space:nowrap">6</td></tr><tr><td>× Not addressed</td><td style="white-space:nowrap">1</td></tr></tbody></table>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h1">Item by item</h2>
+<h3>The problem</h3>
+<table><thead><tr><th>Brief says</th><th>Result</th><th>Where the final output answers it</th></tr></thead><tbody><tr><td>"Revenue per lead dropped 9% … Marketing blames sales, sales blames lead quality, finance says it's clawbacks. I need to know which."</td><td>✓ Addressed</td><td>Headline: "Net revenue per lead fell 8.7% to $52.42 (provisional), and most of the fall is lead mix, not sales."</td></tr><tr><td>Real problem: nobody can split a revenue movement into its drivers</td><td>✓ Addressed</td><td>Revenue bridge: $429,119 to $402,866, split into more leads (+$12.2k), lead mix (−$29.7k), conversion (−$12.2k) and revenue per sale (+$3.4k). The four add up exactly</td></tr><tr><td>The drop is mostly mix: energy grew fast and pays a lower commission</td><td>✓ Addressed</td><td>Energy rose from 27% to 39.5% of leads; energy earns $22 per lead against $142 for home loans</td></tr><tr><td>Clawbacks are a smaller second cause</td><td>! Partly</td><td>The sample data shows <b>conversion</b> as the second cause (−$12.2k). The clawback effect is +$3.4k for now, but Jul to Sep 26 is provisional until 29-Dec-26, so clawbacks may still become the second cause. The dashboard says the latest quarter is provisional, but doesn't say this could change the second cause</td></tr></tbody></table>
+<h3>Objectives and sub-objectives</h3>
+<table><thead><tr><th>Brief says</th><th>Result</th><th>Where the final output answers it</th></tr></thead><tbody><tr><td>Grow net commission revenue profitably</td><td>✓ Addressed</td><td>Net revenue per lead tile, with cost per acquisition and net revenue per marketing dollar</td></tr><tr><td>Convert leads more efficiently</td><td>✓ Addressed</td><td>Health conversion tile, and conversion by product area against target</td></tr><tr><td>Explain performance changes within a day, not a week</td><td>! Partly</td><td>The headline, bridge and why charts explain the change. Doing it within a day depends on a daily data refresh, still an open question with the data team</td></tr><tr><td>Cut cost per acquisition on paid search</td><td>✓ Addressed</td><td>Tile: $93.04 against a $106.70 target, with net revenue per $ as the counter-check</td></tr><tr><td>Lift health conversion back to 11% (now 9.4%)</td><td>✓ Addressed</td><td>Tile: 9.5% against 11% by 30-Jun-27, needing +0.17 points a month. The brief's 9.4% is the same 9.48%, rounded down</td></tr><tr><td>Reduce 90-day clawbacks</td><td>! Partly</td><td>The tile is there, but the target (7.84%) is the same as today (7.86%), so it shows "On track" and asks for no reduction</td></tr></tbody></table>
+<h3>Commission rules</h3>
+<table><thead><tr><th>Brief says</th><th>Result</th><th>Where the final output answers it</th></tr></thead><tbody><tr><td>Health and life policies cancelled within 90 days are clawed back</td><td>✓ Addressed</td><td>Definitions: net commission is gross minus clawbacks; the clawback rate counts health and life sales by quarter of sale</td></tr><tr><td>Reporting today shows gross revenue</td><td>✓ Addressed</td><td>Every revenue figure is net; the net revenue tile explains "Net, not gross, shows whether growth is profitable"</td></tr></tbody></table>
+<h3>Audience</h3>
+<table><thead><tr><th>Brief says</th><th>Result</th><th>Where the final output answers it</th></tr></thead><tbody><tr><td>CCO and exec team, weekly</td><td>✓ Addressed</td><td>The first screen is the exec view: headline, top 3 actions, Top 5 tiles</td></tr><tr><td>Vertical heads and marketing, daily</td><td>× Not addressed</td><td>There's no daily view. The dashboard runs by quarter and month; it has nothing for daily channel and campaign changes</td></tr></tbody></table>
+<h3>Constraints</h3>
+<table><thead><tr><th>Brief says</th><th>Result</th><th>Where the final output answers it</th></tr></thead><tbody><tr><td>Complaints and compliance breaches must stay visible</td><td>! Partly</td><td>Complaints per 1,000 sales is there, but inside the collapsed Detail section, not on the first screen. Compliance breaches aren't shown: the data has no compliance table</td></tr><tr><td>Agent-level data is fine for team leaders, not the exec view</td><td>✓ Addressed</td><td>The dashboard goes down to team level only (speed by team); no agent names or figures</td></tr><tr><td>The company uses Tableau and Snowflake</td><td>! Partly</td><td>The Business Requirements say the HTML dashboard is a design prototype, but nothing yet plans the rebuild in Tableau on Snowflake</td></tr></tbody></table>
+<h3>Chart likes and success</h3>
+<table><thead><tr><th>Brief says</th><th>Result</th><th>Where the final output answers it</th></tr></thead><tbody><tr><td>"Show me a bridge from last quarter to this quarter."</td><td>✓ Addressed</td><td>The revenue bridge, the first chart under the headline</td></tr><tr><td>"I hate funnels that don't add up."</td><td>✓ Addressed</td><td>No funnels; the bridge adds up to the dollar</td></tr><tr><td>"When a number moves, the dashboard tells me why before anyone asks."</td><td>✓ Addressed</td><td>The headline names the cause, the bridge proves it, and every tile and chart says why it matters on hover</td></tr></tbody></table>
+<h3>Data gaps</h3>
+<table><thead><tr><th>Brief says</th><th>Result</th><th>Where the final output answers it</th></tr></thead><tbody><tr><td>6% of sales can't be matched to a lead</td><td>✓ Addressed</td><td>Definitions: conversion includes the 6.1% of sales with no lead attached</td></tr><tr><td>Manila call outcomes sit in a separate system before Mar-25</td><td>! Partly</td><td>Logged in the Business Requirements, but the dashboard doesn't flag that Manila history before Mar-25 is incomplete</td></tr></tbody></table>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h2">Proposed next steps, for Stage 5</h2>
+<p><b>Proposed only: nothing below has been changed.</b> This list goes in the Stage 5 pack. At the walk-through, Priya and Adam agree which to take; each agreed step then goes back through the stage that owns it and its gate.</p>
+<table><thead><tr><th>#</th><th>Gap it closes</th><th>Proposed next step</th><th>Owner</th><th>When</th><th>Stage 5 decision</th></tr></thead><tbody><tr><td style="white-space:nowrap">1</td><td>Clawbacks as the second cause</td><td>Add a note on the bridge: "Clawbacks for Jul to Sep 26 land by 29-Dec-26 and may change the second cause"</td><td style="white-space:nowrap">Visalli</td><td>Before go-live</td><td>To agree</td></tr><tr><td style="white-space:nowrap">2</td><td>Complaints and compliance visible</td><td>Put complaints on the first screen as a small flag next to the tiles</td><td style="white-space:nowrap">Visalli</td><td>Before go-live</td><td>To agree</td></tr><tr><td style="white-space:nowrap">3</td><td>Complaints and compliance visible</td><td>Ask Priya where compliance breach data lives, then add it as a source</td><td style="white-space:nowrap">Gary</td><td>At the walk-through</td><td>To agree</td></tr><tr><td style="white-space:nowrap">4</td><td>Reduce 90-day clawbacks</td><td>Agree a lower clawback target with Priya, so the tile asks for a reduction</td><td>Gary, with Priya</td><td>At the walk-through</td><td>To agree</td></tr><tr><td style="white-space:nowrap">5</td><td>Manila data gap</td><td>Add to Definitions: "Manila call outcomes before Mar-25 come from a separate system"</td><td style="white-space:nowrap">Visalli</td><td>Before go-live</td><td>To agree</td></tr><tr><td style="white-space:nowrap">6</td><td>Explain within a day</td><td>Confirm a daily data refresh with the data team</td><td style="white-space:nowrap">Gary</td><td>Before go-live</td><td>To agree</td></tr><tr><td style="white-space:nowrap">7</td><td>Daily view for vertical heads and marketing</td><td>Scope a daily operational view (Dashboard Patterns: operational monitor)</td><td>Gary, then Visalli</td><td>Next release</td><td>To agree</td></tr><tr><td style="white-space:nowrap">8</td><td>Tableau and Snowflake</td><td>Add "Rebuild in Tableau on Snowflake" to the handover checklist</td><td style="white-space:nowrap">Ovy</td><td>Stage 5 handover</td><td>To agree</td></tr></tbody></table><a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>

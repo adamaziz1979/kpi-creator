@@ -404,7 +404,7 @@ body.ended .dots b,body.ended .node .ph,body.ended .spoke{animation:none!importa
     <table>
       <thead><tr><th>Source</th><th>Used for</th></tr></thead>
       <tbody>
-        <tr><td>File save times</td><td>Stakeholder brief, interview notes, sample data, calculations, Calculation Pack, tile options, proposed fixes, validation, build scripts, Stage 4 dashboard</td></tr>
+        <tr><td>File save times</td><td>Stakeholder brief, interview notes, sample data, calculations, Calculation Pack, tile options, proposed fixes, validation, build scripts, Stage 4 dashboard, coverage check</td></tr>
         <tr><td>History snapshots</td><td>Stage 2, 3 and 4 approvals (the moment the approved version was saved)</td></tr>
         <tr><td>Git commits</td><td>Stage 1 Business Requirements (21:02), meeting script (23:18), Stage 1 and 2 reports (08:25), new agent files (13:03)</td></tr>
         <tr><td>Session logs</td><td>Agent run time: only the time Claude was working inside a reply, with any single wait over 5 minutes cut to 5. Your reading and review time between replies is left out. Each step goes to the agent whose files it touched; agent instructions, guides and personas count as improving the agents</td></tr>
@@ -561,11 +561,15 @@ const E=[
    ${li([['Fixes 1, 2 and 3','made and re-checked'],['Tiles on a 1280 × 800 screen','end at 799px (was 930px)'],['Controls under 44px on a phone','0 (was 18)'],['"Why it matters" on hover, focus and tap','5 tiles, 11 charts'],['Tile numbers count up','land on the Calculation Pack values']])}`},
  {t:'2026-10-21T16:42',a:'ovy',title:'Saves Stage 4 and hands over',log:'Stage 4 approved, ready for handover',gate:4,hand:['jennifer','adam','04 Dashboard'],final:true,
   body:()=>`${files('History/2026.10.21 - Stage 4 approved/','Stage 4 Review.md')}
-   <p>The finished first draft goes to Stage 5: the CCO walk-through, sign-off and go-live.</p>`}
+   <p>The finished first draft goes to Ovy's Stakeholder Brief coverage check, then Stage 5.</p>`},
+ {t:'2026-10-22T06:55',a:'ovy',title:'Checks the final output against the Stakeholder Brief',log:'Coverage check: 15 of 22 addressed',hand:['ovy','adam','Coverage check + next steps'],
+  body:()=>`${files('Stakeholder Brief','04 Dashboard.html','04 Stakeholder Brief Coverage Check.md')}
+   ${li([['Brief items addressed','15 of 22'],['Partly addressed','6'],['Not addressed','1: no daily view'],['Proposed next steps for Stage 5','8, none made yet'],['Now a standing step','process v1.12']])}
+   <p>Ovy goes back to Priya's own words and checks each one against the final dashboard. The gaps go to Stage 5 as proposed next steps, for Priya and Human to agree.</p>`}
 ];
-const OUT=['Stakeholder brief','Interview notes','Business Requirements','Sample data','Meeting script','Calculations','Calculation Pack','Requirements v1.1','Stage 1 and 2 snapshots','Stage 1 and 2 reports','Agent files','KPI tile options','3 dashboard versions','Stage 3 snapshot','Proposed fixes','Standards check','Top 3 actions rule','04 Dashboard','Stage 4 snapshot'];
+const OUT=['Stakeholder brief','Interview notes','Business Requirements','Sample data','Meeting script','Calculations','Calculation Pack','Requirements v1.1','Stage 1 and 2 snapshots','Stage 1 and 2 reports','Agent files','KPI tile options','3 dashboard versions','Stage 3 snapshot','Proposed fixes','Standards check','Top 3 actions rule','04 Dashboard','Stage 4 snapshot','Coverage check'];
 /* the file each output opens in a new window */
-const OUTF=["https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-1/00-stakeholder-brief.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-1/01-interview-notes.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-1/03-business-requirements.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/07-dataset-description.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-1/02-meeting-chat.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/08-calculation-script.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/09-kpi-calculation-pack.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/10-business-requirements-with-data-mapping.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/11-stage-2-review.html", "https://adamaziz1979.github.io/kpi-creator/team.html", "", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-3/13-experimental-a-progress-rings.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-3/15-stage-3-review.html", "", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/17-standards-and-validation.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/16-dashboard.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/16-dashboard.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/18-stage-4-review.html"];
+const OUTF=["https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-1/00-stakeholder-brief.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-1/01-interview-notes.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-1/03-business-requirements.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/07-dataset-description.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-1/02-meeting-chat.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/08-calculation-script.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/09-kpi-calculation-pack.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/10-business-requirements-with-data-mapping.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-2/11-stage-2-review.html", "https://adamaziz1979.github.io/kpi-creator/team.html", "", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-3/13-experimental-a-progress-rings.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-3/15-stage-3-review.html", "", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/17-standards-and-validation.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/16-dashboard.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/16-dashboard.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-4/18-stage-4-review.html", "https://adamaziz1979.github.io/kpi-creator/clearcompare/stage-5/19-stakeholder-brief-coverage-check.html"];
 E.forEach((e,i)=>{e.d=new Date(e.t+':00+11:00');e.o=OUT[i];e.f=OUTF[i];});
 const olink=(f,t)=>f?`<a href="${f}" target="_blank" rel="noopener" title="Open in a new window">${t}</a>`:t;
 const T0=E[0].d;
@@ -631,7 +635,7 @@ function fly(path,label,to){
 const narrow=matchMedia('(max-width:700px)');
 
 /* timeline spaced by agent run time (minutes, cumulative at each step, from the session logs) */
-const AGT=[5,6,19,23,30,35,35,40,44,48,57,70,71,72,77,79,83,89,93],AGMAX=93;
+const AGT=[5,6,19,23,30,35,35,40,44,48,57,70,71,72,77,79,83,89,93,101],AGMAX=101;
 const tx=m=>2+m/AGMAX*96;
 let th='<div class="tline"></div><div class="tfill" id="tfill"></div>',lastX=-9;
 [0,15,30,45,60,75,90].forEach(m=>{th+=`<span class="ax" style="left:${tx(m)}%">${m?(m>=60?`${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m`:`${m}m`):'0'}</span>`;});
@@ -715,8 +719,8 @@ function render(i,animate){
 
 }
 /* the run in numbers, as at each step (run time per agent from the session logs) */
-const RTM=[[1, 1, 3, 0, 0], [1, 1, 4, 0, 0], [7, 3, 7, 1, 1], [7, 4, 10, 1, 1], [7, 8, 12, 1, 2], [7, 10, 15, 1, 2], [7, 10, 15, 1, 2], [8, 11, 17, 2, 2], [9, 12, 18, 2, 3], [11, 12, 20, 2, 3], [15, 14, 22, 2, 4], [15, 14, 23, 14, 4], [15, 14, 23, 15, 4], [15, 14, 23, 15, 5], [16, 15, 23, 15, 8], [16, 15, 23, 15, 10], [16, 15, 23, 16, 13], [16, 15, 23, 17, 18], [17, 15, 23, 17, 21]], RTA=['ovy','gary','kewpie','visalli','jennifer'];
-const IXM=[1,1,10,19,23,32,32,38,40,44,49,58,59,60,60,61,66,72,74];
+const RTM=[[1, 1, 3, 0, 0], [1, 1, 4, 0, 0], [7, 3, 7, 1, 1], [7, 4, 10, 1, 1], [7, 8, 12, 1, 2], [7, 10, 15, 1, 2], [7, 10, 15, 1, 2], [8, 11, 17, 2, 2], [9, 12, 18, 2, 3], [11, 12, 20, 2, 3], [15, 14, 22, 2, 4], [15, 14, 23, 14, 4], [15, 14, 23, 15, 4], [15, 14, 23, 15, 5], [16, 15, 23, 15, 8], [16, 15, 23, 15, 10], [16, 15, 23, 16, 13], [16, 15, 23, 17, 18], [17, 15, 23, 17, 21], [25, 15, 23, 17, 21]], RTA=['ovy','gary','kewpie','visalli','jennifer'];
+const IXM=[1,1,10,19,23,32,32,38,40,44,49,58,59,60,60,61,66,72,74,76];
 const numNow={rt:0,st:0,ck:0,kp:0,ix:0};
 const fmtMin=m=>m>=60?`${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m`:`${m}m`;
 const NF={rt:fmtMin,st:v=>`${v} of 5`,ck:v=>v?`${v} of 31`:'Not run',kp:v=>`${v}`,ix:v=>`${v}`};
