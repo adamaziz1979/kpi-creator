@@ -585,8 +585,8 @@ body.ended .dots b,body.ended .node .ph,body.ended .spoke{animation:none!importa
       &lt;button id=&quot;play&quot; class=&quot;primary&quot;&gt;&amp;#9654; Play&lt;/button&gt;
       &lt;button id=&quot;next&quot; aria-label=&quot;Forward one step&quot; title=&quot;Forward one step&quot;&gt;&amp;#9654;&lt;/button&gt;
       &lt;div class=&quot;speed&quot; role=&quot;group&quot; aria-label=&quot;Playback speed&quot;&gt;&lt;span class=&quot;sl&quot; aria-hidden=&quot;true&quot;&gt;Speed&lt;/span&gt;
-        &lt;button data-s=&quot;1&quot; aria-pressed=&quot;true&quot;&gt;1x&lt;/button&gt;
-        &lt;button data-s=&quot;2&quot; aria-pressed=&quot;false&quot;&gt;2x&lt;/button&gt;
+        &lt;button data-s=&quot;1&quot; aria-pressed=&quot;false&quot;&gt;1x&lt;/button&gt;
+        &lt;button data-s=&quot;2&quot; aria-pressed=&quot;true&quot;&gt;2x&lt;/button&gt;
         &lt;button data-s=&quot;4&quot; aria-pressed=&quot;false&quot;&gt;4x&lt;/button&gt;
       &lt;/div&gt;
     &lt;/div&gt;
@@ -897,7 +897,7 @@ function fmtDay(d){return d.toLocaleDateString(&#x27;en-AU&#x27;,{weekday:&#x27;
 function fmtDur(min){min=Math.round(min);const h=Math.floor(min/60),m=min%60;return h?`${h}h ${String(m).padStart(2,&#x27;0&#x27;)}m`:`${m}m`;}
 
 /* ---------- state ---------- */
-let idx=-1,playing=false,speed=1,timer=null,clockRaf=null,shownClock=T0;
+let idx=-1,playing=false,speed=2,timer=null,clockRaf=null,shownClock=T0;
 const reduce=matchMedia(&#x27;(prefers-reduced-motion: reduce)&#x27;).matches;
 
 let shownAgt=0;

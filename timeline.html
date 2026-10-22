@@ -339,8 +339,8 @@ body.ended .dots b,body.ended .node .ph,body.ended .spoke{animation:none!importa
       <button id="play" class="primary">&#9654; Play</button>
       <button id="next" aria-label="Forward one step" title="Forward one step">&#9654;</button>
       <div class="speed" role="group" aria-label="Playback speed"><span class="sl" aria-hidden="true">Speed</span>
-        <button data-s="1" aria-pressed="true">1x</button>
-        <button data-s="2" aria-pressed="false">2x</button>
+        <button data-s="1" aria-pressed="false">1x</button>
+        <button data-s="2" aria-pressed="true">2x</button>
         <button data-s="4" aria-pressed="false">4x</button>
       </div>
     </div>
@@ -651,7 +651,7 @@ function fmtDay(d){return d.toLocaleDateString('en-AU',{weekday:'short',day:'num
 function fmtDur(min){min=Math.round(min);const h=Math.floor(min/60),m=min%60;return h?`${h}h ${String(m).padStart(2,'0')}m`:`${m}m`;}
 
 /* ---------- state ---------- */
-let idx=-1,playing=false,speed=1,timer=null,clockRaf=null,shownClock=T0;
+let idx=-1,playing=false,speed=2,timer=null,clockRaf=null,shownClock=T0;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let shownAgt=0;
