@@ -481,7 +481,7 @@ function ringsSVG(){
 const files=(...f)=>f.map(x=>`<span class="file">${x}</span>`).join('');
 const li=(rows,cls='reveal')=>`<ul class="list ${cls}">${rows.map((r,i)=>`<li style="animation-delay:${i*.12}s"><span>${r[0]}</span><span>${r[1]}</span></li>`).join('')}</ul>`;
 const E=[
- {t:'2026-10-20T15:45',a:'ovy',title:'Sets up the stakeholder for the test',log:'Stakeholder brief ready',
+ {t:'2026-10-20T15:45',a:'ovy',title:'Sets up the stakeholder',log:'Stakeholder brief ready',
   body:()=>`${files('stakeholder-file.md')}
    <p>Ovy introduces Priya, Chief Commercial Officer at ClearCompare, so Gary has someone to interview in test mode.</p>
    <div class="quote">"Revenue per lead dropped 9% last quarter. Marketing blames sales, sales blames lead quality, and finance says it's clawbacks."</div>`},
