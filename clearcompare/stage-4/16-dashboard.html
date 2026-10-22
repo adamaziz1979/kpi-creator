@@ -281,7 +281,7 @@ footer{color:var(--muted);font-size:.74rem;border-top:1px solid var(--line);padd
    <p class="subt">Share of leads by product area, Apr to Jun 26 against Jul to Sep 26.</p>
    <div class="chart replay" data-c="mix" data-ink data-why="The mix of leads moves revenue per lead even when sales performance holds steady."></div>
    <div class="legend" id="lg-mix"></div>
-   <p class="cap">Colours follow the product area and stay the same on every chart.</p>
+   <p class="cap">Left axis Apr to Jun 26, right axis Jul to Sep 26, on the same scale. Health and energy are highlighted: energy passed health as the largest product area. Hover a line for the numbers.</p>
    <div data-t="mix"></div>
   </article>
   <article class="card">
@@ -482,14 +482,30 @@ function hbars(rows,{max,fmt,hi,target,tName,extra}){return '<div class="hb">'+r
 R.perlead=el=>{if(el.dataset.done)return;el.dataset.done=1;el.innerHTML=hbars(D.perLead,{max:Math.max(...D.perLead.map(r=>r[1])),fmt:money,hi:r=>r[0]==='Energy',extra:r=>`${money(r[2])} a sale`})};
 T.perlead=()=>table(['Product area','Net revenue per lead','Commission per sale'],D.perLead.map(r=>[r[0],money(r[1]),money(r[2])]));
 
-R.mix=el=>{const w=el.clientWidth,bh=26,gap=2,rows=Object.entries(D.mix),lw=Math.min(110,w*.28),h=rows.length*48+6;const areas=['Health','Home loans','Energy','Life'];
- let s=svgOpen(w,h,'Share of leads by product area: '+rows.map(([q,v])=>`${q}: `+areas.map(a=>`${a} ${v[a]}%`).join(', ')).join('; '));
- rows.forEach(([q,v],ri)=>{const y=ri*48+12;s+=`<text class="ax" x="0" y="${y+bh/2+4}">${q}</text>`;let x=lw;const bw=w-lw;
-  s+=`<g class="fade" style="--d:${ri*0.25}s">`;areas.forEach((a,ai)=>{const cw=bw*v[a]/100,ww=cw-(ai<areas.length-1?gap:0);
-   s+=`<rect x="${x}" y="${y}" width="${Math.max(0,ww)}" height="${bh}" rx="3" style="fill:var(${AREA_C[a]})" data-tip="<b>${a}</b><div class='tr'><span>${q}</span><b>${v[a]}%</b></div>"/>`;
-   if(ww>34)s+=`<text x="${x+ww/2}" y="${y+bh/2+4}" text-anchor="middle" style="fill:${inkOn(AREA_C[a])};font:500 11px var(--font-mono);pointer-events:none">${Math.round(v[a])}%</text>`;x+=cw});s+='</g>'});
+/* Lead mix as a barbell on two vertical axes, one per quarter on the same scale (Visalli's chart portfolio: two-period comparison) */
+R.mix=el=>{const w=el.clientWidth,q=Object.keys(D.mix),key=['Health','Energy'],order=['Life','Home loans','Energy','Health'];
+ /* two vertical axes on one shared scale, Apr to Jun 26 on the left and Jul to Sep 26 on the right; each product joins its two quarters */
+ const narrow=w<520,xa=narrow?Math.max(86,w*.3):w*.32,xb=w-xa,top=34,bot=14,H=narrow?280:310,lo=0,hi=50,Y=v=>top+(H-top-bot)*(1-(v-lo)/(hi-lo));
+ let s=svgOpen(w,H,'Share of leads by product area: '+order.map(a=>`${a} ${D.mix[q[0]][a]}% to ${D.mix[q[1]][a]}%`).join(', '));
+ [0,10,20,30,40,50].forEach(t=>{s+=`<line x1="${xa}" x2="${xb}" y1="${Y(t)}" y2="${Y(t)}" style="stroke:var(--line);stroke-dasharray:2 4"/>`+
+  `<text class="ax" x="${xa-10}" y="${Y(t)+4}" text-anchor="end">${t}%</text><text class="ax" x="${xb+10}" y="${Y(t)+4}">${t}%</text>`});
+ [xa,xb].forEach((x,j)=>{s+=`<line x1="${x}" x2="${x}" y1="${Y(hi)}" y2="${Y(lo)}" style="stroke:var(--muted);stroke-width:1.5"/>`+
+  `<text x="${x}" y="14" text-anchor="middle" style="fill:var(--fg);font:500 12px var(--font-mono)">${q[j]}</text>`});
+ /* value labels sit outside the tick labels, nudged apart so close values never overlap; on the right, health and energy also carry their name and the change */
+ const labs=[[],[]];
+ order.forEach((a,i)=>{const k=key.includes(a),v0=D.mix[q[0]][a],v1=D.mix[q[1]][a],c=`var(${AREA_C[a]})`,r=k?7:4.5,d=v1-v0;
+  const tip=`<b>${a}</b><div class='tr'><span>${q[0]}</span><b>${v0}%</b></div><div class='tr'><span>${q[1]}</span><b>${v1}%</b></div><div class='tr'><span>Change</span><b>${d>0?'+':d<0?'−':'±'}${Math.abs(d).toFixed(1)} points</b></div>`;
+  s+=`<g class="fade" style="--d:${(i*.15).toFixed(2)}s;opacity:${k?1:.45}" data-tip="${tip}">`+
+   `<line x1="${xa}" x2="${xb}" y1="${Y(v0)}" y2="${Y(v1)}" style="stroke:transparent;stroke-width:16"/>`+
+   `<line x1="${xa}" x2="${xb}" y1="${Y(v0)}" y2="${Y(v1)}" style="stroke:${c};stroke-width:${k?5:3};stroke-linecap:round;opacity:.6"/>`+
+   `<circle cx="${xa}" cy="${Y(v0)}" r="${r}" style="fill:var(--surface);stroke:${c};stroke-width:${k?2.5:1.5}"/>`+
+   `<circle cx="${xb}" cy="${Y(v1)}" r="${r}" style="fill:${c};stroke:var(--surface);stroke-width:1"/></g>`;
+  labs[0].push({y:Y(v0),t:v0.toFixed(0)+'%',c,k});labs[1].push({y:Y(v1),t:(k?a+' ':'')+v1.toFixed(0)+'%',c,k,sub:k?`${d>0?'+':'−'}${Math.abs(d).toFixed(1)} points`:''})});
+ labs.forEach((L,j)=>{L.sort((a,b)=>a.y-b.y);for(let i=1;i<L.length;i++){const g=L[i-1].sub?50:14,short=g-(L[i].y-L[i-1].y);if(short>0){if(L[i-1].sub){L[i-1].y-=short/2;L[i].y+=short/2}else L[i].y+=short}}
+  L.forEach(l=>{if(l.sub)s+=`<text class="fade ax" style="--d:.7s;fill:${l.c}" x="${xb+(narrow?40:46)}" y="${l.y+18}">${l.sub}</text>`;s+=`<text class="fade" style="--d:.7s;fill:${l.k?l.c:'var(--muted)'};font:${l.k?600:400} ${l.k?13:11}px var(--font-mono)" x="${j?xb+(narrow?40:46):xa-(narrow?40:46)}" y="${l.y+4}" text-anchor="${j?'start':'end'}">${l.t}</text>`})});
  el.innerHTML=s+'</svg>';
- document.getElementById('lg-mix').innerHTML=areas.map(a=>`<span><i style="--c:var(${AREA_C[a]})"></i>${a}</span>`).join('')};
+ document.getElementById('lg-mix').innerHTML=['Health','Energy','Home loans','Life'].map(a=>`<span style="opacity:${key.includes(a)?1:.55}"><i style="--c:var(${AREA_C[a]});border-radius:50%;width:11px;height:11px"></i>${a}</span>`).join('')+
+  `<span><i style="--c:transparent;border:2px solid var(--muted);border-radius:50%;width:11px;height:11px"></i>${q[0]}</span><span><i style="--c:var(--muted);border-radius:50%;width:11px;height:11px"></i>${q[1]}</span>`};
 T.mix=()=>table(['Product area','Apr to Jun 26','Jul to Sep 26'],['Health','Home loans','Energy','Life'].map(a=>[a,D.mix['Apr to Jun 26'][a]+'%',D.mix['Jul to Sep 26'][a]+'%']));
 
 R.conv=el=>{if(el.dataset.done)return;el.dataset.done=1;const mx=2;
