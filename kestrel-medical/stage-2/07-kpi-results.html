@@ -1,0 +1,1291 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kestrel Medical: KPI results (sample data)</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">Kestrel Medical: KPI results (sample data)</label></nav><section id="s0"><p class="src">File: stage-2-07-kpi-results.md</p><h1>Kestrel Medical: KPI results (sample data)</h1>
+<blockquote><b>Sample data.</b> Produced by Kewpie at Stage 2.</blockquote>
+<pre class="code"><code>{
+ &quot;label&quot;: &quot;Sample data&quot;,
+ &quot;cutoff&quot;: &quot;2026-09-30&quot;,
+ &quot;months_left&quot;: 15,
+ &quot;K1&quot;: {
+  &quot;cost_fields_found&quot;: [],
+  &quot;calculable&quot;: false,
+  &quot;stated_margin_pct&quot;: 41.0,
+  &quot;target&quot;: 43.0,
+  &quot;pace_points_per_month_indicative&quot;: 0.133
+ },
+ &quot;K3&quot;: {
+  &quot;baseline_pct&quot;: -6.8,
+  &quot;ytd_2026_m&quot;: 149.36,
+  &quot;ytd_2025_m&quot;: 160.26,
+  &quot;run_rate_pts_per_month&quot;: 0.269,
+  &quot;pace_needed_pts_per_month&quot;: 0.72,
+  &quot;series_pct&quot;: [
+   -12.53,
+   -9.14,
+   -8.68,
+   -7.77,
+   -8.23,
+   -7.61,
+   -7.8,
+   -7.34,
+   -6.8
+  ],
+  &quot;fy2025_vs_fy2024_pct&quot;: 0.39,
+  &quot;order_date_basis_pct&quot;: -9.88,
+  &quot;excl_warranty_pct&quot;: -6.9,
+  &quot;fy2026_estimate_m&quot;: 195.68,
+  &quot;fy2025_actual_m&quot;: 209.95,
+  &quot;need_2027_on_2026_base_m&quot;: 203.5,
+  &quot;growth_needed_vs_2025_pct&quot;: -3.07,
+  &quot;order_types_2025_m&quot;: {
+   &quot;distributor&quot;: 11.6,
+   &quot;service_parts&quot;: 7.2,
+   &quot;standard&quot;: 63.6,
+   &quot;tender_contract&quot;: 125.7,
+   &quot;warranty_replacement&quot;: 1.8
+  },
+  &quot;v11&quot;: {
+   &quot;base_2026_full_year_estimate_m&quot;: 195.68,
+   &quot;target_2027_m&quot;: 203.5,
+   &quot;vs_2025_pct&quot;: -3.07,
+   &quot;monthly_sales_needed_2027_m&quot;: 16.96,
+   &quot;monthly_sales_2026_ytd_avg_m&quot;: 16.6
+  }
+ },
+ &quot;K3.1&quot;: {
+  &quot;BED&quot;: {
+   &quot;baseline_pct&quot;: 2.63,
+   &quot;ytd_2026_m&quot;: 32.55,
+   &quot;ytd_2025_m&quot;: 31.71,
+   &quot;run_rate_pts_per_month&quot;: -0.887,
+   &quot;pace_needed_pts_per_month&quot;: 0.091,
+   &quot;series_pct&quot;: [
+    18.9,
+    8.32,
+    9.99,
+    11.03,
+    5.24,
+    5.3,
+    4.35,
+    2.25,
+    2.63
+   ]
+  },
+  &quot;DEFIB&quot;: {
+   &quot;baseline_pct&quot;: -9.25,
+   &quot;ytd_2026_m&quot;: 29.25,
+   &quot;ytd_2025_m&quot;: 32.23,
+   &quot;run_rate_pts_per_month&quot;: 0.036,
+   &quot;pace_needed_pts_per_month&quot;: 0.883,
+   &quot;series_pct&quot;: [
+    -7.82,
+    -10.7,
+    -14.68,
+    -11.74,
+    -10.61,
+    -9.36,
+    -7.66,
+    -8.62,
+    -9.25
+   ]
+  },
+  &quot;DEFIB_CONS&quot;: {
+   &quot;baseline_pct&quot;: -0.14,
+   &quot;ytd_2026_m&quot;: 13.06,
+   &quot;ytd_2025_m&quot;: 13.07,
+   &quot;run_rate_pts_per_month&quot;: 0.45,
+   &quot;pace_needed_pts_per_month&quot;: 0.276,
+   &quot;series_pct&quot;: [
+    -4.38,
+    -1.1,
+    -0.64,
+    -3.01,
+    -1.5,
+    -1.49,
+    -2.91,
+    1.16,
+    -0.14
+   ]
+  },
+  &quot;ED_STRETCHER&quot;: {
+   &quot;baseline_pct&quot;: -7.42,
+   &quot;ytd_2026_m&quot;: 10.67,
+   &quot;ytd_2025_m&quot;: 11.53,
+   &quot;run_rate_pts_per_month&quot;: 0.654,
+   &quot;pace_needed_pts_per_month&quot;: 0.761,
+   &quot;series_pct&quot;: [
+    1.84,
+    -5.46,
+    -6.48,
+    -8.44,
+    -7.53,
+    -9.38,
+    -10.31,
+    -9.3,
+    -7.42
+   ]
+  },
+  &quot;LOADING&quot;: {
+   &quot;baseline_pct&quot;: -5.01,
+   &quot;ytd_2026_m&quot;: 12.59,
+   &quot;ytd_2025_m&quot;: 13.25,
+   &quot;run_rate_pts_per_month&quot;: 0.311,
+   &quot;pace_needed_pts_per_month&quot;: 0.601,
+   &quot;series_pct&quot;: [
+    -20.3,
+    -10.51,
+    -7.53,
+    -2.07,
+    -9.49,
+    -5.95,
+    -5.53,
+    -5.17,
+    -5.01
+   ]
+  },
+  &quot;PARTS&quot;: {
+   &quot;baseline_pct&quot;: -4.33,
+   &quot;ytd_2026_m&quot;: 6.55,
+   &quot;ytd_2025_m&quot;: 6.84,
+   &quot;run_rate_pts_per_month&quot;: -0.644,
+   &quot;pace_needed_pts_per_month&quot;: 0.556,
+   &quot;series_pct&quot;: [
+    -6.2,
+    -6.17,
+    -3.76,
+    -5.9,
+    -3.53,
+    -2.4,
+    -5.24,
+    -3.57,
+    -4.33
+   ]
+  },
+  &quot;SERVICE&quot;: {
+   &quot;baseline_pct&quot;: -20.75,
+   &quot;ytd_2026_m&quot;: 21.17,
+   &quot;ytd_2025_m&quot;: 26.71,
+   &quot;run_rate_pts_per_month&quot;: 0.308,
+   &quot;pace_needed_pts_per_month&quot;: 1.65,
+   &quot;series_pct&quot;: [
+    -30.43,
+    -29.55,
+    -25.49,
+    -25.25,
+    -25.5,
+    -21.68,
+    -19.15,
+    -21.21,
+    -20.75
+   ]
+  },
+  &quot;STAIRCHAIR&quot;: {
+   &quot;baseline_pct&quot;: -7.07,
+   &quot;ytd_2026_m&quot;: 4.24,
+   &quot;ytd_2025_m&quot;: 4.56,
+   &quot;run_rate_pts_per_month&quot;: 0.888,
+   &quot;pace_needed_pts_per_month&quot;: 0.738,
+   &quot;series_pct&quot;: [
+    9.06,
+    0.85,
+    -5.69,
+    -9.77,
+    -12.74,
+    -9.73,
+    -9.39,
+    -10.34,
+    -7.07
+   ]
+  },
+  &quot;STRETCHER_MAN&quot;: {
+   &quot;baseline_pct&quot;: -2.33,
+   &quot;ytd_2026_m&quot;: 5.66,
+   &quot;ytd_2025_m&quot;: 5.8,
+   &quot;run_rate_pts_per_month&quot;: 0.859,
+   &quot;pace_needed_pts_per_month&quot;: 0.422,
+   &quot;series_pct&quot;: [
+    12.85,
+    15.16,
+    5.01,
+    -4.04,
+    -3.4,
+    -4.91,
+    -1.86,
+    -1.31,
+    -2.33
+   ]
+  },
+  &quot;STRETCHER_PWR&quot;: {
+   &quot;baseline_pct&quot;: -6.31,
+   &quot;ytd_2026_m&quot;: 13.64,
+   &quot;ytd_2025_m&quot;: 14.56,
+   &quot;run_rate_pts_per_month&quot;: 2.541,
+   &quot;pace_needed_pts_per_month&quot;: 0.688,
+   &quot;series_pct&quot;: [
+    10.56,
+    14.58,
+    -2.48,
+    -9.26,
+    -8.11,
+    -13.94,
+    -16.67,
+    -9.68,
+    -6.31
+   ]
+  }
+ },
+ &quot;K3.2&quot;: {
+  &quot;R01&quot;: {
+   &quot;baseline_pct&quot;: -9.22,
+   &quot;ytd_2026_m&quot;: 4.51,
+   &quot;ytd_2025_m&quot;: 4.97,
+   &quot;run_rate_pts_per_month&quot;: 2.052,
+   &quot;pace_needed_pts_per_month&quot;: 0.881,
+   &quot;series_pct&quot;: [
+    1.57,
+    -6.1,
+    -17.97,
+    -15.01,
+    -13.87,
+    -15.37,
+    -7.81,
+    -10.17,
+    -9.22
+   ]
+  },
+  &quot;R02&quot;: {
+   &quot;baseline_pct&quot;: -6.8,
+   &quot;ytd_2026_m&quot;: 8.23,
+   &quot;ytd_2025_m&quot;: 8.83,
+   &quot;run_rate_pts_per_month&quot;: -1.11,
+   &quot;pace_needed_pts_per_month&quot;: 0.72,
+   &quot;series_pct&quot;: [
+    -6.59,
+    -14.87,
+    -11.78,
+    -7.51,
+    -6.59,
+    -3.48,
+    -3.03,
+    -6.72,
+    -6.8
+   ]
+  },
+  &quot;R03&quot;: {
+   &quot;baseline_pct&quot;: 35.4,
+   &quot;ytd_2026_m&quot;: 2.0,
+   &quot;ytd_2025_m&quot;: 1.47,
+   &quot;run_rate_pts_per_month&quot;: 21.204,
+   &quot;pace_needed_pts_per_month&quot;: -2.093,
+   &quot;series_pct&quot;: [
+    -46.02,
+    -64.94,
+    -38.85,
+    -13.43,
+    -14.41,
+    -28.21,
+    -1.5,
+    -0.36,
+    35.4
+   ]
+  },
+  &quot;R04&quot;: {
+   &quot;baseline_pct&quot;: -4.77,
+   &quot;ytd_2026_m&quot;: 6.18,
+   &quot;ytd_2025_m&quot;: 6.49,
+   &quot;run_rate_pts_per_month&quot;: -4.762,
+   &quot;pace_needed_pts_per_month&quot;: 0.585,
+   &quot;series_pct&quot;: [
+    35.58,
+    34.22,
+    6.85,
+    7.27,
+    5.99,
+    9.52,
+    4.42,
+    -2.21,
+    -4.77
+   ]
+  },
+  &quot;R05&quot;: {
+   &quot;baseline_pct&quot;: -9.84,
+   &quot;ytd_2026_m&quot;: 22.62,
+   &quot;ytd_2025_m&quot;: 25.09,
+   &quot;run_rate_pts_per_month&quot;: 0.58,
+   &quot;pace_needed_pts_per_month&quot;: 0.923,
+   &quot;series_pct&quot;: [
+    -26.2,
+    -15.51,
+    -16.72,
+    -13.38,
+    -14.89,
+    -11.58,
+    -11.88,
+    -11.49,
+    -9.84
+   ]
+  },
+  &quot;R06&quot;: {
+   &quot;baseline_pct&quot;: -6.14,
+   &quot;ytd_2026_m&quot;: 7.2,
+   &quot;ytd_2025_m&quot;: 7.68,
+   &quot;run_rate_pts_per_month&quot;: -0.831,
+   &quot;pace_needed_pts_per_month&quot;: 0.676,
+   &quot;series_pct&quot;: [
+    28.43,
+    3.63,
+    -2.88,
+    -2.96,
+    -4.06,
+    -3.65,
+    -5.09,
+    -6.14,
+    -6.14
+   ]
+  },
+  &quot;R07&quot;: {
+   &quot;baseline_pct&quot;: -10.63,
+   &quot;ytd_2026_m&quot;: 7.13,
+   &quot;ytd_2025_m&quot;: 7.97,
+   &quot;run_rate_pts_per_month&quot;: -0.889,
+   &quot;pace_needed_pts_per_month&quot;: 0.975,
+   &quot;series_pct&quot;: [
+    -3.7,
+    -13.02,
+    -5.8,
+    -6.15,
+    -4.46,
+    -7.96,
+    -12.93,
+    -9.06,
+    -10.63
+   ]
+  },
+  &quot;R08&quot;: {
+   &quot;baseline_pct&quot;: -5.5,
+   &quot;ytd_2026_m&quot;: 3.04,
+   &quot;ytd_2025_m&quot;: 3.22,
+   &quot;run_rate_pts_per_month&quot;: 0.286,
+   &quot;pace_needed_pts_per_month&quot;: 0.633,
+   &quot;series_pct&quot;: [
+    8.29,
+    -20.33,
+    -6.45,
+    -19.63,
+    -19.63,
+    -6.36,
+    -15.26,
+    -9.17,
+    -5.5
+   ]
+  },
+  &quot;R09&quot;: {
+   &quot;baseline_pct&quot;: -8.01,
+   &quot;ytd_2026_m&quot;: 1.75,
+   &quot;ytd_2025_m&quot;: 1.91,
+   &quot;run_rate_pts_per_month&quot;: 3.853,
+   &quot;pace_needed_pts_per_month&quot;: 0.8,
+   &quot;series_pct&quot;: [
+    1.04,
+    -17.05,
+    -27.09,
+    -19.31,
+    -27.2,
+    -19.57,
+    -21.22,
+    -16.39,
+    -8.01
+   ]
+  },
+  &quot;R10&quot;: {
+   &quot;baseline_pct&quot;: -17.53,
+   &quot;ytd_2026_m&quot;: 17.71,
+   &quot;ytd_2025_m&quot;: 21.47,
+   &quot;run_rate_pts_per_month&quot;: 0.358,
+   &quot;pace_needed_pts_per_month&quot;: 1.435,
+   &quot;series_pct&quot;: [
+    -26.41,
+    -26.01,
+    -24.59,
+    -23.37,
+    -19.89,
+    -18.61,
+    -17.96,
+    -19.63,
+    -17.53
+   ]
+  },
+  &quot;R11&quot;: {
+   &quot;baseline_pct&quot;: -1.47,
+   &quot;ytd_2026_m&quot;: 31.07,
+   &quot;ytd_2025_m&quot;: 31.53,
+   &quot;run_rate_pts_per_month&quot;: 1.279,
+   &quot;pace_needed_pts_per_month&quot;: 0.365,
+   &quot;series_pct&quot;: [
+    -12.4,
+    -8.14,
+    -3.59,
+    -3.3,
+    -3.39,
+    -5.31,
+    -4.68,
+    -1.24,
+    -1.47
+   ]
+  },
+  &quot;R12&quot;: {
+   &quot;baseline_pct&quot;: 0.12,
+   &quot;ytd_2026_m&quot;: 8.85,
+   &quot;ytd_2025_m&quot;: 8.84,
+   &quot;run_rate_pts_per_month&quot;: -3.168,
+   &quot;pace_needed_pts_per_month&quot;: 0.259,
+   &quot;series_pct&quot;: [
+    18.72,
+    24.01,
+    21.68,
+    16.93,
+    13.72,
+    9.62,
+    8.22,
+    2.05,
+    0.12
+   ]
+  },
+  &quot;R13&quot;: {
+   &quot;baseline_pct&quot;: -4.47,
+   &quot;ytd_2026_m&quot;: 21.66,
+   &quot;ytd_2025_m&quot;: 22.67,
+   &quot;run_rate_pts_per_month&quot;: 0.079,
+   &quot;pace_needed_pts_per_month&quot;: 0.564,
+   &quot;series_pct&quot;: [
+    -14.02,
+    -2.73,
+    -4.67,
+    -4.25,
+    -6.64,
+    -4.71,
+    -6.82,
+    -2.48,
+    -4.47
+   ]
+  },
+  &quot;R14&quot;: {
+   &quot;baseline_pct&quot;: -8.69,
+   &quot;ytd_2026_m&quot;: 7.41,
+   &quot;ytd_2025_m&quot;: 8.11,
+   &quot;run_rate_pts_per_month&quot;: 0.065,
+   &quot;pace_needed_pts_per_month&quot;: 0.846,
+   &quot;series_pct&quot;: [
+    -25.81,
+    -5.02,
+    -5.93,
+    -6.47,
+    -9.58,
+    -8.89,
+    -5.71,
+    -8.75,
+    -8.69
+   ]
+  }
+ },
+ &quot;K2&quot;: {
+  &quot;definition&quot;: &quot;order_type = tender_contract, order date&quot;,
+  &quot;baseline_2026_ytd_pct&quot;: 17.03,
+  &quot;fy&quot;: {
+   &quot;2021&quot;: 14.04,
+   &quot;2022&quot;: 14.04,
+   &quot;2023&quot;: 14.05,
+   &quot;2024&quot;: 17.03,
+   &quot;2025&quot;: 17.03
+  },
+  &quot;ytd_2025_pct&quot;: 17.02,
+  &quot;series_2026_pct&quot;: [
+   17.138,
+   17.118,
+   17.144,
+   17.112,
+   17.087,
+   17.033,
+   17.036,
+   17.043,
+   17.032
+  ],
+  &quot;run_rate_pts_per_month&quot;: -0.0,
+  &quot;pace_needed_pts_per_month&quot;: 0.0,
+  &quot;lines_2026_ytd&quot;: 5485,
+  &quot;net_value_by_year_m&quot;: {
+   &quot;2021&quot;: 115.3,
+   &quot;2022&quot;: 120.3,
+   &quot;2023&quot;: 124.4,
+   &quot;2024&quot;: 127.7,
+   &quot;2025&quot;: 127.2,
+   &quot;2026&quot;: 86.7
+  },
+  &quot;max_order_total_aud&quot;: 2278217.0,
+  &quot;orders_ge_5m&quot;: 0,
+  &quot;sens_tender_plus_distributor_pct&quot;: 16.78,
+  &quot;sens_top1pct_lines_pct&quot;: 4.14,
+  &quot;top1pct_cutoff_aud&quot;: 87101.0,
+  &quot;draft_placeholder_contract_id&quot;: {
+   &quot;lines&quot;: 3153,
+   &quot;groups&quot;: [
+    &quot;SERVICE&quot;
+   ],
+   &quot;order_types&quot;: [
+    &quot;standard&quot;
+   ],
+   &quot;prefix&quot;: [
+    &quot;SC&quot;
+   ]
+  },
+  &quot;tc_net_ytd_2025_m&quot;: 95.1,
+  &quot;tc_net_ytd_2026_m&quot;: 86.7,
+  &quot;all_lines_avg_discount_2026_ytd_pct&quot;: 12.52,
+  &quot;all_lines_avg_discount_2025_pct&quot;: 12.84,
+  &quot;calc_vs_field_gap_p999_pts&quot;: 0.002,
+  &quot;avg_discount_by_type_2026&quot;: {
+   &quot;distributor&quot;: 13.64,
+   &quot;service_parts&quot;: 0.0,
+   &quot;standard&quot;: 4.27,
+   &quot;tender_contract&quot;: 17.03,
+   &quot;warranty_replacement&quot;: 0.0
+  },
+  &quot;v11&quot;: {
+   &quot;role&quot;: &quot;Gary Phase 2 proposal, information only&quot;,
+   &quot;start_pct&quot;: 17.03,
+   &quot;end_pct&quot;: 14.0,
+   &quot;pace_needed_pts_per_month&quot;: -0.202,
+   &quot;path_pct&quot;: {
+    &quot;Sep-26&quot;: 17.03,
+    &quot;Dec-26&quot;: 16.42,
+    &quot;Mar-27&quot;: 15.82,
+    &quot;Jun-27&quot;: 15.21,
+    &quot;Sep-27&quot;: 14.61,
+    &quot;Dec-27&quot;: 14.0
+   },
+   &quot;status_now&quot;: &quot;Not rated (no target in the first pass)&quot;,
+   &quot;flat_first_amber&quot;: &quot;Oct-26&quot;,
+   &quot;flat_first_red&quot;: &quot;Feb-27&quot;,
+   &quot;run_rate_pts_per_month&quot;: -0.0,
+   &quot;dollars_note_net_ytd_2026_m&quot;: 86.7
+  }
+ },
+ &quot;K4&quot;: {
+  &quot;big_tenders&quot;: [
+   {
+    &quot;ref&quot;: &quot;TND-2024-03&quot;,
+    &quot;customer&quot;: &quot;Coastal Ambulance Service&quot;,
+    &quot;close&quot;: &quot;22/03/2024&quot;,
+    &quot;value_m&quot;: 14.0,
+    &quot;outcome&quot;: &quot;won&quot;,
+    &quot;winner&quot;: &quot;Kestrel Medical&quot;
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2024-07&quot;,
+    &quot;customer&quot;: &quot;Southern Metro Health Network&quot;,
+    &quot;close&quot;: &quot;12/07/2024&quot;,
+    &quot;value_m&quot;: 6.5,
+    &quot;outcome&quot;: &quot;lost&quot;,
+    &quot;winner&quot;: &quot;Vantage Medical&quot;
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2025-02&quot;,
+    &quot;customer&quot;: &quot;Western Plains LHD&quot;,
+    &quot;close&quot;: &quot;30/04/2025&quot;,
+    &quot;value_m&quot;: 7.2,
+    &quot;outcome&quot;: &quot;lost&quot;,
+    &quot;winner&quot;: &quot;Allied Clinical Supply&quot;
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2025-06&quot;,
+    &quot;customer&quot;: &quot;Highlands Ambulance&quot;,
+    &quot;close&quot;: &quot;19/09/2025&quot;,
+    &quot;value_m&quot;: 11.8,
+    &quot;outcome&quot;: &quot;lost&quot;,
+    &quot;winner&quot;: &quot;Norland Rescue Systems&quot;
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2026-01&quot;,
+    &quot;customer&quot;: &quot;Capital Region Health&quot;,
+    &quot;close&quot;: &quot;27/02/2026&quot;,
+    &quot;value_m&quot;: 5.6,
+    &quot;outcome&quot;: &quot;won&quot;,
+    &quot;winner&quot;: &quot;Kestrel Medical&quot;
+   }
+  ],
+  &quot;won_of_decided&quot;: [
+   2,
+   5
+  ],
+  &quot;rate_pct&quot;: 40.0,
+  &quot;same_set_if_pa_ignored&quot;: true,
+  &quot;pa_rows&quot;: 24,
+  &quot;bid_per_year&quot;: {
+   &quot;2024&quot;: 2,
+   &quot;2025&quot;: 2,
+   &quot;2026&quot;: 1
+  },
+  &quot;sens&quot;: {
+   &quot;&gt;=5m&quot;: [
+    2,
+    5
+   ],
+   &quot;&gt;=4m&quot;: [
+    5,
+    10
+   ],
+   &quot;&gt;=3m&quot;: [
+    8,
+    13
+   ],
+   &quot;&gt;=2m&quot;: [
+    13,
+    20
+   ],
+   &quot;&gt;=1m&quot;: [
+    19,
+    35
+   ],
+   &quot;&gt;=0m&quot;: [
+    28,
+    53
+   ]
+  },
+  &quot;partial_cancelled_big&quot;: 0,
+  &quot;consecutive_wins_needed_for_rolling5&quot;: {
+   &quot;40&quot;: 0,
+   &quot;60&quot;: 2,
+   &quot;80&quot;: 3,
+   &quot;100&quot;: 4
+  },
+  &quot;all_outcomes&quot;: {
+   &quot;won&quot;: 28,
+   &quot;lost&quot;: 25,
+   &quot;partial&quot;: 6,
+   &quot;cancelled&quot;: 5
+  },
+  &quot;name_variants_in_register&quot;: [
+   &quot;Southern Metro Health Network&quot;,
+   &quot;Southern Metropolitan Health Network&quot;,
+   &quot;Western Plains Health District&quot;,
+   &quot;Western Plains LHD&quot;
+  ],
+  &quot;v11&quot;: {
+   &quot;window_won&quot;: 2,
+   &quot;window_size&quot;: 5,
+   &quot;calendar_year_won_of_decided&quot;: {
+    &quot;2024&quot;: [
+     1,
+     2
+    ],
+    &quot;2025&quot;: [
+     0,
+     2
+    ],
+    &quot;2026&quot;: [
+     1,
+     1
+    ]
+   },
+   &quot;proposed_target_won_of_last5&quot;: 3,
+   &quot;next_consecutive_wins_needed&quot;: 2,
+   &quot;window_after_next_win&quot;: 2,
+   &quot;window_after_two_wins&quot;: 3,
+   &quot;big_tenders_per_year&quot;: {
+    &quot;2024&quot;: 2,
+    &quot;2025&quot;: 2,
+    &quot;2026&quot;: 1
+   },
+   &quot;months_to_dec27&quot;: 15,
+   &quot;expected_big_tenders_to_dec27&quot;: 2.5
+  }
+ },
+ &quot;K4.1&quot;: {
+  &quot;lost_all&quot;: 25,
+  &quot;lost_with_winning_price&quot;: 5,
+  &quot;avg_gap_pct_known&quot;: 0.89,
+  &quot;median_gap_pct_known&quot;: 0.96,
+  &quot;lost_gap_list&quot;: [
+   {
+    &quot;ref&quot;: &quot;TND-2021-22&quot;,
+    &quot;gap_pct&quot;: 1.92,
+    &quot;big&quot;: false
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2024-07&quot;,
+    &quot;gap_pct&quot;: 2.07,
+    &quot;big&quot;: true
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2025-25&quot;,
+    &quot;gap_pct&quot;: 0.96,
+    &quot;big&quot;: false
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2025-06&quot;,
+    &quot;gap_pct&quot;: -1.47,
+    &quot;big&quot;: true
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2026-22&quot;,
+    &quot;gap_pct&quot;: 0.96,
+    &quot;big&quot;: false
+   }
+  ],
+  &quot;big_lost&quot;: [
+   {
+    &quot;ref&quot;: &quot;TND-2024-07&quot;,
+    &quot;customer&quot;: &quot;Southern Metro Health Network&quot;,
+    &quot;gap_pct&quot;: 2.07
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2025-02&quot;,
+    &quot;customer&quot;: &quot;Western Plains LHD&quot;,
+    &quot;gap_pct&quot;: null
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2025-06&quot;,
+    &quot;customer&quot;: &quot;Highlands Ambulance&quot;,
+    &quot;gap_pct&quot;: -1.47
+   }
+  ]
+ },
+ &quot;K4.2&quot;: {
+  &quot;lost&quot;: 25,
+  &quot;lost_with_scoring&quot;: 20,
+  &quot;lost_with_debrief&quot;: 25,
+  &quot;top_gap_counts&quot;: {
+   &quot;service&quot;: 7,
+   &quot;clinical&quot;: 5,
+   &quot;price&quot;: 3,
+   &quot;sustain&quot;: 3,
+   &quot;supply&quot;: 2
+  },
+  &quot;price_is_top_gap&quot;: 3,
+  &quot;price_ahead_count&quot;: 9,
+  &quot;rows&quot;: [
+   {
+    &quot;ref&quot;: &quot;TND-2021-22&quot;,
+    &quot;customer&quot;: &quot;Central Queensland Health District&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 0.9,
+     &quot;clinical&quot;: 2.7,
+     &quot;service&quot;: 0.5,
+     &quot;supply&quot;: -0.1,
+     &quot;training&quot;: -0.4,
+     &quot;sustain&quot;: 0.2
+    },
+    &quot;top&quot;: &quot;clinical&quot;,
+    &quot;price_gap&quot;: 0.9
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2021-24&quot;,
+    &quot;customer&quot;: &quot;Riverbend Private Hospitals&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 0.3,
+     &quot;clinical&quot;: -0.2,
+     &quot;service&quot;: 0.8,
+     &quot;supply&quot;: -0.2,
+     &quot;training&quot;: 0.6,
+     &quot;sustain&quot;: -0.5
+    },
+    &quot;top&quot;: &quot;service&quot;,
+    &quot;price_gap&quot;: 0.3
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2021-31&quot;,
+    &quot;customer&quot;: &quot;Acacia Private Hospitals&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 0.6,
+     &quot;clinical&quot;: -1.8,
+     &quot;service&quot;: 0.7,
+     &quot;supply&quot;: -0.1,
+     &quot;training&quot;: 0.6,
+     &quot;sustain&quot;: -0.1
+    },
+    &quot;top&quot;: &quot;service&quot;,
+    &quot;price_gap&quot;: 0.6
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2021-27&quot;,
+    &quot;customer&quot;: &quot;Ironbark Private Hospitals&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 0.9,
+     &quot;clinical&quot;: 1.0,
+     &quot;service&quot;: -1.05,
+     &quot;supply&quot;: 0.8,
+     &quot;training&quot;: 0.2,
+     &quot;sustain&quot;: 0.2
+    },
+    &quot;top&quot;: &quot;clinical&quot;,
+    &quot;price_gap&quot;: 0.9
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2021-29&quot;,
+    &quot;customer&quot;: &quot;Coral Private Hospitals&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 0.9,
+     &quot;clinical&quot;: 1.0,
+     &quot;service&quot;: -2.0,
+     &quot;supply&quot;: 0.7,
+     &quot;training&quot;: 0.5,
+     &quot;sustain&quot;: 0.3
+    },
+    &quot;top&quot;: &quot;clinical&quot;,
+    &quot;price_gap&quot;: 0.9
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2021-23&quot;,
+    &quot;customer&quot;: &quot;Coastal Ambulance Service&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 1.8,
+     &quot;clinical&quot;: 0.75,
+     &quot;service&quot;: -1.95,
+     &quot;supply&quot;: 0.0,
+     &quot;training&quot;: -0.4,
+     &quot;sustain&quot;: 0.0
+    },
+    &quot;top&quot;: &quot;price&quot;,
+    &quot;price_gap&quot;: 1.8
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2022-25&quot;,
+    &quot;customer&quot;: &quot;Coastal Ambulance Service&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: -0.9,
+     &quot;clinical&quot;: 0.5,
+     &quot;service&quot;: 0.0,
+     &quot;supply&quot;: 0.8,
+     &quot;training&quot;: 0.3,
+     &quot;sustain&quot;: 0.1
+    },
+    &quot;top&quot;: &quot;supply&quot;,
+    &quot;price_gap&quot;: -0.9
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2022-31&quot;,
+    &quot;customer&quot;: &quot;Hillcrest Private Hospitals&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 2.1,
+     &quot;clinical&quot;: -1.0,
+     &quot;service&quot;: 0.9,
+     &quot;supply&quot;: 0.0,
+     &quot;training&quot;: -0.7,
+     &quot;sustain&quot;: 0.6
+    },
+    &quot;top&quot;: &quot;price&quot;,
+    &quot;price_gap&quot;: 2.1
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2022-29&quot;,
+    &quot;customer&quot;: &quot;Riverbend Private Hospitals&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: -2.4,
+     &quot;clinical&quot;: -0.25,
+     &quot;service&quot;: 0.75,
+     &quot;supply&quot;: -0.6,
+     &quot;training&quot;: -0.4,
+     &quot;sustain&quot;: 1.0
+    },
+    &quot;top&quot;: &quot;sustain&quot;,
+    &quot;price_gap&quot;: -2.4
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2022-20&quot;,
+    &quot;customer&quot;: &quot;Hunter Coast Health District&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 1.5,
+     &quot;clinical&quot;: -2.0,
+     &quot;service&quot;: -0.6,
+     &quot;supply&quot;: 0.7,
+     &quot;training&quot;: 0.3,
+     &quot;sustain&quot;: 0.6
+    },
+    &quot;top&quot;: &quot;price&quot;,
+    &quot;price_gap&quot;: 1.5
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2023-29&quot;,
+    &quot;customer&quot;: &quot;Ironbark Private Hospitals&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: -1.8,
+     &quot;clinical&quot;: -0.3,
+     &quot;service&quot;: -1.4,
+     &quot;supply&quot;: 0.6,
+     &quot;training&quot;: -0.4,
+     &quot;sustain&quot;: 0.4
+    },
+    &quot;top&quot;: &quot;supply&quot;,
+    &quot;price_gap&quot;: -1.8
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2023-30&quot;,
+    &quot;customer&quot;: &quot;Darling Downs Health&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 1.2,
+     &quot;clinical&quot;: -0.75,
+     &quot;service&quot;: -1.2,
+     &quot;supply&quot;: -0.5,
+     &quot;training&quot;: 0.0,
+     &quot;sustain&quot;: 2.0
+    },
+    &quot;top&quot;: &quot;sustain&quot;,
+    &quot;price_gap&quot;: 1.2
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2023-20&quot;,
+    &quot;customer&quot;: &quot;Southern Metropolitan Health Network&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: -1.2,
+     &quot;clinical&quot;: 1.2,
+     &quot;service&quot;: -0.2,
+     &quot;supply&quot;: 0.4,
+     &quot;training&quot;: 0.3,
+     &quot;sustain&quot;: -0.4
+    },
+    &quot;top&quot;: &quot;clinical&quot;,
+    &quot;price_gap&quot;: -1.2
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2023-26&quot;,
+    &quot;customer&quot;: &quot;Aotearoa Ambulance Trust&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: -0.9,
+     &quot;clinical&quot;: 1.75,
+     &quot;service&quot;: 0.3,
+     &quot;supply&quot;: -0.4,
+     &quot;training&quot;: -0.1,
+     &quot;sustain&quot;: 0.1
+    },
+    &quot;top&quot;: &quot;clinical&quot;,
+    &quot;price_gap&quot;: -0.9
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2023-28&quot;,
+    &quot;customer&quot;: &quot;Riverbend Private Hospitals&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: -0.9,
+     &quot;clinical&quot;: -1.0,
+     &quot;service&quot;: -1.9,
+     &quot;supply&quot;: 0.3,
+     &quot;training&quot;: -0.1,
+     &quot;sustain&quot;: 0.6
+    },
+    &quot;top&quot;: &quot;sustain&quot;,
+    &quot;price_gap&quot;: -0.9
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2023-24&quot;,
+    &quot;customer&quot;: &quot;Aotearoa Ambulance Trust&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: -2.1,
+     &quot;clinical&quot;: -0.75,
+     &quot;service&quot;: 1.05,
+     &quot;supply&quot;: -0.4,
+     &quot;training&quot;: 1.0,
+     &quot;sustain&quot;: 0.6
+    },
+    &quot;top&quot;: &quot;service&quot;,
+    &quot;price_gap&quot;: -2.1
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2024-07&quot;,
+    &quot;customer&quot;: &quot;Southern Metro Health Network&quot;,
+    &quot;big&quot;: true,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 0.6,
+     &quot;clinical&quot;: 0.5,
+     &quot;service&quot;: 2.85,
+     &quot;supply&quot;: 1.0,
+     &quot;training&quot;: 0.3,
+     &quot;sustain&quot;: 0.6
+    },
+    &quot;top&quot;: &quot;service&quot;,
+    &quot;price_gap&quot;: 0.6
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2024-25&quot;,
+    &quot;customer&quot;: &quot;Coastal Ambulance Service&quot;,
+    &quot;big&quot;: false,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: -1.5,
+     &quot;clinical&quot;: 0.5,
+     &quot;service&quot;: 2.25,
+     &quot;supply&quot;: 0.8,
+     &quot;training&quot;: 0.6,
+     &quot;sustain&quot;: 1.2
+    },
+    &quot;top&quot;: &quot;service&quot;,
+    &quot;price_gap&quot;: -1.5
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2025-02&quot;,
+    &quot;customer&quot;: &quot;Western Plains LHD&quot;,
+    &quot;big&quot;: true,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 1.2,
+     &quot;clinical&quot;: -0.5,
+     &quot;service&quot;: 1.95,
+     &quot;supply&quot;: 0.6,
+     &quot;training&quot;: 0.4,
+     &quot;sustain&quot;: 0.4
+    },
+    &quot;top&quot;: &quot;service&quot;,
+    &quot;price_gap&quot;: 1.2
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2025-06&quot;,
+    &quot;customer&quot;: &quot;Highlands Ambulance&quot;,
+    &quot;big&quot;: true,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: -0.9,
+     &quot;clinical&quot;: -0.25,
+     &quot;service&quot;: 4.35,
+     &quot;supply&quot;: 3.5,
+     &quot;training&quot;: 0.2,
+     &quot;sustain&quot;: 0.6
+    },
+    &quot;top&quot;: &quot;service&quot;,
+    &quot;price_gap&quot;: -0.9
+   }
+  ],
+  &quot;big&quot;: [
+   {
+    &quot;ref&quot;: &quot;TND-2024-07&quot;,
+    &quot;customer&quot;: &quot;Southern Metro Health Network&quot;,
+    &quot;big&quot;: true,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 0.6,
+     &quot;clinical&quot;: 0.5,
+     &quot;service&quot;: 2.85,
+     &quot;supply&quot;: 1.0,
+     &quot;training&quot;: 0.3,
+     &quot;sustain&quot;: 0.6
+    },
+    &quot;top&quot;: &quot;service&quot;,
+    &quot;price_gap&quot;: 0.6
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2025-02&quot;,
+    &quot;customer&quot;: &quot;Western Plains LHD&quot;,
+    &quot;big&quot;: true,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: 1.2,
+     &quot;clinical&quot;: -0.5,
+     &quot;service&quot;: 1.95,
+     &quot;supply&quot;: 0.6,
+     &quot;training&quot;: 0.4,
+     &quot;sustain&quot;: 0.4
+    },
+    &quot;top&quot;: &quot;service&quot;,
+    &quot;price_gap&quot;: 1.2
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2025-06&quot;,
+    &quot;customer&quot;: &quot;Highlands Ambulance&quot;,
+    &quot;big&quot;: true,
+    &quot;gaps&quot;: {
+     &quot;price&quot;: -0.9,
+     &quot;clinical&quot;: -0.25,
+     &quot;service&quot;: 4.35,
+     &quot;supply&quot;: 3.5,
+     &quot;training&quot;: 0.2,
+     &quot;sustain&quot;: 0.6
+    },
+    &quot;top&quot;: &quot;service&quot;,
+    &quot;price_gap&quot;: -0.9
+   }
+  ],
+  &quot;weights&quot;: {
+   &quot;price&quot;: 30,
+   &quot;clinical&quot;: 25,
+   &quot;service&quot;: 15,
+   &quot;supply&quot;: 10,
+   &quot;training&quot;: 10,
+   &quot;sustain&quot;: 10
+  }
+ },
+ &quot;K4.3&quot;: {
+  &quot;all_lost&quot;: {
+   &quot;Allied Clinical Supply&quot;: {
+    &quot;n&quot;: 7,
+    &quot;value_m&quot;: 15.2
+   },
+   &quot;Helix Healthcare&quot;: {
+    &quot;n&quot;: 5,
+    &quot;value_m&quot;: 13.2
+   },
+   &quot;Meridian Biomedical&quot;: {
+    &quot;n&quot;: 6,
+    &quot;value_m&quot;: 7.5
+   },
+   &quot;Norland Rescue Systems&quot;: {
+    &quot;n&quot;: 3,
+    &quot;value_m&quot;: 13.9
+   },
+   &quot;Vantage Medical&quot;: {
+    &quot;n&quot;: 4,
+    &quot;value_m&quot;: 10.6
+   }
+  },
+  &quot;big_lost&quot;: [
+   {
+    &quot;ref&quot;: &quot;TND-2024-07&quot;,
+    &quot;winner&quot;: &quot;Vantage Medical&quot;,
+    &quot;value_m&quot;: 6.5
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2025-02&quot;,
+    &quot;winner&quot;: &quot;Allied Clinical Supply&quot;,
+    &quot;value_m&quot;: 7.2
+   },
+   {
+    &quot;ref&quot;: &quot;TND-2025-06&quot;,
+    &quot;winner&quot;: &quot;Norland Rescue Systems&quot;,
+    &quot;value_m&quot;: 11.8
+   }
+  ],
+  &quot;lost_missing_winner&quot;: 0
+ },
+ &quot;K5&quot;: {
+  &quot;reports&quot;: 30,
+  &quot;sales_def&quot;: {
+   &quot;ship date&quot;: 14,
+   &quot;n/a&quot;: 6,
+   &quot;invoice date&quot;: 5,
+   &quot;order date&quot;: 5
+  },
+  &quot;cust_group&quot;: {
+   &quot;n/a&quot;: 9,
+   &quot;parent where known&quot;: 6,
+   &quot;ship-to&quot;: 6,
+   &quot;manual mapping tab&quot;: 5,
+   &quot;sold-to&quot;: 4
+  },
+  &quot;candidate_sets_count&quot;: {
+   &quot;invoice date + parent where known&quot;: 1,
+   &quot;ship date + parent where known&quot;: 3,
+   &quot;order date + parent where known&quot;: 1
+  },
+  &quot;both_na&quot;: 3,
+  &quot;any_na&quot;: 12,
+  &quot;distinct_combos&quot;: 17,
+  &quot;stale_over_30d&quot;: 8,
+  &quot;stale_names&quot;: [
+   &quot;02 Sales by product group.xlsx&quot;,
+   &quot;05 Open quotes.xlsx&quot;,
+   &quot;09 Overdue PMs.xlsx&quot;,
+   &quot;10 Service revenue.xlsx&quot;,
+   &quot;13 Ambulance accounts.xlsx&quot;,
+   &quot;23 Installed base (service).xlsx&quot;,
+   &quot;25 Rep targets.xlsx&quot;,
+   &quot;29 Quarterly review pack.xlsx&quot;
+  ],
+  &quot;owners&quot;: {
+   &quot;Tom Nguyen&quot;: 8,
+   &quot;Deb Harlow&quot;: 8,
+   &quot;Sharon Doyle&quot;: 7,
+   &quot;Sales Ops&quot;: 5,
+   &quot;Raj Pillai&quot;: 2
+  }
+ },
+ &quot;extra&quot;: {
+  &quot;median_reps_per_sold_to&quot;: 4.0,
+  &quot;service_jan_jul_share_2025_pct&quot;: 64.0
+ },
+ &quot;dq&quot;: {
+  &quot;sales_lines&quot;: 120391,
+  &quot;unshipped_lines&quot;: 1517,
+  &quot;unshipped_pct&quot;: 1.26,
+  &quot;list_price_missing&quot;: 0,
+  &quot;negative_discount_lines&quot;: 2,
+  &quot;duplicate_lines&quot;: 0,
+  &quot;tender_rows&quot;: 64,
+  &quot;lost_missing_winning_price&quot;: 20,
+  &quot;tenders_pa_values&quot;: 24,
+  &quot;lost_missing_scoring&quot;: 5,
+  &quot;winner_missing&quot;: 5
+ }
+}</code></pre></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>

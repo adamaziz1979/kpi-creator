@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Kestrel Medical KPI dashboard (Standard version): why the big tenders were lost. Test case, Sample data.">
+<title>Kestrel Medical Tender Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+/* Monochrome blue (dark by default). JS swaps the values for light mode. */
+:root{--bg:#0c121a;--surface:#141c27;--fg:#e8edf3;--muted:#94a1b2;--line:#243042;--accent:#4f9dff;--accent-soft:#16263d;
+ --c1:#225fb0;--c2:#bcd9ff;--c3:#4f9dff;--c4:#8ec0ff;--grey:#8b96a5;--pos:#bcd9ff;--neg:#4f9dff;
+ --s-ok:#5fd38d;--s-warn:#f2a65a;--s-bad:#f87171;
+ --font-body:"Lexend",Arial,sans-serif;--font-mono:"IBM Plex Mono",Consolas,monospace;color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-weight:300;font-size:15px;line-height:1.55}
+.wrap{max-width:1360px;margin:0 auto;padding-block:0 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:24px}
+h1,h2,h3{text-wrap:balance;margin:0;font-weight:600;letter-spacing:-0.01em}
+h1{font-size:clamp(1.25rem,2.6vw,1.6rem)}
+h2{font-size:1.15rem}
+h3{font-size:1rem}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0}
+
+/* A. Header (sticky) */
+.top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 0;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between}
+.top .meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--font-mono);font-size:.72rem;color:var(--muted)}
+.tag{display:inline-block;font-family:var(--font-mono);font-size:.68rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:6px;border:1px solid var(--line);color:var(--fg)}
+.tag.prov{border-color:var(--s-warn);color:var(--s-warn)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{font:inherit;font-size:.84rem;font-weight:400;color:var(--muted);background:none;border:0;min-height:44px;padding:0 14px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{color:var(--fg);background:var(--accent-soft);font-weight:500}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+/* B. Headline */
+.headline{display:grid;gap:8px;padding-top:6px}
+.headline p.big{margin:0;font-size:clamp(1.2rem,2.5vw,1.65rem);font-weight:500;line-height:1.35;max-width:62ch}
+.headline p.big b{color:var(--accent);font-weight:600}
+.headline p.sub{margin:0;color:var(--muted);max-width:80ch}
+/* Top 3 actions under the headline: owner, action, target and date */
+.top-actions{display:grid;gap:6px;margin-top:6px}
+/* Top 3 actions as cards: owner, what they do, the target and date */
+.act-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;list-style:none;margin:0;padding:0}
+.act-cards li{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:10px;padding:10px 12px;display:grid;gap:4px;align-content:start}
+.act-cards .own{font-family:var(--font-mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
+.act-cards p{margin:0;font-size:.88rem;line-height:1.35}
+.act-cards .tgt{font-size:.84rem;font-weight:500;line-height:1.35}
+@media (max-width:640px){.act-cards{grid-template-columns:minmax(0,1fr)}}
+
+/* C. Top 5 tiles */
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+/* Every tile has the same 9 rows (name, number, provisional, target, gap, needs, trend, status, note); subgrid lines them up across tiles */
+.stats{grid-auto-rows:auto}
+.stat{background:var(--surface);padding:16px 16px 12px;display:grid;grid-row:span 9;grid-template-rows:subgrid;row-gap:4px;align-content:start;min-width:0}
+.stat>*{align-self:start}
+.stat[data-tip]{cursor:help}
+.stat:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+#tip .why{margin-top:4px;line-height:1.45;max-width:260px}
+#tip .why:first-child{margin-top:0}
+#tip .tr+.why,#tip b+.why{border-top:1px solid var(--line);padding-top:4px}
+.stat .tile-top{align-self:end}
+.stat .nm{font-size:.84rem;color:var(--muted);line-height:1.3}
+/* Standard tile: the number and its sparkline side by side, detail lines underneath */
+.stat .tile-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:end}
+.stat .act{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:40px}
+.stat .act b{font-size:clamp(1.9rem,2.6vw,2.4rem);font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat .tag.prov{width:max-content}
+.stat .ln{font-family:var(--font-mono);font-size:.7rem;color:var(--muted);line-height:1.45}
+.stat .ln b{color:var(--fg);font-weight:500}
+.stat .ln.trend[data-s="bad"]{color:var(--s-bad)}
+.stat .note{font-size:.74rem;color:var(--muted);line-height:1.35}
+.spk{position:relative;min-width:60px}
+.spark{display:block;width:100%;height:40px}
+.spark path{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.spark path.dash{stroke-dasharray:3 3}
+.spark .area{fill:var(--accent);fill-opacity:.1;stroke:none}
+.spark .tgt-s{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.spk .end{position:absolute;right:-4px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:.74rem;font-weight:500;padding:3px 8px;border-radius:6px;border:1px solid var(--line);border-left:4px solid var(--sc);color:var(--fg);white-space:nowrap;width:max-content;margin-top:2px}
+.st .ic{color:var(--sc);font-weight:600}
+.st[data-s="ok"]{--sc:var(--s-ok)} .st[data-s="warn"]{--sc:var(--s-warn)} .st[data-s="bad"]{--sc:var(--s-bad)}
+@media (max-width:1100px){.stats{grid-template-columns:repeat(6,minmax(0,1fr))}.stat{grid-column:span 2}.stat:nth-child(-n+2){grid-column:span 3}}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat,.stat:nth-child(-n+2){grid-column:span 1}.stat:first-child{grid-column:1/-1}}
+
+/* Cards */
+.zone{display:grid;gap:12px}
+.zone>h2{display:flex;align-items:baseline;gap:10px}
+.zone>h2 small{font-family:var(--font-mono);font-size:.7rem;font-weight:400;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:stretch}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 16px 12px;display:grid;grid-template-rows:auto 1fr auto auto auto;gap:10px;min-width:0}
+.card h3{font-size:1rem}
+.subt{margin:-6px 0 0;font-size:.76rem;color:var(--muted)}
+.chart{min-width:0;align-self:start}
+.chart.replay{cursor:pointer}
+.chart svg{display:block;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.76rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:2px;background:var(--c);display:inline-block}
+.legend i.ln{height:2px;width:14px;border-radius:1px}
+.cap{margin:0;color:var(--muted);font-size:.74rem;line-height:1.45}
+details.data>summary{cursor:pointer;font-size:.78rem;color:var(--accent);width:max-content;min-height:44px;display:flex;align-items:center;list-style:none}
+details.data>summary::-webkit-details-marker{display:none}
+details.data>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+table.t{width:100%;table-layout:fixed;border-collapse:collapse;font-size:.78rem;margin-top:6px}
+table.t th,table.t td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);overflow-wrap:break-word;vertical-align:top}
+table.t th{font-family:var(--font-mono);font-weight:500;font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+table.t td{font-variant-numeric:tabular-nums}
+
+/* SVG parts */
+.grid-l{stroke:var(--line);stroke-width:1}
+.ax{fill:var(--muted);font-family:var(--font-mono);font-size:11px}
+.lab{fill:var(--fg);font-family:var(--font-body);font-size:12px}
+.lab .b{font-weight:600}
+.dot{stroke:var(--surface);stroke-width:2}
+.hit{fill:transparent}
+.cross{stroke:var(--muted);stroke-width:1}
+.tgt{stroke:var(--fg);stroke-width:1.5;stroke-dasharray:4 4;opacity:.8}
+
+/* Horizontal bars */
+.hb{display:grid;gap:8px}
+.hb-r{display:grid;grid-template-columns:130px minmax(0,1fr) 88px;gap:12px;align-items:center;font-size:.88rem;min-height:32px}
+.hb-r small{display:block;color:var(--muted);font-size:.7rem}
+.hb-t{position:relative;height:14px}
+.hb-t::before{content:"";position:absolute;left:0;top:50%;width:100%;height:1px;background:var(--line)}
+.hb-f{position:absolute;left:0;top:1px;height:12px;background:var(--grey);border-radius:0 4px 4px 0;transform-origin:left center}
+.hb-f.hi{background:var(--accent)}
+.hb-k{position:absolute;top:-4px;width:2px;height:22px;background:var(--fg);margin-left:-1px}
+.hb-v{text-align:right;font-family:var(--font-mono);font-size:.8rem}
+.hb-v small{font-family:var(--font-body)}
+@media (max-width:460px){.hb-r{grid-template-columns:96px minmax(0,1fr) 78px;gap:8px}}
+
+/* Diverging */
+.dv{display:grid;gap:10px}
+.dv-r{display:grid;grid-template-columns:110px minmax(0,1fr) 120px;gap:12px;align-items:center;font-size:.86rem}
+.dv-t{position:relative;height:26px}
+.dv-t::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--muted)}
+.dv-b{position:absolute;top:7px;height:12px}
+.dv-b.p{left:50%;background:var(--pos);border-radius:0 4px 4px 0;transform-origin:left center}
+.dv-b.n{right:50%;background:var(--neg);border-radius:4px 0 0 4px;transform-origin:right center}
+.dv-l{position:absolute;top:3px;font-family:var(--font-mono);font-size:.74rem;color:var(--fg);white-space:nowrap}
+.dv-v{font-family:var(--font-mono);font-size:.76rem;color:var(--muted);text-align:right}
+.dv-ax{display:grid;grid-template-columns:110px minmax(0,1fr) 120px;gap:12px}
+.dv-ax div{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.68rem;color:var(--muted)}
+@media (max-width:520px){.dv-r,.dv-ax{grid-template-columns:84px minmax(0,1fr);}.dv-v{grid-column:2;text-align:left}.dv-ax>span:last-child{display:none}}
+
+/* F. Actions */
+.acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}
+.acts li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;align-content:start}
+.acts .own{font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
+.acts p{margin:0;font-size:.92rem}
+.acts small{color:var(--muted);font-size:.74rem}
+@media (max-width:900px){.acts{grid-template-columns:minmax(0,1fr)}}
+
+/* G and H. Collapsed detail */
+details.sec{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+details.sec>summary{list-style:none;cursor:pointer;padding:12px 16px;min-height:48px;display:flex;align-items:center;gap:10px;font-weight:500}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:10px}
+details.sec>summary .cnt{font-family:var(--font-mono);font-size:.7rem;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 6px}
+.chev{width:7px;height:7px;flex:none;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s}
+details[open]>summary .chev{transform:rotate(45deg)}
+details.sec .body{padding:0 16px 16px;display:grid;gap:12px}
+.mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.mini{grid-template-columns:minmax(0,1fr)}}
+.box{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:4px}
+.box b{font-size:1.4rem;font-weight:600}
+.box span{font-size:.78rem;color:var(--muted)}
+dl.defs{margin:0;display:grid;grid-template-columns:200px minmax(0,1fr);gap:8px 16px;font-size:.86rem}
+dl.defs dt{font-weight:500}
+dl.defs dd{margin:0;color:var(--muted)}
+@media (max-width:640px){dl.defs{grid-template-columns:minmax(0,1fr)}dl.defs dd{margin-bottom:6px}}
+footer{color:var(--muted);font-size:.74rem;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:4px}
+
+/* Tooltip */
+#tip{position:fixed;z-index:50;pointer-events:none;max-width:260px;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.28);font-size:.78rem;line-height:1.45;opacity:0;transition:opacity .1s}
+#tip.on{opacity:1}
+#tip .tr{display:flex;justify-content:space-between;gap:12px;font-family:var(--font-mono);font-size:.72rem;color:var(--muted)}
+#tip .tr b{color:var(--fg);font-weight:500}
+
+/* Motion: play on first view, click to replay, nothing moves with reduced motion */
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes growy{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.play .draw{stroke-dasharray:1;animation:draw 1.6s ease-out both}
+.play .fade{animation:fadein .4s ease-out both;animation-delay:var(--d,0s)}
+.play .hb-f,.play .dv-b{animation:grow .9s ease-out both;animation-delay:var(--d,0s)}
+.play .col{transform-box:fill-box;transform-origin:bottom;animation:growy .7s ease-out both;animation-delay:var(--d,0s)}
+@media (prefers-reduced-motion:reduce){.play *{animation:none!important}.chev,#tip{transition:none}}
+@media print{.top{position:static}.seg{display:none}details.sec{break-inside:avoid}}
+
+/* ---------- Kestrel additions ---------- */
+/* Category colours (Charcoal and teal, fixed slots): scoring areas keep the same colour on every chart */
+:root{--k1:#20a89b;--k2:#db684c;--k3:#538ae6;--k4:#c35890;--k5:#b8892d;--k6:#9468c2}
+/* Tiles: 10 rows (name, number, owner or tag, target, gap, needs, trend, status, note, stand-in) */
+.stat{grid-row:span 10}
+.stat .act b.ph{font-size:1.02rem;font-weight:500;color:var(--muted);line-height:1.3}
+.stat.phd{background:repeating-linear-gradient(135deg,var(--surface) 0 10px,var(--bg) 10px 11px)}
+.st[data-s="none"]{--sc:var(--muted)}
+.st[data-s="none"] .ic{font-weight:400}
+.owner{font-family:var(--font-mono);font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.standin{border:1px dashed var(--muted);border-radius:8px;padding:8px 10px;display:grid;gap:3px;background:var(--bg);margin-top:4px}
+.standin .lbls{display:flex;gap:4px;flex-wrap:wrap}
+.standin .lbls .tag{font-size:.6rem;padding:1px 6px;color:var(--muted)}
+.standin .sn{font-size:.78rem;font-weight:500}
+.standin .sv{font-size:1.2rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.standin .sd{font-size:.7rem;color:var(--muted);line-height:1.35}
+.dots5{display:flex;gap:6px;align-items:center;height:40px}
+.dots5 i{width:14px;height:14px;border-radius:50%;border:2px solid var(--fg);display:inline-block}
+.dots5 i.w{background:var(--fg)}
+.headline p.big b.svc{color:var(--k1)}
+/* Small multiples of diverging bars (scoring gap by area) */
+.sm{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:900px){.sm{grid-template-columns:minmax(0,1fr)}}
+.sm h4{margin:0 0 2px;font-size:.92rem;font-weight:500}
+.sm .who{margin:0 0 8px;font-size:.72rem;color:var(--muted)}
+.gr{display:grid;grid-template-columns:118px minmax(0,1fr);gap:8px;align-items:center;font-size:.8rem;min-height:26px}
+.gt{position:relative;height:22px}
+.gt::after{content:"";position:absolute;left:var(--z);top:0;bottom:0;width:1px;background:var(--muted)}
+.gb{position:absolute;top:5px;height:12px;transform-origin:var(--o) center}
+.gl{position:absolute;top:2px;font-family:var(--font-mono);font-size:.72rem;white-space:nowrap;color:var(--fg)}
+.gax{display:grid;grid-template-columns:118px minmax(0,1fr);gap:8px;font-family:var(--font-mono);font-size:.64rem;color:var(--muted);margin-top:4px}
+.gax div{display:flex;justify-content:space-between}
+.play .gb{animation:grow .9s ease-out both;animation-delay:var(--d,0s)}
+.hb-f.cat{background:var(--c)}
+.hb-f.fad{opacity:.35}
+.lg-fade{opacity:.55}
+.phbox{border:1px dashed var(--muted);border-radius:8px;padding:12px;display:grid;gap:4px;background:repeating-linear-gradient(135deg,var(--surface) 0 10px,var(--bg) 10px 11px)}
+.phbox b{font-size:1rem;font-weight:500}
+.phbox span{font-size:.78rem;color:var(--muted)}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:16px;align-items:start}
+@media (max-width:760px){.pair{grid-template-columns:minmax(0,1fr)}}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.acts li .tgt{font-weight:500}
+.headline p.big{font-size:clamp(1.15rem,2.2vw,1.42rem);max-width:none}
+.headline p.sub{max-width:none;font-size:.9rem}
+.standin{padding:6px 8px;gap:2px}
+.standin .sd.c{font-size:.66rem}
+.stat{padding:12px 14px 10px;row-gap:3px}
+.headline{gap:6px;padding-top:2px}
+.standin .lbls .tag{letter-spacing:.02em}
+.card{grid-template-rows:none;align-content:start}
+@media (max-width:640px){.top{position:static}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+ <div>
+  <p class="eyebrow">KPI Creator · Stage 3 · Standard version</p>
+  <h1>Kestrel Medical: why the big tenders were lost</h1>
+  <div class="meta"><span class="tag">Sample data</span><span>Year to date: Jan to Sep 26</span><span>Data to 30-Sep-26</span><span>Business Requirements v1.3</span></div>
+ </div>
+ <div class="seg" id="mode" role="group" aria-label="Colour mode"><button type="button" data-m="dark" aria-pressed="true">Dark</button><button type="button" data-m="light" aria-pressed="false">Light</button></div>
+</header>
+
+<main class="wrap" style="padding:0">
+
+<section class="headline" aria-label="Headline">
+ <p class="big">Kestrel lost <b>3 of its last 5</b> big tenders, and the buyers' debriefs point to <b class="svc">service and support</b>, not price: it was the biggest scoring gap on all three.</p>
+ <p class="sub" id="subhead"></p>
+ <div class="top-actions" aria-labelledby="t-acts">
+  <p class="eyebrow" id="t-acts">Top 3 actions</p>
+  <ol class="act-cards">
+   <li><span class="own">Bid manager, with the sales leader</span><p>Reviews the debriefs; the sales leader sets the response</p><span class="tgt">Proposed: 3 of the last 5 by Dec-27 (Phase 2)</span></li>
+   <li><span class="own">Sales leader</span><p>Reviews big-deal pricing if the trend keeps rising</p><span class="tgt">Target set in Phase 2</span></li>
+   <li><span class="own">Sales leader</span><p>Moves rep focus to the growing product groups</p><span class="tgt">Revenue growth of 4% in 2027</span></li>
+  </ol>
+ </div>
+</section>
+
+<section class="stats" id="tiles" aria-label="Top 5 KPIs"></section>
+
+<section class="zone" aria-labelledby="z-changed">
+ <h2 id="z-changed">What changed <small>Discount on big deals and big tender results, 2021 to 2026</small></h2>
+ <article class="card">
+  <h3 id="t-disc"></h3>
+  <p class="subt">Average discount off list price on tender contract orders, by year of order (2026 is Jan to Sep). Below: the last 5 tenders of $5m or more, by close date.</p>
+  <div class="chart replay" data-c="disc" data-why="It shows margin leaking before year end, and is the evidence for or against more discount room."></div>
+  <div class="legend"><span><i class="ln" style="--c:var(--accent)"></i>Average discount on big deals</span><span><i style="--c:var(--fg);border-radius:50%"></i>Big tender won</span><span><i style="--c:transparent;border:2px solid var(--fg);border-radius:50%"></i>Big tender lost</span></div>
+  <p class="cap">The axis starts at 12% so the step can be read. No target in the first pass: it is set in Phase 2. Big deal means tender contract orders until the sales leader sets a size rule. Click the chart to replay.</p>
+  <div data-t="disc"></div>
+ </article>
+</section>
+
+<section class="zone" aria-labelledby="z-why">
+ <h2 id="z-why">Why <small>What the buyers' debriefs say, largest cause first</small></h2>
+ <article class="card">
+  <h3>Service and support was the biggest gap on all 3 big losses; price was never the biggest</h3>
+  <p class="subt">Weighted points out of 100 the winning supplier scored above Kestrel, by scoring area, from each buyer's debrief. Right of the line: the winner scored higher.</p>
+  <div class="chart replay" data-c="big3" data-why="It says whether we lost on price, product fit, service or something else."></div>
+  <div class="legend" id="lg-area"></div>
+  <p class="cap">Strong Inference: scores parsed from the debrief letters, in three layouts, compared in weighted points (price 30, clinical fit 25, service and support 15, the rest 10 each).</p>
+  <div data-t="big3"></div>
+ </article>
+ <div class="grid">
+  <article class="card">
+   <h3 id="t-top"></h3>
+   <p class="subt">Lost tenders of every size with a scoring table, by the area with the biggest gap to the winner. Whole register, 2021 to 2026.</p>
+   <div class="chart replay" data-c="topgap" data-why="It says whether we lost on price, product fit, service or something else."></div>
+   <p class="cap" id="cap-top"></p>
+   <div data-t="topgap"></div>
+  </article>
+  <article class="card">
+   <h3>The 3 big losses went to 3 different winners, one a distributor that bundles brands</h3>
+   <p class="subt">Contract value of lost tenders by winning supplier, with the number lost. Whole register, 2021 to 2026.</p>
+   <div class="chart replay" data-c="winners" data-why="It shows whether one competitor's product or bundled distributor bids are taking the tenders."></div>
+   <div class="legend"><span><i style="--c:var(--accent)"></i>Won one of the 3 big losses</span><span><i style="--c:var(--grey)"></i>Other winners</span></div>
+   <p class="cap">No single competitor explains the big losses. Allied Clinical Supply is the distributor.</p>
+   <div data-t="winners"></div>
+  </article>
+ </div>
+</section>
+
+<section class="zone" aria-labelledby="z-do">
+ <h2 id="z-do">What to do <small>Owners and targets from the Business Requirements v1.3. Open targets are set in Phase 2</small></h2>
+ <ul class="acts">
+  <li><span class="own">Bid manager, with the sales leader</span><p>Reviews the debriefs and scoring of every lost bid; the sales leader decides how the tender response changes. <span class="tgt">Win-rate target set in Phase 2.</span></p><small id="a1"></small></li>
+  <li><span class="own">Sales leader</span><p>If the trend keeps rising, reviews big-deal pricing within her authority and pulls back discounts that aren't winning business. <span class="tgt">Target set in Phase 2.</span></p><small id="a2"></small></li>
+  <li><span class="own">Sales leader</span><p>Moves rep focus to growing product groups and customers, so revenue grows <span class="tgt">4% in 2027</span>.</p><small id="a3"></small></li>
+ </ul>
+</section>
+
+<section class="zone" aria-labelledby="z-detail">
+ <h2 id="z-detail">Detail <small>Select a section to open it</small></h2>
+
+ <details class="sec"><summary><span class="chev"></span>Revenue growth on the year, by month, product group and rep <span class="cnt">10 groups · 14 reps</span></summary><div class="body">
+  <h3 id="t-k3"></h3>
+  <p class="subt" style="margin:0">Net sales shipped year to date against the same months of 2025, ship date. Target 4% in 2027, on 2026 full-year actuals.</p>
+  <div class="chart replay" data-c="k3line" data-why="It's global's growth target, and it drives where reps focus and any headcount ask."></div>
+  <div data-t="k3line"></div>
+  <div class="ctl"><div class="seg" id="gsel" role="group" aria-label="Split revenue growth by"><button type="button" data-g="groups" aria-pressed="true">By product group</button><button type="button" data-g="reps" aria-pressed="false">By rep</button></div></div>
+  <h3 id="t-split"></h3>
+  <p class="subt" style="margin:0" id="s-split"></p>
+  <div class="chart" data-c="split" data-ink data-why="It shows which product groups and reps grow or go backwards, so rep focus goes to the right places."></div>
+  <div class="legend"><span><i style="--c:var(--neg)"></i>Going backwards</span><span><i style="--c:var(--pos)"></i>Growing</span></div>
+  <div data-t="split" id="tbl-split"></div>
+ </div></details>
+
+ <details class="sec"><summary><span class="chev"></span>Big tender win rate: the last 5 tenders and the size line <span class="cnt">5 tenders</span></summary><div class="body">
+  <h3>2 of the last 5 big tenders won; the count moves a lot with the size line</h3>
+  <p class="subt" style="margin:0">Tenders of $5m or more (annual amounts times contract length), decided, newest last. No target in the first pass: the bid manager sets it in Phase 2.</p>
+  <div id="tbl-tenders"></div>
+  <div id="tbl-sens"></div>
+ </div></details>
+
+ <details class="sec"><summary><span class="chev"></span>Our price against the winning price on lost tenders <span class="cnt">Phase 2 · 1 stand-in</span></summary><div class="body">
+  <div class="pair">
+   <div class="phbox"><span class="owner">Bid manager</span><b>Our price against the winning price on lost tenders</b><span>Phase 2: waiting for data</span><span>Waiting for winning prices from the debrief letters</span><span class="st" data-s="none"><span class="ic" aria-hidden="true">○</span>Not rated: Phase 2</span></div>
+   <div class="standin" data-why="It proves or disproves the price story, using the buyer's price score until real prices are back-filled.">
+    <div class="lbls"><span class="tag">Stand-in, not the KPI</span><span class="tag">Sample data</span></div>
+    <span class="sn">Price score gap on lost tenders</span>
+    <span class="sv" id="s2v"></span>
+    <span class="sd">Price score, not price. The buyer's view of price, not our price against the winner's. Strong Inference.</span>
+    <div class="chart" data-c="s2" data-why="It proves or disproves the price story, using the buyer's price score until real prices are back-filled."></div>
+    <div data-t="s2"></div>
+   </div>
+  </div>
+ </div></details>
+
+ <details class="sec"><summary><span class="chev"></span>Gross margin by product group <span class="cnt">Phase 2 · 1 stand-in</span></summary><div class="body">
+  <div class="pair">
+   <div class="phbox"><span class="owner">Sales leader</span><b>Gross margin by product group</b><span>Phase 2: waiting for data</span><span>Waiting for cost of sales from finance</span><span class="st" data-s="none"><span class="ic" aria-hidden="true">○</span>Not rated: Phase 2</span></div>
+   <div class="standin">
+    <div class="lbls"><span class="tag">Stand-in, not the KPI</span><span class="tag">Sample data</span></div>
+    <span class="sn">Net price realisation by product group, with share of net sales</span>
+    <span class="sd">Service and Parts show 100% because they aren't discounted. That says nothing about their margin. Groups are not ranked best or worst.</span>
+    <div class="chart" data-c="s1" data-why="It shows where the margin may leak, on the price side only, until cost of sales arrives."></div>
+    <div data-t="s1"></div>
+   </div>
+  </div>
+ </div></details>
+
+ <details class="sec"><summary><span class="chev"></span>Monthly reports: what the 30 reports say they use <span class="cnt">Stand-in detail</span></summary><div class="body">
+  <div class="standin">
+   <div class="lbls"><span class="tag">Stand-in, not the KPI</span><span class="tag">Sample data</span></div>
+   <span class="sn">Reports on the draft agreed set: sales definition and customer grouping in use</span>
+   <span class="sd">Against a draft set. Shows what reports say they use, not whether their numbers agree. Working Hypothesis. Index at 30-Sep-26.</span>
+   <div class="mini" id="s3" data-why="Every other measure depends on agreed numbers, and reconciling takes three days a month."></div>
+  </div>
+ </div></details>
+
+ <details class="sec"><summary><span class="chev"></span>Definitions <span class="cnt">11 KPIs · 4 stand-ins</span></summary><div class="body">
+  <dl class="defs">
+   <dt>Gross margin per cent</dt><dd>(Net sales minus cost of sales) ÷ net sales, shipped lines, January to December. Phase 2: waiting for cost of sales from SAP product costing. Must reconcile to finance's 41% before use.</dd>
+   <dt>Average discount off list price on big deals</dt><dd>1 minus net value ÷ list value, value-weighted, tender contract orders, by order date. Counter-metric: tender contract net sales and the big tender win rate.</dd>
+   <dt>Revenue growth on the year</dt><dd>Net sales shipped year to date ÷ the same months last year, minus 1, ship date. The 4% for 2027 is measured on 2026 full-year actuals.</dd>
+   <dt>Big tender win rate</dt><dd>Tenders won out of the last 5 decided tenders with a contract value of $5m or more. Annual amounts are multiplied by the contract length. Counter-metric: number and value of big tenders bid.</dd>
+   <dt>Monthly reports that match the agreed set of numbers</dt><dd>Reports whose monthly net sales check against the governed sales table, ÷ reports that carry a sales number. Phase 2: waiting for finance's agreed definitions.</dd>
+   <dt>Gross margin by product group</dt><dd>Gross margin per cent by product group. Phase 2, with the same cost of sales feed.</dd>
+   <dt>Revenue growth by product group</dt><dd>Revenue growth on the year, split by product group.</dd>
+   <dt>Revenue growth by rep</dt><dd>Revenue growth on the year, split by the rep on the order line.</dd>
+   <dt>Our price against the winning price on lost tenders</dt><dd>Our submitted price ÷ the winning price, minus 1, lost tenders, total contract value. Phase 2: winning price is recorded on 5 of 25 lost tenders.</dd>
+   <dt>Why we lost, from the debriefs</dt><dd>For each lost tender with a scoring table, the scoring area with the biggest gap to the winner, in weighted points out of 100.</dd>
+   <dt>Who is winning the tenders we lose</dt><dd>Count and contract value of lost tenders by winning supplier.</dd>
+   <dt>Stand-ins (not KPIs)</dt><dd>Net price realisation (net value ÷ list value, shipped lines); Net price realisation by product group; Reports on the draft agreed set; Price score gap on lost tenders. Each has no target and no status colour, and is removed when its KPI switches on in Phase 2.</dd>
+  </dl>
+ </div></details>
+</section>
+
+<footer>
+ <span>Built by Visalli from the Business Requirements v1.3 and the KPI Calculation Pack v1.2 (Stage 2, 24-Oct-26). Every number matches the Calculation Pack.</span>
+ <span>Kestrel Medical is a test case. Sample data, data to 30-Sep-26. Check against real data before go-live.</span>
+</footer>
+</main>
+</div>
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script>
+const D={"k2": {"fy": {"2021": 14.04, "2022": 14.04, "2023": 14.05, "2024": 17.03, "2025": 17.03}, "ytd": 17.03, "series": [17.138, 17.118, 17.144, 17.112, 17.087, 17.033, 17.036, 17.043, 17.032]}, "k3": {"series": [-12.53, -9.14, -8.68, -7.77, -8.23, -7.61, -7.8, -7.34, -6.8], "base": -6.8, "pace": 0.72, "run": 0.27}, "months": ["Jan-26", "Feb-26", "Mar-26", "Apr-26", "May-26", "Jun-26", "Jul-26", "Aug-26", "Sep-26"], "tenders": [{"ref": "TND-2024-03", "customer": "Coastal Ambulance Service", "close": "22/03/2024", "value_m": 14.0, "outcome": "won", "winner": "Kestrel Medical"}, {"ref": "TND-2024-07", "customer": "Southern Metro Health Network", "close": "12/07/2024", "value_m": 6.5, "outcome": "lost", "winner": "Vantage Medical"}, {"ref": "TND-2025-02", "customer": "Western Plains LHD", "close": "30/04/2025", "value_m": 7.2, "outcome": "lost", "winner": "Allied Clinical Supply"}, {"ref": "TND-2025-06", "customer": "Highlands Ambulance", "close": "19/09/2025", "value_m": 11.8, "outcome": "lost", "winner": "Norland Rescue Systems"}, {"ref": "TND-2026-01", "customer": "Capital Region Health", "close": "27/02/2026", "value_m": 5.6, "outcome": "won", "winner": "Kestrel Medical"}], "big3": [{"ref": "TND-2024-07", "customer": "Southern Metro Health Network", "gaps": {"price": 0.6, "clinical": 0.5, "service": 2.85, "supply": 1.0, "training": 0.3, "sustain": 0.6}}, {"ref": "TND-2025-02", "customer": "Western Plains LHD", "gaps": {"price": 1.2, "clinical": -0.5, "service": 1.95, "supply": 0.6, "training": 0.4, "sustain": 0.4}}, {"ref": "TND-2025-06", "customer": "Highlands Ambulance", "gaps": {"price": -0.9, "clinical": -0.25, "service": 4.35, "supply": 3.5, "training": 0.2, "sustain": 0.6}}], "topgap": {"service": 7, "clinical": 5, "price": 3, "sustain": 3, "supply": 2}, "scored": 20, "lostN": 25, "winners": [["Allied Clinical Supply", 7, 15.2], ["Norland Rescue Systems", 3, 13.9], ["Helix Healthcare", 5, 13.2], ["Vantage Medical", 4, 10.6], ["Meridian Biomedical", 6, 7.5]], "bigWinners": {"Vantage Medical": "Southern Metro Health Network", "Allied Clinical Supply": "Western Plains LHD", "Norland Rescue Systems": "Highlands Ambulance"}, "groups": [["Service", -20.75, 1.65, 0.31, 21.17, 26.71], ["Defibrillators", -9.25, 0.88, 0.04, 29.25, 32.23], ["ED stretchers", -7.42, 0.76, 0.65, 10.67, 11.53], ["Stair chairs", -7.07, 0.74, 0.89, 4.24, 4.56], ["Powered stretchers", -6.31, 0.69, 2.54, 13.64, 14.56], ["Loading systems", -5.01, 0.6, 0.31, 12.59, 13.25], ["Parts", -4.33, 0.56, -0.64, 6.55, 6.84], ["Manual stretchers", -2.33, 0.42, 0.86, 5.66, 5.8], ["Defibrillator consumables", -0.14, 0.28, 0.45, 13.06, 13.07], ["Beds", 2.63, 0.09, -0.89, 32.55, 31.71]], "reps": [["Rep R10", -17.53, 1.44, 0.36, 17.71, 21.47], ["Rep R07", -10.63, 0.97, -0.89, 7.13, 7.97], ["Rep R05", -9.84, 0.92, 0.58, 22.62, 25.09], ["Rep R01", -9.22, 0.88, 2.05, 4.51, 4.97], ["Rep R14", -8.69, 0.85, 0.07, 7.41, 8.11], ["Rep R09", -8.01, 0.8, 3.85, 1.75, 1.91], ["Rep R02", -6.8, 0.72, -1.11, 8.23, 8.83], ["Rep R06", -6.14, 0.68, -0.83, 7.2, 7.68], ["Rep R08", -5.5, 0.63, 0.29, 3.04, 3.22], ["Rep R04", -4.77, 0.58, -4.76, 6.18, 6.49], ["Rep R13", -4.47, 0.56, 0.08, 21.66, 22.67], ["Rep R11", -1.47, 0.36, 1.28, 31.07, 31.53], ["Rep R12", 0.12, 0.26, -3.17, 8.85, 8.84], ["Rep R03", 35.4, -2.09, 21.2, 2.0, 1.47]], "s1": {"ytd": 87.36, "ytd25": 87.67, "groups": [["Loading systems", 82.91, 82.85, 0.06, 8.4], ["Powered stretchers", 82.95, 82.94, 0.01, 9.1], ["Stair chairs", 83.1, 83.19, -0.08, 2.8], ["Manual stretchers", 83.12, 83.27, -0.15, 3.8], ["Defibrillators", 84.17, 84.05, 0.12, 19.6], ["Beds", 84.33, 84.68, -0.34, 21.8], ["ED stretchers", 84.45, 84.15, 0.3, 7.1], ["Defibrillator consumables", 95.0, 95.0, -0.0, 8.7], ["Parts", 100.0, 100.0, 0.0, 4.4], ["Service", 100.0, 100.0, 0.0, 14.2]]}, "s2": {"behind": 11, "scored": 20, "big": [["Southern Metro Health Network", 0.6, 5.25], ["Western Plains LHD", 1.2, 2.85], ["Highlands Ambulance", -0.9, 8.4]]}, "s3": {"match": 3, "reports": 30, "combos": 17, "defs": {"ship date": 14, "n/a": 6, "invoice date": 5, "order date": 5}, "grouping": {"n/a": 9, "parent where known": 6, "ship-to": 6, "manual mapping tab": 5, "sold-to": 4}, "fresh": 22}, "sens": {">=5m": [2, 5], ">=4m": [5, 10], ">=3m": [8, 13], ">=2m": [13, 20], ">=1m": [19, 35], ">=0m": [28, 53]}, "lost": [{"ref": "TND-2021-22", "customer": "Central Queensland Health District", "close": "21/01/2021", "value_m": 2.21, "winner": "Meridian Biomedical", "top": "clinical", "big": false}, {"ref": "TND-2021-24", "customer": "Riverbend Private Hospitals", "close": "18/02/2021", "value_m": 0.79, "winner": "Helix Healthcare", "top": "service", "big": false}, {"ref": "TND-2021-31", "customer": "Acacia Private Hospitals", "close": "18/07/2021", "value_m": 0.99, "winner": "Meridian Biomedical", "top": "service", "big": false}, {"ref": "TND-2021-27", "customer": "Ironbark Private Hospitals", "close": "01/08/2021", "value_m": 0.9, "winner": "Meridian Biomedical", "top": "clinical", "big": false}, {"ref": "TND-2021-29", "customer": "Coral Private Hospitals", "close": "27/10/2021", "value_m": 0.72, "winner": "Norland Rescue Systems", "top": "clinical", "big": false}, {"ref": "TND-2021-23", "customer": "Coastal Ambulance Service", "close": "02/11/2021", "value_m": 1.14, "winner": "Allied Clinical Supply", "top": "price", "big": false}, {"ref": "TND-2022-25", "customer": "Coastal Ambulance Service", "close": "14/02/2022", "value_m": 1.71, "winner": "Meridian Biomedical", "top": "supply", "big": false}, {"ref": "TND-2022-31", "customer": "Hillcrest Private Hospitals", "close": "07/05/2022", "value_m": 1.72, "winner": "Allied Clinical Supply", "top": "price", "big": false}, {"ref": "TND-2022-29", "customer": "Riverbend Private Hospitals", "close": "26/07/2022", "value_m": 4.8, "winner": "Helix Healthcare", "top": "sustain", "big": false}, {"ref": "TND-2022-20", "customer": "Hunter Coast Health District", "close": "15/12/2022", "value_m": 1.38, "winner": "Norland Rescue Systems", "top": "price", "big": false}, {"ref": "TND-2023-29", "customer": "Ironbark Private Hospitals", "close": "01/02/2023", "value_m": 1.36, "winner": "Helix Healthcare", "top": "supply", "big": false}, {"ref": "TND-2023-30", "customer": "Darling Downs Health", "close": "04/04/2023", "value_m": 4.8, "winner": "Helix Healthcare", "top": "sustain", "big": false}, {"ref": "TND-2023-20", "customer": "Southern Metropolitan Health Network", "close": "03/07/2023", "value_m": 1.42, "winner": "Helix Healthcare", "top": "clinical", "big": false}, {"ref": "TND-2023-26", "customer": "Aotearoa Ambulance Trust", "close": "05/09/2023", "value_m": 0.75, "winner": "Allied Clinical Supply", "top": "clinical", "big": false}, {"ref": "TND-2023-28", "customer": "Riverbend Private Hospitals", "close": "19/11/2023", "value_m": 2.83, "winner": "Allied Clinical Supply", "top": "sustain", "big": false}, {"ref": "TND-2023-24", "customer": "Aotearoa Ambulance Trust", "close": "23/11/2023", "value_m": 0.85, "winner": "Meridian Biomedical", "top": "service", "big": false}, {"ref": "TND-2024-07", "customer": "Southern Metro Health Network", "close": "12/07/2024", "value_m": 6.5, "winner": "Vantage Medical", "top": "service", "big": true}, {"ref": "TND-2024-25", "customer": "Coastal Ambulance Service", "close": "01/09/2024", "value_m": 1.88, "winner": "Vantage Medical", "top": "service", "big": false}, {"ref": "TND-2025-25", "customer": "Red Centre Ambulance", "close": "30/01/2025", "value_m": 1.12, "winner": "Vantage Medical", "top": "none", "big": false}, {"ref": "TND-2025-02", "customer": "Western Plains LHD", "close": "30/04/2025", "value_m": 7.2, "winner": "Allied Clinical Supply", "top": "service", "big": true}, {"ref": "TND-2025-21", "customer": "Silverleaf Private Hospitals", "close": "16/08/2025", "value_m": 0.86, "winner": "Allied Clinical Supply", "top": "none", "big": false}, {"ref": "TND-2025-06", "customer": "Highlands Ambulance", "close": "19/09/2025", "value_m": 11.8, "winner": "Norland Rescue Systems", "top": "service", "big": true}, {"ref": "TND-2025-27", "customer": "Coral Private Hospitals", "close": "09/10/2025", "value_m": 0.85, "winner": "Meridian Biomedical", "top": "none", "big": false}, {"ref": "TND-2026-25", "customer": "Ironbark Private Hospitals", "close": "21/03/2026", "value_m": 0.73, "winner": "Allied Clinical Supply", "top": "none", "big": false}, {"ref": "TND-2026-22", "customer": "Adelaide Coastal Health Network", "close": "04/07/2026", "value_m": 1.11, "winner": "Vantage Medical", "top": "none", "big": false}]};
+const PAL={dark:{bg:'#0c121a',surface:'#141c27',fg:'#e8edf3',muted:'#94a1b2',line:'#243042',accent:'#4f9dff',soft:'#16263d',grey:'#8b96a5',pos:'#bcd9ff',neg:'#4f9dff',
+  cats:['#20a89b','#db684c','#538ae6','#c35890','#b8892d','#9468c2']},
+ light:{bg:'#f5f8fc',surface:'#ffffff',fg:'#121a24',muted:'#556273',line:'#dbe3ee',accent:'#1f64c8',soft:'#e3eefc',grey:'#6b7685',pos:'#93bdf2',neg:'#1f64c8',
+  cats:['#12a195','#c0482a','#2663c9','#9e366f','#a57710','#7c50a8']}};
+const STATUS={dark:{ok:'#5fd38d',warn:'#f2a65a',bad:'#f87171'},light:{ok:'#15803d',warn:'#b45309',bad:'#b91c1c'}};
+let mode='dark';try{const m=localStorage.getItem('kmDashMode');if(m==='light'||m==='dark')mode=m}catch(e){}
+function applyMode(){const t=PAL[mode],s=STATUS[mode],r=document.documentElement.style;document.documentElement.dataset.theme=mode;
+ const set={bg:t.bg,surface:t.surface,fg:t.fg,muted:t.muted,line:t.line,accent:t.accent,'accent-soft':t.soft,grey:t.grey,pos:t.pos,neg:t.neg,'s-ok':s.ok,'s-warn':s.warn,'s-bad':s.bad};
+ t.cats.forEach((c,i)=>set['k'+(i+1)]=c);for(const k in set)r.setProperty('--'+k,set[k]);
+ document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));try{localStorage.setItem('kmDashMode',mode)}catch(e){}}
+document.getElementById('mode').addEventListener('click',e=>{const b=e.target.closest('button');if(b){mode=b.dataset.m;applyMode()}});
+
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sg=(v,dp=1)=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(dp);
+const pct=(v,dp=2)=>v.toFixed(dp)+'%';
+const ICON={ok:'✓',warn:'!',bad:'×',none:'○'},WORD={ok:'On track',warn:'Behind',bad:'Off track'};
+/* Scoring areas keep one colour on every chart (Charcoal and teal slots 1 to 6) */
+const AREA=[['service','Service and support','--k1'],['price','Price','--k2'],['clinical','Clinical fit','--k3'],['supply','Supply reliability','--k4'],['training','Training','--k5'],['sustain','Sustainability','--k6']];
+const AN=Object.fromEntries(AREA.map(a=>[a[0],a[1]])),AC=Object.fromEntries(AREA.map(a=>[a[0],a[2]]));
+const KEY=['service','price'];
+const table=(head,rows)=>`<details class="data"><summary>See data</summary><table class="t"><thead><tr>${head.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></details>`;
+const svgOpen=(w,h,label)=>`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">`;
+const short=n=>n.replace(' Health Network','').replace(' Ambulance Service',' Ambulance').replace(' Region Health','').replace(' LHD','');
+
+/* ---------- Words that come from the numbers ---------- */
+const tg=D.topgap,lostBig=D.tenders.filter(t=>t.outcome==='lost');
+document.getElementById('subhead').textContent=`Price was the biggest gap on only ${tg.price} of ${D.scored} scored losses. Discount on big deals has held at ${pct(D.k2.ytd)} since 2024; revenue is ${Math.abs(D.k3.base)}% down on last year. Strong Inference (debrief scores).`;
+document.getElementById('t-disc').textContent=`Discount on big deals rose from ${pct(D.k2.fy['2023'])} to ${pct(D.k2.fy['2024'])} in 2024, and Kestrel still lost 3 of its last 5 big tenders`;
+document.getElementById('t-top').textContent=`Price was the biggest gap on only ${tg.price} of ${D.scored} lost tenders; service and support on ${tg.service}`;
+document.getElementById('cap-top').textContent=`${D.lostN-D.scored} of ${D.lostN} lost tenders have no scoring table and are left out. Debriefs were received on all ${D.lostN}.`;
+document.getElementById('t-k3').textContent=`Revenue is ${sg(D.k3.base)}% on last year; it needs +${D.k3.pace.toFixed(2)} points a month and is moving +${D.k3.run.toFixed(2)}`;
+document.getElementById('a1').textContent=`2 of the last 5 now. Gary's starting proposal, 3 of the last 5 by Dec-27, means winning the next 2 big tenders (Working Hypothesis). A service measure is a Phase 2 question for the sales leader.`;
+document.getElementById('a2').textContent=`${pct(D.k2.ytd)} now; trend flat (0.00 points a month). Target set in Phase 2, once finance and the bid manager have checked the numbers. Read with the win rate: pulling back discount can lose deals.`;
+document.getElementById('a3').textContent=`${sg(D.k3.base)}% year to date. Needs +${D.k3.pace.toFixed(2)} points a month; trend +${D.k3.run.toFixed(2)}. Only Beds is growing (+2.6%).`;
+
+/* ---------- C. Tiles ---------- */
+function spark(vals,tgt){const w=100,h=40,all=tgt==null?vals:[...vals,tgt],mx=Math.max(...all),mn=Math.min(...all),Y=v=>h-3-(v-mn)/((mx-mn)||1)*(h-6);const P=vals.map((v,i)=>[i*w/(vals.length-1),Y(v)]);
+ const path=a=>'M'+a.map(p=>p.map(n=>n.toFixed(1)).join(',')).join('L'),end=P.at(-1)[1]/h*100;
+ return `<div class="spk"><svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path class="area" d="${path(P)}L${w},${h}L0,${h}Z"/>${tgt==null?'':`<line class="tgt-s" x1="0" x2="${w}" y1="${Y(tgt)}" y2="${Y(tgt)}"/>`}<path d="${path(P)}"/></svg><span class="end" style="top:calc(${end.toFixed(1)}% - 4px)"></span></div>`}
+const E='<span aria-hidden="true"></span>';
+const TILES=[
+ {n:'Gross margin per cent',ph:true,owner:'Owner: sales leader',t:'Target: 43% for 2027',gap:'Needs cost of sales (finance)',
+  note:"Finance's stated figure about 41%, not calculated (Working Hypothesis)",
+  why:"It's global's headline target, and any discount case has to square with it.",
+  si:{n:'Net price realisation',v:pct(D.s1.ytd),d:`Jan to Sep 26; ${pct(D.s1.ytd25)} in 2025`,c:"Price side only. This is not gross margin and can't be compared with the 43% target."}},
+ {n:'Average discount off list price on big deals',v:pct(D.k2.ytd),spark:D.k2.series,tgt:null,owner:'Owner: sales leader',t:'Target set in Phase 2',gap:'Jan to Sep 26, tender contracts',
+  need:'',trend:'Trend flat (0.00 pts a month)',s:'none',sw:'Not rated: target open',note:'Set once finance and the bid manager check the numbers',
+  why:'It shows margin leaking before year end, and is the evidence for or against more discount room.'},
+ {n:'Revenue growth on the year',v:sg(D.k3.base)+'%',spark:D.k3.series,tgt:4,owner:'Owner: sales leader',t:'Target +4% in 2027',gap:`${sg(D.k3.base-4)} pts`,
+  need:`Needs +${D.k3.pace.toFixed(2)} pts a month`,trend:`Trend +${D.k3.run.toFixed(2)} pts a month`,s:'bad',note:'Jan to Sep 26 on Jan to Sep 25',
+  why:"It's global's growth target, and it drives where reps focus and any headcount ask."},
+ {n:'Big tender win rate',v:'2 of 5',dots:D.tenders.map(t=>t.outcome==='won'),owner:'Owner: bid manager',t:'Target set in Phase 2',gap:'2024: 1 of 2 won',need:'2025: 0 of 2 won',trend:'2026 to Sep: 1 of 1 won',s:'none',sw:'Not rated: target open',
+  note:'Tenders of $5m or more. Small numbers',why:'Three of the last five were lost. It decides how Kestrel responds to the next big tenders.'},
+ {n:'Monthly reports that match the agreed set of numbers',ph:true,owner:'Owner: finance report owner',t:'Target: set in Phase 2',gap:"Needs finance's definitions",
+  note:'First check runs once they are agreed',
+  why:'Reconciling takes three days a month, and every other measure depends on agreed numbers.',
+  si:{n:'Reports on the draft agreed set',v:`${D.s3.match} of ${D.s3.reports}`,d:`${D.s3.combos} different combinations in use`,c:'Against a draft set. Shows what reports say they use, not whether their numbers agree.'}}];
+const cap1=x=>x.charAt(0).toUpperCase()+x.slice(1);
+document.getElementById('tiles').innerHTML=TILES.map(t=>{const ln=x=>x?`<span class="ln">${x}</span>`:E;
+ const top=t.ph?`<div class="tile-top"><div class="act"><b class="ph">Phase 2: waiting for data</b></div></div>`:
+  `<div class="tile-top"><div class="act"><b>${t.v}</b></div>${t.spark?spark(t.spark,t.tgt):`<div class="dots5" aria-hidden="true">${t.dots.map(w=>`<i class="${w?'w':''}"></i>`).join('')}</div>`}</div>`;
+ const st=t.ph?`<span class="st" data-s="none"><span class="ic" aria-hidden="true">○</span>Not rated: Phase 2</span>`:`<span class="st" data-s="${t.s}"><span class="ic" aria-hidden="true">${ICON[t.s]}</span>${t.sw||WORD[t.s]}</span>`;
+ const si=t.si?`<div class="standin"><div class="lbls"><span class="tag">Stand-in, not the KPI · Sample data</span></div><span class="sn">${t.si.n}: <span class="sv">${t.si.v}</span></span><span class="sd">${t.si.d}</span><span class="sd c">${t.si.c}</span></div>`:E;
+ return `<div class="stat${t.ph?' phd':''}" tabindex="0" role="group" aria-label="${esc(t.n)}: ${esc(t.ph?'Phase 2, waiting for data':t.v)}. Why it matters: ${esc(t.why)}" data-tip="<b>Why it matters</b><div class='why'>${esc(t.why)}</div>">
+ <span class="nm">${t.n}</span>${top}<span class="owner">${t.owner}</span>${ln(t.t)}${ln(t.gap)}${ln(t.need)}
+ ${t.trend?`<span class="ln trend" data-s="${t.s||''}">${cap1(t.trend)}</span>`:E}${st}<span class="note">${t.note}</span>${si}</div>`}).join('');
+
+function countUp(el,ms=1200){const full=el.textContent,m=full.match(/^([^0-9]*)([0-9][0-9,]*\.?[0-9]*)(.*)$/);if(!m)return;
+ const [,pre,num,post]=m,target=parseFloat(num.replace(/,/g,'')),dp=(num.split('.')[1]||'').length;let t0=null;
+ const step=now=>{if(t0===null)t0=now;const k=Math.max(0,Math.min(1,(now-t0)/ms)),e=1-Math.pow(1-k,3);el.textContent=pre+(target*e).toFixed(dp)+post;if(k<1)requestAnimationFrame(step);else el.textContent=full};
+ requestAnimationFrame(step);setTimeout(()=>{el.textContent=full},ms+400)}
+{const nums=[...document.querySelectorAll('#tiles .act b:not(.ph)')].filter(b=>!/ of /.test(b.textContent));
+ if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&'IntersectionObserver' in window){const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){nums.forEach(n=>countUp(n));io.disconnect()}},{threshold:.3});io.observe(document.getElementById('tiles'))}}
+
+/* ---------- Charts ---------- */
+const R={},T={};
+function yGrid(m,w,Y,ticks,fmt){return ticks.map(t=>`<line class="grid-l" x1="${m.l}" x2="${w-m.r}" y1="${Y(t)}" y2="${Y(t)}"/><text class="ax" x="${m.l-8}" y="${Y(t)+4}" text-anchor="end">${fmt(t)}</text>`).join('')}
+const dmy=s=>{const [d,m,y]=s.split('/').map(Number);return y+(m-1)/12+(d-1)/365};
+
+/* D. Discount by year and the big tenders along the same time line (one y-axis; tenders sit in their own lane) */
+R.disc=el=>{const w=el.clientWidth,narrow=w<560,h=narrow?290:340,m={l:44,r:narrow?16:24,t:16,b:narrow?90:140},lo=12,hi=18,x0=2021,x1=2027;
+ const X=v=>m.l+(w-m.l-m.r)*(v-x0)/(x1-x0),Y=v=>m.t+(h-m.t-m.b)*(1-(v-lo)/(hi-lo)),base=h-m.b;
+ const pts=[...Object.entries(D.k2.fy).map(([y,v])=>[+y+.5,v,y]),[2026.375,D.k2.ytd,'Jan to Sep 26']];
+ let s=svgOpen(w,h,`Average discount on big deals by year: ${pts.map(p=>p[2]+' '+pct(p[1])).join(', ')}. Big tenders: ${D.tenders.map(t=>`${t.customer} ${t.outcome}`).join(', ')}.`)+yGrid(m,w,Y,[12,14,16,18],v=>v+'%');
+ for(let y=x0;y<=2026;y++)s+=`<text class="ax" x="${X(y+.5)}" y="${base+16}" text-anchor="middle">${narrow?"'"+String(y).slice(2):y}</text>`;
+ const d='M'+pts.map(p=>`${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join('L');
+ s+=`<path class="draw" pathLength="1" d="${d}" style="fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round"/>`;
+ pts.forEach((p,i)=>{s+=`<circle class="dot fade" style="--d:${.2+i*.15}s;fill:var(--accent)" cx="${X(p[0])}" cy="${Y(p[1])}" r="4.5"/>`+
+  `<rect class="hit" x="${X(p[0])-18}" y="${m.t}" width="36" height="${base-m.t}" data-tip="<b>${p[2]}</b><div class='tr'><span>Average discount</span><b>${pct(p[1])}</b></div>"/>`});
+ s+=`<text class="lab fade" style="--d:1s" x="${X(2023.5)}" y="${Y(D.k2.fy['2023'])+20}" text-anchor="middle"><tspan class="b">${pct(D.k2.fy['2023'])}</tspan></text>`;
+ s+=`<text class="lab fade" style="--d:1s" x="${X(2024.5)}" y="${Y(D.k2.fy['2024'])-12}" text-anchor="middle"><tspan class="b">${pct(D.k2.fy['2024'])}</tspan></text>`;
+ /* tender lane */
+ const ly=base+(narrow?52:50);s+=`<line x1="${m.l}" x2="${w-m.r}" y1="${ly}" y2="${ly}" style="stroke:var(--line)"/><text class="ax" x="${m.l}" y="${ly-16}">Big tenders, $5m or more</text>`;
+ D.tenders.forEach((t,i)=>{const x=X(dmy(t.close)),won=t.outcome==='won',lab=`${won?'Won':'Lost'} ${short(t.customer)}`;
+  s+=`<g class="fade" style="--d:${1.2+i*.12}s"><circle cx="${x}" cy="${ly}" r="7" style="fill:${won?'var(--fg)':'var(--surface)'};stroke:var(--fg);stroke-width:2"/>`;
+  if(!narrow)s+=`<text class="ax" x="${x}" y="${ly+(i%2?50:22)}" text-anchor="middle" style="fill:var(--fg)">${lab}</text><text class="ax" x="${x}" y="${ly+(i%2?62:34)}" text-anchor="middle">$${t.value_m.toFixed(1)}m</text>`;
+  s+=`</g><rect class="hit" x="${x-12}" y="${ly-14}" width="24" height="28" tabindex="0" data-tip="<b>${esc(t.customer)}</b><div class='tr'><span>Closed</span><b>${t.close}</b></div><div class='tr'><span>Value</span><b>$${t.value_m.toFixed(1)}m</b></div><div class='tr'><span>Outcome</span><b>${won?'Won':'Lost'}</b></div><div class='tr'><span>Winner</span><b>${esc(t.winner)}</b></div>"/>`});
+ el.innerHTML=s+'</svg>'};
+T.disc=()=>table(['Year or tender','Value'],[...Object.entries(D.k2.fy).map(([y,v])=>[`Discount ${y}`,pct(v)]),['Discount Jan to Sep 26',pct(D.k2.ytd)],
+ ...D.tenders.map(t=>[`${t.customer}, closed ${t.close}`,`$${t.value_m.toFixed(1)}m · ${t.outcome} · winner ${t.winner}`])]);
+
+/* E1. Small multiples: gap by scoring area on each big loss, one scale */
+function gapRows(gaps,lo,hi,dl){const z=(-lo)/(hi-lo)*100;return AREA.map(([k,n,c],i)=>{const v=gaps[k],key=KEY.includes(k),wd=Math.abs(v)/(hi-lo)*100,pos=v>=0;
+ return `<div class="gr"><span style="${key?'font-weight:500':'color:var(--muted)'}">${n}</span><div class="gt" style="--z:${z}%" tabindex="0" role="img" aria-label="${n}: ${sg(v,2)} points" data-tip="<b>${n}</b><div class='tr'><span>Winner's lead</span><b>${sg(v,2)} pts</b></div>">
+  <span class="gb" style="--o:${pos?'left':'right'};--d:${dl+i*.06}s;${pos?`left:${z}%`:`right:${100-z}%`};width:${wd}%;background:var(${c});opacity:${key?1:.35};border-radius:${pos?'0 4px 4px 0':'4px 0 0 4px'}"></span>
+  <span class="gl" style="${pos?`left:calc(${z+wd}% + 5px)`:`right:calc(${100-z+wd}% + 5px)`};${key?'font-weight:600':'color:var(--muted)'}">${sg(v,2)}</span></div></div>`}).join('')}
+R.big3=el=>{if(el.dataset.done)return;el.dataset.done=1;const lo=-1.5,hi=5;
+ el.innerHTML='<div class="sm">'+D.big3.map((b,j)=>{const t=D.tenders.find(x=>x.ref===b.ref);return `<div><h4>${b.customer}</h4><p class="who">$${t.value_m.toFixed(1)}m · closed ${t.close} · won by ${t.winner}</p>${gapRows(b.gaps,lo,hi,j*.2)}
+  <div class="gax"><span></span><div><span>Kestrel ahead</span><span>Winner ahead</span></div></div></div>`}).join('')+'</div>';
+ document.getElementById('lg-area').innerHTML=AREA.map(([k,n,c])=>`<span class="${KEY.includes(k)?'':'lg-fade'}"><i style="--c:var(${c})"></i>${n}</span>`).join('')};
+T.big3=()=>table(['Big loss',...AREA.map(a=>a[1])],D.big3.map(b=>[b.customer,...AREA.map(a=>sg(b.gaps[a[0]],2))]));
+
+/* E2. Ranked bars: biggest gap by area, coloured by area */
+function hbars(rows,{max,fmt,cls,extra,tipx}){return '<div class="hb">'+rows.map((r,i)=>`<div class="hb-r"><span>${r[0]}${extra?`<small>${extra(r)}</small>`:''}</span>
+ <span class="hb-t" data-tip="<b>${esc(r[0])}</b><div class='tr'><span>Value</span><b>${fmt(r[1])}</b></div>${tipx?tipx(r):''}" tabindex="0" role="img" aria-label="${esc(r[0])}: ${fmt(r[1])}"><span class="hb-f ${cls(r)}" style="width:${(r[1]/max*100).toFixed(1)}%;--d:${i*0.08}s;${r.c?`--c:var(${r.c})`:''}"></span></span>
+ <span class="hb-v">${fmt(r[1])}</span></div>`).join('')+'</div>'}
+R.topgap=el=>{if(el.dataset.done)return;el.dataset.done=1;const rows=Object.entries(D.topgap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{const r=[AN[k],v];r.c=AC[k];r.k=KEY.includes(k);return r});
+ el.innerHTML=hbars(rows,{max:Math.max(...rows.map(r=>r[1])),fmt:v=>`${v} of ${D.scored}`,cls:r=>'cat'+(r.k?'':' fad')})};
+T.topgap=()=>table(['Biggest gap','Lost tenders'],Object.entries(D.topgap).map(([k,v])=>[AN[k],`${v} of ${D.scored}`]));
+
+/* E3. Ranked bars: lost value by winner, the big-loss winners highlighted */
+R.winners=el=>{if(el.dataset.done)return;el.dataset.done=1;const rows=D.winners.map(r=>[r[0],r[2],r[1]]);
+ el.innerHTML=hbars(rows,{max:Math.max(...rows.map(r=>r[1])),fmt:v=>'$'+v.toFixed(1)+'m',cls:r=>D.bigWinners[r[0]]?'hi':'',extra:r=>`${r[2]} lost${D.bigWinners[r[0]]?' · '+short(D.bigWinners[r[0]]):''}`,tipx:r=>`<div class='tr'><span>Tenders lost</span><b>${r[2]}</b></div>`})};
+T.winners=()=>table(['Winning supplier','Lost tenders','Contract value','Big loss'],D.winners.map(r=>[r[0],r[1],'$'+r[2].toFixed(1)+'m',D.bigWinners[r[0]]||'']));
+
+/* G. Revenue growth year to date by month */
+R.k3line=el=>{const w=el.clientWidth,h=220,m={l:44,r:56,t:18,b:28},v=D.k3.series,n=v.length,lo=-14,hi=6;
+ const X=i=>m.l+(w-m.l-m.r)*i/(n-1),Y=x=>m.t+(h-m.t-m.b)*(1-(x-lo)/(hi-lo));
+ let s=svgOpen(w,h,`Revenue growth year to date by month in 2026: ${v.map((x,i)=>D.months[i]+' '+x+'%').join(', ')}. Target 4% in 2027.`)+yGrid(m,w,Y,[-12,-8,-4,0,4],x=>x+'%');
+ D.months.forEach((mo,i)=>{if(i%2===0||i===n-1)s+=`<text class="ax" x="${X(i)}" y="${h-8}" text-anchor="middle">${mo}</text>`});
+ const d='M'+v.map((x,i)=>`${X(i).toFixed(1)},${Y(x).toFixed(1)}`).join('L');
+ s+=`<line class="tgt" x1="${m.l}" x2="${w-m.r}" y1="${Y(4)}" y2="${Y(4)}"/><text class="ax" x="${m.l+6}" y="${Y(4)-6}">Target +4% in 2027</text>`;
+ s+=`<path class="draw" pathLength="1" d="${d}" style="fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round"/>`;
+ s+=`<g class="fade" style="--d:1.4s"><circle class="dot" cx="${X(n-1)}" cy="${Y(v[n-1])}" r="4.5" style="fill:var(--accent)"/><text class="lab" x="${X(n-1)+8}" y="${Y(v[n-1])+4}"><tspan class="b">${sg(v[n-1])}%</tspan></text></g>`;
+ v.forEach((x,i)=>{s+=`<rect class="hit" x="${X(i)-12}" y="${m.t}" width="24" height="${h-m.t-m.b}" data-tip="<b>${D.months[i]}</b><div class='tr'><span>Growth year to date</span><b>${sg(x,2)}%</b></div>"/>`});
+ el.innerHTML=s+'</svg>'};
+T.k3line=()=>table(['Month','Growth year to date'],D.months.map((m,i)=>[m,sg(D.k3.series[i],2)+'%']));
+
+/* G. Revenue growth by product group or rep: diverging bars (same chart type at each level) */
+let split='groups';
+R.split=el=>{const rows=D[split],mx=Math.ceil(Math.max(...rows.map(r=>Math.abs(r[1])))/5)*5;
+ document.getElementById('t-split').textContent=split==='groups'?`Only Beds is growing; Service is ${sg(rows[0][1])}%`:`12 of 14 reps are going backwards; ${rows[0][0]} is ${sg(rows[0][1])}%`;
+ document.getElementById('s-split').textContent=(split==='groups'?'Revenue growth by product group':'Revenue growth by rep, credited from the order line')+', Jan to Sep 26 against Jan to Sep 25. Hover for pace needed and trend.'+(split==='groups'?' Service is lumpy: 64% of its 2025 sales fall in January and July.':' Rep R03 is on a small base ($1.5m in 2025).');
+ el.innerHTML='<div class="dv">'+rows.map((r,i)=>{const g=r[1],p=Math.min(1,Math.abs(g)/mx)*50,pos=g>=0;
+  return `<div class="dv-r"><span>${r[0]}</span><div class="dv-t" tabindex="0" role="img" aria-label="${r[0]}: ${sg(g)}%" data-tip="<b>${r[0]}</b><div class='tr'><span>Growth</span><b>${sg(g,1)}%</b></div><div class='tr'><span>Needs</span><b>${sg(r[2],2)} pts a month</b></div><div class='tr'><span>Trend</span><b>${sg(r[3],2)} pts a month</b></div><div class='tr'><span>Net sales</span><b>$${r[4].toFixed(2)}m, was $${r[5].toFixed(2)}m</b></div>">
+   <span class="dv-b ${pos?'p':'n'}" style="width:${p}%;--d:${i*0.04}s"></span><span class="dv-l" style="${pos?`left:calc(${50+p}% + 6px)`:`right:calc(${50+p}% + 6px)`}">${sg(g)}%</span></div>
+   <span class="dv-v">needs ${sg(r[2],2)} · trend ${sg(r[3],2)}</span></div>`}).join('')+`<div class="dv-ax"><span></span><div><span>−${mx}%</span><span>0%</span><span>+${mx}%</span></div><span></span></div></div>`;
+ document.getElementById('tbl-split').innerHTML=table([split==='groups'?'Product group':'Rep','Growth','Needs (pts a month)','Trend (pts a month)'],rows.map(r=>[r[0],sg(r[1])+'%',sg(r[2],2),sg(r[3],2)]))};
+T.split=()=>'';
+document.getElementById('gsel').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;split=b.dataset.g;
+ document.querySelectorAll('#gsel button').forEach(x=>x.setAttribute('aria-pressed',x===b));const el=document.querySelector('[data-c="split"]');R.split(el);play(el)});
+
+/* Stand-ins in the drill-down */
+document.getElementById('s2v').textContent=`Behind on price in ${D.s2.behind} of ${D.s2.scored} scored losses`;
+R.s2=el=>{if(el.dataset.done)return;el.dataset.done=1;const lo=-1.5,hi=5,z=(-lo)/(hi-lo)*100;
+ el.innerHTML='<p class="cap" style="margin:6px 0">The 3 big losses: price points (of 30) the winner scored above Kestrel</p>'+D.s2.big.map((b,i)=>{const v=b[1],wd=Math.abs(v)/(hi-lo)*100,pos=v>=0;
+  return `<div class="gr"><span>${short(b[0])}</span><div class="gt" style="--z:${z}%" tabindex="0" role="img" aria-label="${b[0]}: ${sg(v,2)} price points" data-tip="<b>${esc(b[0])}</b><div class='tr'><span>Price score gap</span><b>${sg(v,2)} of 30</b></div><div class='tr'><span>Other five areas</span><b>${sg(b[2],2)} of 70</b></div>"><span class="gb" style="--o:${pos?'left':'right'};${pos?`left:${z}%`:`right:${100-z}%`};width:${wd}%;background:var(--grey);border-radius:${pos?'0 4px 4px 0':'4px 0 0 4px'}"></span><span class="gl" style="${pos?`left:calc(${z+wd}% + 5px)`:`right:calc(${100-z+wd}% + 5px)`}">${sg(v,2)}</span></div></div>`}).join('')+
+  '<div class="gax"><span></span><div><span>Kestrel ahead</span><span>Winner ahead</span></div></div>'};
+T.s2=()=>table(['Big loss','Price score gap (of 30)','Other five areas (of 70)'],D.s2.big.map(b=>[b[0],sg(b[1],2),sg(b[2],2)]));
+R.s1=el=>{if(el.dataset.done)return;el.dataset.done=1;
+ el.innerHTML=hbars(D.s1.groups,{max:100,fmt:v=>pct(v),cls:()=>'',extra:r=>`${r[4]}% of net sales · ${sg(r[3],2)} pts on 2025`})};
+T.s1=()=>table(['Product group','Realisation 2026','Realisation 2025','Change (pts)','Share of net sales'],D.s1.groups.map(r=>[r[0],pct(r[1]),pct(r[2]),sg(r[3],2),r[4]+'%']));
+{const l=(o,t)=>`<div class="box"><span>${t}</span>${hbars(Object.entries(o).map(([k,v])=>[cap1(k),v]),{max:D.s3.reports/2,fmt:v=>`${v} of ${D.s3.reports}`,cls:()=>''})}</div>`;
+ document.getElementById('s3').innerHTML=`<div class="box"><span>Reports on the draft set (ship date, parent where known)</span><b>${D.s3.match} of ${D.s3.reports}</b><span>${D.s3.combos} combinations in use · ${D.s3.fresh} of ${D.s3.reports} refreshed in the last 30 days</span></div>`+l(D.s3.defs,'Sales definition')+l(D.s3.grouping,'Customer grouping')}
+document.getElementById('tbl-tenders').innerHTML=table(['Customer','Closed','Value','Outcome','Winner'],D.tenders.map(t=>[t.customer,t.close,'$'+t.value_m.toFixed(1)+'m',t.outcome==='won'?'Won':'Lost',t.winner]));
+document.getElementById('tbl-sens').innerHTML='<p class="cap" style="margin-top:8px">If the size line moved (won of decided): '+Object.entries(D.sens).map(([k,v])=>`${k.replace('>=','$')} or more ${v[0]} of ${v[1]}`).join(' · ')+'</p>';
+
+/* ---------- Render, replay and tooltips ---------- */
+document.querySelectorAll('[data-t]').forEach(n=>{if(T[n.dataset.t])n.innerHTML=T[n.dataset.t]()});
+const charts=[...document.querySelectorAll('.chart')];
+const draw=el=>{if(el.offsetParent!==null)R[el.dataset.c](el)};
+charts.forEach(draw);
+document.querySelectorAll('details.sec').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)d.querySelectorAll('.chart').forEach(el=>{R[el.dataset.c](el);play(el)})}));
+let rw=null,lastW=innerWidth;addEventListener('resize',()=>{clearTimeout(rw);rw=setTimeout(()=>{if(innerWidth===lastW)return;lastW=innerWidth;charts.forEach(el=>{if(!el.dataset.done&&el.offsetParent!==null)R[el.dataset.c](el)})},150)});
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function play(el){if(reduce)return;el.classList.remove('play');void el.offsetWidth;el.classList.add('play')}
+if('IntersectionObserver' in window&&!reduce){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){play(e.target);io.unobserve(e.target)}}),{threshold:.3});charts.forEach(el=>io.observe(el))}
+charts.forEach(el=>el.addEventListener('click',()=>{if(el.classList.contains('replay'))play(el)}));
+const tip=document.getElementById('tip');
+let hoverEl=null;document.addEventListener('pointermove',e=>{hoverEl=e.target},true);
+const whyOf=el=>{const w=el&&el.closest&&el.closest('[data-why]');return w&&!(el.closest('.stat'))?w.dataset.why:''};
+function showTip(html,x,y,src){const why=whyOf(src||hoverEl);tip.innerHTML=html+(why?`<div class='why'><b>Why it matters:</b> ${esc(why)}</div>`:'');tip.classList.add('on');const r=tip.getBoundingClientRect();let l=x+14,t=y+14;if(l+r.width>innerWidth-8)l=x-r.width-14;if(t+r.height>innerHeight-8)t=y-r.height-14;tip.style.left=Math.max(8,l)+'px';tip.style.top=Math.max(8,t)+'px'}
+function hideTip(){tip.classList.remove('on')}
+document.addEventListener('pointermove',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t.dataset.tip,e.clientX,e.clientY,t);else if(whyOf(e.target))showTip('',e.clientX,e.clientY,e.target);else hideTip()});
+document.addEventListener('focusin',e=>{const t=e.target.closest('[data-tip]');if(t){const b=t.getBoundingClientRect();showTip(t.dataset.tip,b.right,b.top,t)}});
+document.addEventListener('focusout',hideTip);
+applyMode();
+</script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kestrel Medical: Kewpie&#x27;s calculation script</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">Kestrel Medical: Kewpie&#x27;s calculation script</label></nav><section id="s0"><p class="src">File: stage-2-07-calculation-script.md</p><h1>Kestrel Medical: Kewpie's calculation script</h1>
+<blockquote><b>Sample data.</b> Produced by Kewpie at Stage 2.</blockquote>
+<pre class="code"><code>&quot;&quot;&quot;Kestrel Medical (Sample data): Stage 2 calculations. Re-run: python calc_kpis.py (needs pandas; not python -I)
+Reads data/*.csv, writes kpi_results.json. Data cutoff = last date in the sales data.&quot;&quot;&quot;
+import json, re, os
+import pandas as pd
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+D = os.path.join(HERE, &quot;data&quot;)
+R = {&quot;label&quot;: &quot;Sample data&quot;}
+TARGET_G = 4.0
+
+s = pd.read_csv(f&quot;{D}/sales_order_lines.csv&quot;, low_memory=False, parse_dates=[&quot;order_date&quot;, &quot;actual_ship_date&quot;])
+s[&quot;gross&quot;] = s.list_price * s.qty
+s[&quot;oy&quot;], s[&quot;om&quot;] = s.order_date.dt.year, s.order_date.dt.month
+s[&quot;sy&quot;], s[&quot;sm&quot;] = s.actual_ship_date.dt.year, s.actual_ship_date.dt.month
+CUT = s.order_date.max()
+M = CUT.month                      # last complete month (Sep)
+MONTHS_LEFT = (2027 - CUT.year) * 12 + 12 - CUT.month   # Sep-26 to Dec-27 = 15
+R[&quot;cutoff&quot;] = str(CUT.date()); R[&quot;months_left&quot;] = MONTHS_LEFT
+
+
+def r(x, n=2):
+    return None if x is None or pd.isna(x) else round(float(x), n)
+
+
+# ---- K1: cost of sales
+cost_cols = [f&quot;{f}.{c}&quot; for f in os.listdir(D) if f.endswith(&quot;.csv&quot;)
+             for c in pd.read_csv(f&quot;{D}/{f}&quot;, nrows=0).columns if &quot;cost&quot; in c.lower() and &quot;consum&quot; not in c.lower()]
+R[&quot;K1&quot;] = {&quot;cost_fields_found&quot;: cost_cols, &quot;calculable&quot;: False, &quot;stated_margin_pct&quot;: 41.0, &quot;target&quot;: 43.0,
+           &quot;pace_points_per_month_indicative&quot;: r((43 - 41) / MONTHS_LEFT, 3)}
+
+
+# ---- K3 and sub-KPIs: YTD growth, ship date basis
+def ytd(df, y, m, by=&quot;sy&quot;, bm=&quot;sm&quot;):
+    return df[(df[by] == y) &amp; (df[bm] &lt;= m)].net_value_aud.sum()
+
+
+def growth_series(df, by=&quot;sy&quot;, bm=&quot;sm&quot;):
+    out = []
+    for m in range(1, M + 1):
+        a, b = ytd(df, CUT.year, m, by, bm), ytd(df, CUT.year - 1, m, by, bm)
+        out.append((a / b - 1) * 100 if b else None)
+    return out
+
+
+def g_block(df, by=&quot;sy&quot;, bm=&quot;sm&quot;):
+    g = growth_series(df, by, bm); cur = g[-1]
+    run = (g[-1] - g[-4]) / 3 if g[-4] is not None and cur is not None else None
+    pace = (TARGET_G - cur) / MONTHS_LEFT if cur is not None else None
+    return {&quot;baseline_pct&quot;: r(cur), &quot;ytd_2026_m&quot;: r(ytd(df, CUT.year, M, by, bm) / 1e6),
+            &quot;ytd_2025_m&quot;: r(ytd(df, CUT.year - 1, M, by, bm) / 1e6),
+            &quot;run_rate_pts_per_month&quot;: r(run, 3), &quot;pace_needed_pts_per_month&quot;: r(pace, 3),
+            &quot;series_pct&quot;: [r(x) for x in g]}
+
+
+k3 = g_block(s)
+fy = lambda y: s[s.sy == y].net_value_aud.sum()
+k3[&quot;fy2025_vs_fy2024_pct&quot;] = r((fy(2025) / fy(2024) - 1) * 100)
+k3[&quot;order_date_basis_pct&quot;] = g_block(s, &quot;oy&quot;, &quot;om&quot;)[&quot;baseline_pct&quot;]
+k3[&quot;excl_warranty_pct&quot;] = g_block(s[s.order_type != &quot;warranty_replacement&quot;])[&quot;baseline_pct&quot;]
+q4_25 = s[(s.sy == 2025) &amp; (s.sm &gt;= 10)].net_value_aud.sum()
+fy26 = ytd(s, 2026, M) + q4_25 * (1 + k3[&quot;baseline_pct&quot;] / 100)
+k3[&quot;fy2026_estimate_m&quot;] = r(fy26 / 1e6); k3[&quot;fy2025_actual_m&quot;] = r(fy(2025) / 1e6)
+k3[&quot;need_2027_on_2026_base_m&quot;] = r(fy26 * 1.04 / 1e6)
+k3[&quot;growth_needed_vs_2025_pct&quot;] = r((fy26 * 1.04 / fy(2025) - 1) * 100)
+k3[&quot;order_types_2025_m&quot;] = {k: r(v / 1e6, 1) for k, v in s[s.sy == 2025].groupby(&quot;order_type&quot;).net_value_aud.sum().items()}
+R[&quot;K3&quot;] = k3
+R[&quot;K3.1&quot;] = {g: g_block(df) for g, df in s.groupby(&quot;material_group&quot;)}
+R[&quot;K3.2&quot;] = {g: g_block(df) for g, df in s.groupby(&quot;rep_id&quot;)}
+
+
+# ---- K2: discount on big deals (placeholder = order_type tender_contract)
+def disc(df):
+    return (1 - df.net_value_aud.sum() / df.gross.sum()) * 100 if len(df) else None
+
+
+def ytd_o(df, y, m):
+    return df[(df.oy == y) &amp; (df.om &lt;= m)]
+
+
+tc = s[s.order_type == &quot;tender_contract&quot;]
+series = [disc(ytd_o(tc, 2026, m)) for m in range(1, M + 1)]
+p99 = s.net_value_aud.quantile(0.99)
+k2 = {&quot;definition&quot;: &quot;order_type = tender_contract, order date&quot;, &quot;baseline_2026_ytd_pct&quot;: r(series[-1]),
+      &quot;fy&quot;: {str(y): r(disc(tc[tc.oy == y])) for y in range(2021, 2026)},
+      &quot;ytd_2025_pct&quot;: r(disc(ytd_o(tc, 2025, M))), &quot;series_2026_pct&quot;: [r(x, 3) for x in series],
+      &quot;run_rate_pts_per_month&quot;: r((series[-1] - series[-4]) / 3, 3), &quot;pace_needed_pts_per_month&quot;: 0.0,
+      &quot;lines_2026_ytd&quot;: int(len(ytd_o(tc, 2026, M))),
+      &quot;net_value_by_year_m&quot;: {str(y): r(tc[tc.oy == y].net_value_aud.sum() / 1e6, 1) for y in range(2021, 2027)},
+      &quot;max_order_total_aud&quot;: r(s.net_value_aud.max(), 0), &quot;orders_ge_5m&quot;: int((s.net_value_aud &gt;= 5e6).sum()),
+      &quot;sens_tender_plus_distributor_pct&quot;: r(disc(ytd_o(s[s.order_type.isin([&quot;tender_contract&quot;, &quot;distributor&quot;])], 2026, M))),
+      &quot;sens_top1pct_lines_pct&quot;: r(disc(ytd_o(s[s.net_value_aud &gt;= p99], 2026, M))), &quot;top1pct_cutoff_aud&quot;: r(p99, 0),
+      &quot;draft_placeholder_contract_id&quot;: {&quot;lines&quot;: int(s.contract_id.notna().sum()),
+                                        &quot;groups&quot;: s[s.contract_id.notna()].material_group.unique().tolist(),
+                                        &quot;order_types&quot;: s[s.contract_id.notna()].order_type.unique().tolist(),
+                                        &quot;prefix&quot;: sorted(s.contract_id.dropna().str[:2].unique().tolist())},
+      &quot;tc_net_ytd_2025_m&quot;: r(ytd_o(tc, 2025, M).net_value_aud.sum() / 1e6, 1),
+      &quot;tc_net_ytd_2026_m&quot;: r(ytd_o(tc, 2026, M).net_value_aud.sum() / 1e6, 1),
+      &quot;all_lines_avg_discount_2026_ytd_pct&quot;: r(disc(ytd_o(s, 2026, M))),
+      &quot;all_lines_avg_discount_2025_pct&quot;: r(disc(s[s.oy == 2025])),
+      &quot;calc_vs_field_gap_p999_pts&quot;: r((((1 - s.net_value_aud / s.gross) * 100) - s.discount_pct).abs().quantile(0.999), 3),
+      &quot;avg_discount_by_type_2026&quot;: {k: r(disc(ytd_o(df, 2026, M))) for k, df in s.groupby(&quot;order_type&quot;)}}
+R[&quot;K2&quot;] = k2
+
+
+# ---- Tender register
+t = pd.read_csv(f&quot;{D}/tender_register.csv&quot;)
+
+
+def money(v):
+    m = re.match(r&quot;\$([\d.]+)m( pa)?&quot;, v.strip())
+    return float(m.group(1)) * 1e6, bool(m.group(2))
+
+
+def total_val(row, naive=False):
+    x, pa = money(row.estimated_value)
+    return x if (naive or not pa) else x * int(row.contract_length.split()[0])
+
+
+t[&quot;value&quot;] = t.apply(total_val, axis=1); t[&quot;value_naive&quot;] = t.apply(lambda q: total_val(q, True), axis=1)
+t[&quot;our&quot;] = t.our_submitted_price.map(lambda v: money(v)[0])
+t[&quot;win&quot;] = t.winning_price.map(lambda v: money(v)[0] if pd.notna(v) else None)
+t[&quot;close&quot;] = pd.to_datetime(t.close_date, format=&quot;%d/%m/%Y&quot;)
+big = t[t.value &gt;= 5e6].sort_values(&quot;close&quot;); dec = big[big.outcome.isin([&quot;won&quot;, &quot;lost&quot;])]
+wins = (dec.outcome == &quot;won&quot;).tolist()
+need = {}
+for tgt in (40, 60, 80, 100):
+    for k in range(0, 12):
+        w = (wins + [True] * k)[-5:]
+        if sum(w) / 5 * 100 &gt;= tgt:
+            need[str(tgt)] = k; break
+
+
+def rate(df):
+    d = df[df.outcome.isin([&quot;won&quot;, &quot;lost&quot;])]
+    return [int((d.outcome == &quot;won&quot;).sum()), int(len(d))]
+
+
+k4 = {&quot;big_tenders&quot;: [{&quot;ref&quot;: x.tender_reference, &quot;customer&quot;: x.customer, &quot;close&quot;: x.close_date,
+                       &quot;value_m&quot;: r(x.value / 1e6, 2), &quot;outcome&quot;: x.outcome, &quot;winner&quot;: x.winning_supplier}
+                      for x in big.itertuples()],
+      &quot;won_of_decided&quot;: rate(big), &quot;rate_pct&quot;: r(rate(big)[0] / rate(big)[1] * 100, 0),
+      &quot;same_set_if_pa_ignored&quot;: sorted(t[t.value_naive &gt;= 5e6].tender_reference) == sorted(big.tender_reference),
+      &quot;pa_rows&quot;: int(t.estimated_value.str.contains(&quot;pa&quot;).sum()),
+      &quot;bid_per_year&quot;: {str(y): int((big.close.dt.year == y).sum()) for y in (2024, 2025, 2026)},
+      &quot;sens&quot;: {f&quot;&gt;={n}m&quot;: rate(t[t.value &gt;= n * 1e6]) for n in (5, 4, 3, 2, 1, 0)},
+      &quot;partial_cancelled_big&quot;: int(big.outcome.isin([&quot;partial&quot;, &quot;cancelled&quot;]).sum()),
+      &quot;consecutive_wins_needed_for_rolling5&quot;: need,
+      &quot;all_outcomes&quot;: t.outcome.value_counts().to_dict(),
+      &quot;name_variants_in_register&quot;: sorted({c for c in t.customer if &quot;Southern Metro&quot; in c or &quot;Western Plains&quot; in c})}
+R[&quot;K4&quot;] = k4
+
+# K4.1 price against winning price
+lost = t[t.outcome == &quot;lost&quot;]
+lw = lost.dropna(subset=[&quot;win&quot;]).copy(); lw[&quot;gap&quot;] = (lw.our / lw.win - 1) * 100
+bl = big[big.outcome == &quot;lost&quot;]
+R[&quot;K4.1&quot;] = {&quot;lost_all&quot;: len(lost), &quot;lost_with_winning_price&quot;: len(lw),
+             &quot;avg_gap_pct_known&quot;: r(lw.gap.mean()), &quot;median_gap_pct_known&quot;: r(lw.gap.median()),
+             &quot;lost_gap_list&quot;: [{&quot;ref&quot;: x.tender_reference, &quot;gap_pct&quot;: r(x.gap), &quot;big&quot;: bool(x.value &gt;= 5e6)}
+                               for x in lw.itertuples()],
+             &quot;big_lost&quot;: [{&quot;ref&quot;: x.tender_reference, &quot;customer&quot;: x.customer,
+                           &quot;gap_pct&quot;: r((x.our / x.win - 1) * 100) if pd.notna(x.win) else None}
+                          for x in bl.itertuples()]}
+
+# K4.2 scoring tables (gap in weighted points out of 100)
+W = {&quot;price&quot;: 30, &quot;clinical&quot;: 25, &quot;service&quot;: 15, &quot;supply&quot;: 10, &quot;training&quot;: 10, &quot;sustain&quot;: 10}
+
+
+def area(n):
+    n = n.lower()
+    for k in W:
+        if n.strip().startswith(k) or k in n:
+            return k
+
+
+def parse(txt):
+    out = {}
+    if &quot;Criterion&quot; in txt:
+        for ln in txt.splitlines()[1:]:
+            p = [x.strip() for x in ln.split(&quot;|&quot;)]
+            if len(p) == 4:
+                w, a, b = (float(x.strip(&quot;%&quot;)) for x in p[1:]); out[area(p[0])] = (b - a) * w / 100
+    elif &quot;PREF=&quot; in txt:
+        for m in re.finditer(r&quot;([A-Z&amp;_]+)=(\d+(?:\.\d+)?)/PREF=(\d+(?:\.\d+)?)&quot;, txt):
+            a = area(m.group(1).replace(&quot;_&quot;, &quot; &quot;).replace(&quot;&amp;&quot;, &quot; &quot;))
+            out[a] = (float(m.group(3)) - float(m.group(2))) * W[a] / 100
+    else:
+        for m in re.finditer(r&quot;([A-Za-z ]+): ([\d.]+)/(\d+) \(preferred ([\d.]+)/\d+\)&quot;, txt):
+            out[area(m.group(1))] = float(m.group(4)) - float(m.group(2))
+    return out
+
+
+rows = []
+for x in lost.itertuples():
+    if isinstance(x.scoring_table, str):
+        g = parse(x.scoring_table)
+        if len(g) == 6:
+            rows.append({&quot;ref&quot;: x.tender_reference, &quot;customer&quot;: x.customer, &quot;big&quot;: bool(x.value &gt;= 5e6),
+                         &quot;gaps&quot;: {k: r(v) for k, v in g.items()}, &quot;top&quot;: max(g, key=g.get), &quot;price_gap&quot;: r(g[&quot;price&quot;])})
+cnt = pd.Series([z[&quot;top&quot;] for z in rows]).value_counts().to_dict()
+R[&quot;K4.2&quot;] = {&quot;lost&quot;: len(lost), &quot;lost_with_scoring&quot;: len(rows), &quot;lost_with_debrief&quot;: int((lost.debrief_received == &quot;Y&quot;).sum()),
+             &quot;top_gap_counts&quot;: cnt, &quot;price_is_top_gap&quot;: int(sum(z[&quot;top&quot;] == &quot;price&quot; for z in rows)),
+             &quot;price_ahead_count&quot;: int(sum(z[&quot;price_gap&quot;] &lt;= 0 for z in rows)), &quot;rows&quot;: rows,
+             &quot;big&quot;: [z for z in rows if z[&quot;big&quot;]], &quot;weights&quot;: W}
+g = lost.groupby(&quot;winning_supplier&quot;).agg(n=(&quot;tender_reference&quot;, &quot;size&quot;), value_m=(&quot;value&quot;, lambda v: v.sum() / 1e6))
+R[&quot;K4.3&quot;] = {&quot;all_lost&quot;: {k: {&quot;n&quot;: int(v.n), &quot;value_m&quot;: r(v.value_m, 1)} for k, v in g.iterrows()},
+             &quot;big_lost&quot;: [{&quot;ref&quot;: x.tender_reference, &quot;winner&quot;: x.winning_supplier, &quot;value_m&quot;: r(x.value / 1e6, 1)}
+                          for x in bl.itertuples()],
+             &quot;lost_missing_winner&quot;: int(lost.winning_supplier.isna().sum())}
+
+# ---- K5
+m = pd.read_csv(f&quot;{D}/monthly_reports_index.csv&quot;, parse_dates=[&quot;last_refreshed&quot;], keep_default_na=False)
+cand = {}
+for sd in m.sales_definition.unique():
+    if sd != &quot;n/a&quot;:
+        cand[f&quot;{sd} + parent where known&quot;] = int(((m.sales_definition == sd) &amp; (m.customer_grouping == &quot;parent where known&quot;)).sum())
+stale = m[m.last_refreshed &lt; CUT - pd.Timedelta(days=30)]
+R[&quot;K5&quot;] = {&quot;reports&quot;: len(m), &quot;sales_def&quot;: m.sales_definition.value_counts().to_dict(),
+           &quot;cust_group&quot;: m.customer_grouping.value_counts().to_dict(), &quot;candidate_sets_count&quot;: cand,
+           &quot;both_na&quot;: int(((m.sales_definition == &quot;n/a&quot;) &amp; (m.customer_grouping == &quot;n/a&quot;)).sum()),
+           &quot;any_na&quot;: int(((m.sales_definition == &quot;n/a&quot;) | (m.customer_grouping == &quot;n/a&quot;)).sum()),
+           &quot;distinct_combos&quot;: int(m.groupby([&quot;sales_definition&quot;, &quot;customer_grouping&quot;]).ngroups),
+           &quot;stale_over_30d&quot;: len(stale), &quot;stale_names&quot;: stale.workbook.tolist(), &quot;owners&quot;: m.owner.value_counts().to_dict()}
+
+
+# ---- extra checks for notes
+sv = s[(s.material_group == &quot;SERVICE&quot;) &amp; (s.sy == 2025)]
+R[&quot;extra&quot;] = {&quot;median_reps_per_sold_to&quot;: float(s.groupby(&quot;sold_to_id&quot;).rep_id.nunique().median()),
+              &quot;service_jan_jul_share_2025_pct&quot;: r(sv[sv.sm.isin([1, 7])].net_value_aud.sum() / sv.net_value_aud.sum() * 100, 0)}
+
+# ---- data quality
+R[&quot;dq&quot;] = {&quot;sales_lines&quot;: len(s), &quot;unshipped_lines&quot;: int(s.actual_ship_date.isna().sum()),
+           &quot;unshipped_pct&quot;: r(s.actual_ship_date.isna().mean() * 100), &quot;list_price_missing&quot;: int((s.list_price &lt;= 0).sum()),
+           &quot;negative_discount_lines&quot;: int((s.discount_pct &lt; 0).sum()), &quot;duplicate_lines&quot;: int(s.duplicated([&quot;order_id&quot;, &quot;line_no&quot;]).sum()),
+           &quot;tender_rows&quot;: len(t), &quot;lost_missing_winning_price&quot;: int(len(lost) - len(lw)),
+           &quot;tenders_pa_values&quot;: int(t.estimated_value.str.contains(&quot;pa&quot;).sum()),
+           &quot;lost_missing_scoring&quot;: int(len(lost) - len(rows)), &quot;winner_missing&quot;: int(t.winning_supplier.isna().sum())}
+
+# ---- v1.1 (Business Requirements v1.1, approved at the Stage 2 gate): changed targets and measures
+# K2 (v1.3): NO target in the first pass (Sharon left it open). The path below is Gary&#x27;s Phase 2 proposal, kept as information only.
+start, end = k2[&quot;baseline_2026_ytd_pct&quot;], 14.0
+step = (end - start) / MONTHS_LEFT
+path = [start + step * i for i in range(MONTHS_LEFT + 1)]          # index 0 = Sep-26, 15 = Dec-27
+flat_gap = [start - p for p in path]                              # gap above the path if the discount stays flat
+mn = [&quot;Sep-26&quot;, &quot;Oct-26&quot;, &quot;Nov-26&quot;, &quot;Dec-26&quot;, &quot;Jan-27&quot;, &quot;Feb-27&quot;, &quot;Mar-27&quot;, &quot;Apr-27&quot;, &quot;May-27&quot;, &quot;Jun-27&quot;, &quot;Jul-27&quot;, &quot;Aug-27&quot;, &quot;Sep-27&quot;, &quot;Oct-27&quot;, &quot;Nov-27&quot;, &quot;Dec-27&quot;]
+k2[&quot;v11&quot;] = {&quot;role&quot;: &quot;Gary Phase 2 proposal, information only&quot;, &quot;start_pct&quot;: start, &quot;end_pct&quot;: end, &quot;pace_needed_pts_per_month&quot;: r(step, 3),
+             &quot;path_pct&quot;: {mn[i]: r(path[i]) for i in (0, 3, 6, 9, 12, 15)},
+             &quot;status_now&quot;: &quot;Not rated (no target in the first pass)&quot;,
+             &quot;flat_first_amber&quot;: next(mn[i] for i in range(1, 16) if flat_gap[i] &gt; 0),
+             &quot;flat_first_red&quot;: next(mn[i] for i in range(1, 16) if flat_gap[i] &gt; 1),
+             &quot;run_rate_pts_per_month&quot;: k2[&quot;run_rate_pts_per_month&quot;],
+             &quot;dollars_note_net_ytd_2026_m&quot;: k2[&quot;tc_net_ytd_2026_m&quot;]}
+# K4: count out of the last 5 big decided tenders, calendar-year count alongside; Gary&#x27;s starting proposal 3 of the last 5.
+last5 = dec.tail(5)
+need3 = next(k for k in range(0, 12) if sum((wins + [True] * k)[-5:]) &gt;= 3)
+cy = {str(y): [int((dec[dec.close.dt.year == y].outcome == &quot;won&quot;).sum()), int((dec.close.dt.year == y).sum())] for y in (2024, 2025, 2026)}
+k4[&quot;v11&quot;] = {&quot;window_won&quot;: int(sum(wins[-5:])), &quot;window_size&quot;: int(len(wins[-5:])), &quot;calendar_year_won_of_decided&quot;: cy,
+             &quot;proposed_target_won_of_last5&quot;: 3, &quot;next_consecutive_wins_needed&quot;: need3,
+             &quot;window_after_next_win&quot;: int(sum((wins + [True])[-5:])), &quot;window_after_two_wins&quot;: int(sum((wins + [True] * 2)[-5:])),
+             &quot;big_tenders_per_year&quot;: k4[&quot;bid_per_year&quot;], &quot;months_to_dec27&quot;: MONTHS_LEFT,
+             &quot;expected_big_tenders_to_dec27&quot;: r(2 * MONTHS_LEFT / 12, 1)}
+# K3: unchanged measure; target base is now the 2026 full-year actuals (estimate until the year closes).
+k3[&quot;v11&quot;] = {&quot;base_2026_full_year_estimate_m&quot;: k3[&quot;fy2026_estimate_m&quot;], &quot;target_2027_m&quot;: k3[&quot;need_2027_on_2026_base_m&quot;],
+             &quot;vs_2025_pct&quot;: k3[&quot;growth_needed_vs_2025_pct&quot;],
+             &quot;monthly_sales_needed_2027_m&quot;: r(k3[&quot;need_2027_on_2026_base_m&quot;] / 12, 2), &quot;monthly_sales_2026_ytd_avg_m&quot;: r(k3[&quot;ytd_2026_m&quot;] / M, 2)}
+
+json.dump(R, open(os.path.join(HERE, &quot;kpi_results.json&quot;), &quot;w&quot;), indent=1, default=str)
+print(&quot;ok&quot;)
+</code></pre></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>

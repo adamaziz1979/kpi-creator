@@ -16,6 +16,10 @@ Built by [Adam Aziz](https://www.linkedin.com/in/adamaziz1979/) with Claude Code
 
 Every approved output, stage by stage: https://adamaziz1979.github.io/kpi-creator/clearcompare/
 
+## Kestrel Medical test case
+
+Third blind run, all five stages, signed off with conditions on 24-Oct-26: https://adamaziz1979.github.io/kpi-creator/kestrel-medical/
+
 ## The process and the team
 
 - KPI Generator Process: https://adamaziz1979.github.io/kpi-creator/process.html

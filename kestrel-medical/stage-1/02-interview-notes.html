@@ -1,0 +1,78 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kestrel Medical: Interview Notes (Stage 1)</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">Kestrel Medical: Interview Notes (Stage 1)</label></nav><section id="s0"><p class="src">File: stage-1-02-interview-notes.md</p><h1 id="s0-top">Kestrel Medical: Interview Notes (Stage 1)</h1><div class="toc" role="navigation" aria-label="Contents"><b>In this document</b><ol><li><a href="#s0-h0" data-jump="s0-h0">Questions used</a></li><li><a href="#s0-h1" data-jump="s0-h1">Key facts (Sharon's words)</a></li><li><a href="#s0-h2" data-jump="s0-h2">Corrections at playback</a></li><li><a href="#s0-h3" data-jump="s0-h3">Gary's reading</a></li></ol></div>
+<blockquote><b>Test case.</b> Gary's working notes from the interview with Sharon (stakeholder agent), 23-Oct-26. The word-for-word record is the Meeting Script.</blockquote>
+<h2 id="s0-h0">Questions used</h2>
+<table><thead><tr><th>#</th><th>Area</th><th>Asked</th><th>Covered</th></tr></thead><tbody><tr><td>Question 1 + probe</td><td>Why / What</td><td>Problem and why now; probe on "undercut"</td><td style="white-space:nowrap">✅</td></tr><tr><td>Question 2</td><td style="white-space:nowrap">What</td><td>Outcomes and numbers</td><td>✅ (no win-rate number)</td></tr><tr><td>Question 3</td><td style="white-space:nowrap">Who</td><td>Audience, decisions, format</td><td>✅ partly</td></tr><tr><td>Question 4</td><td>Why / Action</td><td>What to know, action, owner per outcome</td><td style="white-space:nowrap">✅</td></tr><tr><td>Question 5</td><td style="white-space:nowrap">When</td><td>Year basis, growth base, next global date</td><td>✅ partly</td></tr><tr><td>Question 6</td><td style="white-space:nowrap">Where</td><td>Data, history, trust, why reports disagree</td><td>✅ partly</td></tr><tr><td>Question 7</td><td>Constraints</td><td>Privacy, global pack, charts</td><td>⚠️ mostly open</td></tr></tbody></table>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h1">Key facts (Sharon's words)</h2>
+<ul><li>Lost three of the last five big tenders, each over five million dollars</li><li>Gross margin about 41 per cent; global wants 43 per cent in 2027, plus 4 per cent revenue growth. Revenue flat last year</li><li>Financial year January to December, set by global</li><li>Reps say Kestrel is undercut 10 to 15 per cent "from what they're seeing"</li><li>Losses: Southern Metropolitan Health Network, ED stretchers, 2024 ("I was told it was price"); Highlands Ambulance, powered stretcher renewal, 2025 ("about the stretcher as much as anything"); Western Plains Health District, acute care beds, 2025 (lost to Allied Clinical Supply, a distributor that bundles brands)</li><li>Deb Harlow, bid manager: tender file and debrief letters. Tom Nguyen, finance: owns the Excel reports and the margin numbers</li><li>Systems: SAP ERP, field service system, CRM (not trusted for win-loss), Excel, tender spreadsheet. Monthly reports from ERP extracts</li><li>Three days a month reconciling thirty reports</li><li>Pack for global first, screen in rep meetings second, not phone. Monthly</li><li>Must speak to how Kestrel's market works, not global's standard view; automated and consistent</li></ul>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h2">Corrections at playback</h2>
+<ol><li>Before: "discount and tender decisions are being made blind". After: Sharon believes it's price and wants the evidence to prove or disprove it</li><li>Before: "My proposed target is better than half in 2027, for Deb to confirm". After: no target; left for Deb Harlow</li><li>Before: "Target all of them" (monthly reports). After: one agreed set of numbers, with Tom checking the reports against it; target open</li></ol>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h3">Gary's reading</h2>
+<ul><li>The real problem is a discount decision being made on belief. The debriefs may show product fit or bundling, not price. If so, more discount costs margin and still loses</li><li>The Top 5 balances the margin side (gross margin, big-deal discount) against the win side (tender win rate), so the dashboard shows the trade-off rather than one side of it</li></ul><a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>
