@@ -195,7 +195,7 @@ const esc=t=>t.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&qu
 const promptFor=a=>`Professional headshot photograph of a ${a.photo}. Head and shoulders, facing the camera, soft studio lighting, plain deep navy background, shallow depth of field, natural skin texture, 85mm lens, square 1:1 crop. Australian professional, modern and approachable. No text, no logos.`;
 document.getElementById("flow").innerHTML=A.map(a=>`<li><a href="#${a.id}" data-jump="${a.id}">${face(a,"f-"+a.id)}<b>${a.name}</b><span class="st">${a.title}</span></a></li>`).join("");
 document.getElementById("cards").innerHTML=A.map(a=>`<article class="card${a.human?" human":""}" id="${a.id}"><div class="head">${face(a,a.id)}<div><p class="name">${a.name}</p>
- <div class="tags"><span class="pill">${a.stage}: ${a.title}</span>${a.human?`<span class="pill human">Not an agent</span>`:`<span class="pill ${a.built?"built":"todo"}">${a.built?"Built":"Not built yet"}</span>`}</div>
+ <div class="tags"><span class="pill">${a.stage}: ${a.title}</span>${a.human?`<span class="pill human">Human</span>`:`<span class="pill ${a.built?"built":"todo"}">${a.built?"Built":"Not built yet"}</span>`}</div>
  <p class="role">${a.role}${a.cmd?` · <span style="color:var(--accent)">${a.cmd}</span>`:""}</p></div></div>
  <blockquote>"${esc(a.quote)}"</blockquote>
  <dl>${Object.entries(a.facts).map(([k,v])=>`<dt>${k==="Works"?"How they work":k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
