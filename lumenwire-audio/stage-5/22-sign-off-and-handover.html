@@ -1,0 +1,85 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lumenwire Audio: Sign-off and Handover (Stage 5)</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">Lumenwire Audio: Sign-off and Handover</label></nav><section id="s0"><p class="src">File: 2026.10.27 - Lumenwire Audio - 05 Sign-off and Handover.md</p><h1 id="s0-top">Lumenwire Audio: Sign-off and Handover</h1><div class="toc" role="navigation" aria-label="Contents"><b>In this document</b><ol><li><a href="#s0-h0" data-jump="s0-h0">Walk-through notes (27-Oct-26)</a></li><li><a href="#s0-h1" data-jump="s0-h1">Coverage check next steps agreed</a></li><li><a href="#s0-h2" data-jump="s0-h2">Feedback log</a></li><li><a href="#s0-h3" data-jump="s0-h3">Sign-off</a></li><li><a href="#s0-h4" data-jump="s0-h4">Handover checklist</a></li><li><a href="#s0-h5" data-jump="s0-h5">Go-live</a></li></ol></div>
+<blockquote><b>Test case, Sample data.</b> Marcus was played by the case's stakeholder agent. Check every number against real data before go-live.</blockquote>
+<p><b>Author:</b> Ovy. <b>Date:</b> 27-Oct-26. <b>Dashboard:</b> <code>2026.10.27 - Lumenwire Audio - 04 Dashboard.html</code> (Experimental A, finished by Jennifer). <b>Built from:</b> Business Requirements v1.3, KPI Calculation Pack v1.1.</p>
+<h2 id="s0-h0">1. Walk-through notes (27-Oct-26)</h2>
+<p>Ovy ran the walk-through with Marcus (co-founder and CEO) for Adam, Head of the Data Team, in this order: the headline and Top 3 actions, the Top 5 tiles, the Why pages, the detail and definitions, then the coverage check's next steps.</p>
+<ul><li><b>First attempt void.</b> Marcus's agent can't open files other than its brief and the Meeting Script, so it reacted without seeing the dashboard and volunteered details never given to Gary. Ovy resent the dashboard text inside the message. The extra details weren't passed to any agent. They're logged for the sealed check's fidelity review.</li><li><b>What Marcus kept:</b><ul><li>The revenue bridge, especially "OEMs buying fewer units than they installed took A$48.0m off", read as a timing effect, not a collapse in demand.</li><li>The OEM buffer finding as the lead Why page.</li><li>The six decisions on page 4.</li><li>"End customers kept installing".</li></ul></li><li><b>What Marcus pushed on:</b><ul><li>He'd lead with software growth and margin. Not changed: the data shows the growth is one A$7.4m licence, which he accepted on the Why page.</li><li>Targets other than A$115m shouldn't look agreed.</li><li>The reps' A$400 per design win with no clawback should be on a main page.</li></ul></li><li><b>His questions:</b><ul><li>Who chooses the one forecast number?</li><li>Does the board get the Why pages with page 1?</li><li>How were the stock peak and the 6-month target set?</li><li>Has firmware 4.5.0 been ruled out?</li><li>Can OEMs and customers be named?</li></ul></li></ul>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h1">2. Coverage check next steps agreed</h2>
+<table><thead><tr><th>Gap from the coverage check</th><th>Marcus</th><th>Owner</th><th>Status</th></tr></thead><tbody><tr><td>One forecast number</td><td style="white-space:nowrap">Take</td><td>CFO chooses which forecast counts; Kewpie and Visalli rebuild once she has</td><td>Handed over, due 6-Nov-26</td></tr><tr><td>Targets other than A$115m read as firm</td><td style="white-space:nowrap">Take</td><td>Gary (v1.3) and Jennifer</td><td><b>Done 27-Oct-26:</b> all marked Proposed</td></tr><tr><td>Where to put sales and engineering effort</td><td>Take at region and OEM level; park the rep-level split</td><td>Kewpie (splits), Visalli (view); OEM names wait on the CFO and legal</td><td>Handed over, next phase</td></tr><tr><td>Monthly status on the Top 3 actions</td><td style="white-space:nowrap">Take</td><td>Visalli and Jennifer for the line; CEO and VP Sales supply the status</td><td><b>Done 27-Oct-26:</b> status line added, first update at the next board meeting</td></tr><tr><td>One board-pack page; phone use</td><td>Take the one-page question (wants the Why pages to go with page 1); park the phone question</td><td>Jennifer, after the chair confirms</td><td>Handed over</td></tr></tbody></table>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h2">3. Feedback log</h2>
+<table><thead><tr><th>#</th><th>Feedback</th><th>Owner</th><th>Status</th></tr></thead><tbody><tr><td style="white-space:nowrap">1</td><td>Mark targets other than A$115m "Proposed"</td><td>Gary, Jennifer</td><td>Done (Business Requirements v1.3)</td></tr><tr><td style="white-space:nowrap">2</td><td>Put the A$400 per design win, no clawback, on a main page</td><td>Visalli, Jennifer</td><td>Done (page 3, third finding)</td></tr><tr><td style="white-space:nowrap">3</td><td>Monthly status on the Top 3 actions</td><td>Visalli, Jennifer</td><td>Done (No update until the first report)</td></tr><tr><td style="white-space:nowrap">4</td><td>Lead with software growth and margin</td><td style="white-space:nowrap">Visalli</td><td>Not changed: the data shows the growth is one licence. Marcus accepted this</td></tr><tr><td style="white-space:nowrap">5</td><td>Check firmware 4.5.0 before the demand page goes to the board</td><td>Head of Platform Engineering</td><td style="white-space:nowrap">Open</td></tr><tr><td style="white-space:nowrap">6</td><td>Confirm OEM stock report coverage (28 OEMs, 46% of hardware revenue)</td><td>VP Sales</td><td style="white-space:nowrap">Open</td></tr><tr><td style="white-space:nowrap">7</td><td>Correct the FY27 plan's repeat of the one-off licence</td><td style="white-space:nowrap">CFO</td><td style="white-space:nowrap">Open</td></tr><tr><td style="white-space:nowrap">8</td><td>Who confirms the New devices activated target: Gary named the CFO, the KPI owner is the VP Sales</td><td>Adam to decide</td><td style="white-space:nowrap">Open</td></tr></tbody></table>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h3">4. Sign-off</h2>
+<p><b>Marcus: signed off with conditions, 27-Oct-26.</b></p>
+<table><thead><tr><th>Condition (Marcus's words)</th><th>Status</th></tr></thead><tbody><tr><td>The forecast number is owned by the CFO and labelled</td><td>Partly met: the dashboard names the CFO; her choice is due 6-Nov-26</td></tr><tr><td>Targets other than A$115m are marked "Proposed"</td><td>Met (v1.3)</td></tr><tr><td>The FY27 plan's treatment of the one-off licence is corrected before it goes to the board</td><td>Open: CFO. The dashboard already flags it</td></tr><tr><td>The shipping rate is shown as measured, not the 80% he believed</td><td>Met: "The 80% belief was never measured"</td></tr><tr><td>Firmware 4.5.0 and OEM stock coverage are checked before the demand page goes to the board</td><td>Open: Head of Platform Engineering and VP Sales</td></tr></tbody></table>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h4">5. Handover checklist</h2>
+<ul><li>[x] Dashboard: <code>02 - Deliverables/2026.10.27 - Lumenwire Audio - 04 Dashboard.html</code></li><li>[x] Definitions for all 10 KPIs on the dashboard's back page, and in the Business Requirements v1.3</li><li>[x] Action owners: CEO (revenue, software), VP Sales (design wins, stock cover), CFO (forecast accuracy, gross margin), Head of Platform Engineering (months to first shipment)</li><li>[ ] Data refresh: monthly after month-end close. History and refresh per system are still unknown (open question). Owners: the CFO, VP Sales and Head of Platform Engineering to confirm</li><li>[ ] Review rhythm: monthly board pack, with the first status update at the next board meeting</li><li>[ ] Six decisions due 6-Nov-26 (page 4)</li><li>[ ] Sample data checked against real data before go-live</li></ul>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h5">6. Go-live</h2>
+<ul><li><b>Go-live date:</b> 27-Oct-26 (test mode: sample data only, nothing published).</li><li><b>Human's go-live approval:</b> Adam, 27-Oct-26: "Go-live approved. Run the sealed check."</li></ul><a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>

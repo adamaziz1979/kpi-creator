@@ -1,0 +1,2364 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lumenwire Audio: KPI results</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">Lumenwire Audio: KPI results</label></nav><section id="s0"><p class="src">File: 05-kpi-results.md</p><h1>Lumenwire Audio: KPI results</h1>
+<p>The results the calculation script writes. The Calculation Pack reads every number from here.</p>
+<pre class="code"><code>{
+ &quot;dq_gl_unmapped_rows&quot;: 0,
+ &quot;dq_gl_dup_rows&quot;: 0,
+ &quot;fy_rev&quot;: {
+  &quot;2020&quot;: {
+   &quot;total&quot;: 57740271.1,
+   &quot;hw&quot;: 53140271.1,
+   &quot;sw&quot;: 4000000.0,
+   &quot;oth&quot;: 600000.0,
+   &quot;cos&quot;: 18476886.75
+  },
+  &quot;2021&quot;: {
+   &quot;total&quot;: 66153367.589999996,
+   &quot;hw&quot;: 59053367.59,
+   &quot;sw&quot;: 6500000.0,
+   &quot;oth&quot;: 599999.9999999999,
+   &quot;cos&quot;: 20507543.95
+  },
+  &quot;2022&quot;: {
+   &quot;total&quot;: 80499806.82,
+   &quot;hw&quot;: 70099806.82000001,
+   &quot;sw&quot;: 9800000.0,
+   &quot;oth&quot;: 600000.0,
+   &quot;cos&quot;: 25437938.96
+  },
+  &quot;2023&quot;: {
+   &quot;total&quot;: 93755733.66,
+   &quot;hw&quot;: 80155733.65999998,
+   &quot;sw&quot;: 12999999.999999998,
+   &quot;oth&quot;: 600000.0,
+   &quot;cos&quot;: 30376857.71
+  },
+  &quot;2024&quot;: {
+   &quot;total&quot;: 122086358.34999998,
+   &quot;hw&quot;: 105086358.35,
+   &quot;sw&quot;: 16400000.000000002,
+   &quot;oth&quot;: 600000.0,
+   &quot;cos&quot;: 37480512.01
+  },
+  &quot;2025&quot;: {
+   &quot;total&quot;: 118400000.0,
+   &quot;hw&quot;: 99199999.99999999,
+   &quot;sw&quot;: 18600000.0,
+   &quot;oth&quot;: 600000.0,
+   &quot;cos&quot;: 34336000.0
+  },
+  &quot;2026&quot;: {
+   &quot;total&quot;: 80600000.0,
+   &quot;hw&quot;: 54299999.99999999,
+   &quot;sw&quot;: 25700000.0,
+   &quot;oth&quot;: 600000.0,
+   &quot;cos&quot;: 18538000.0
+  }
+ },
+ &quot;recon_FY25_total&quot;: 118400000.0,
+ &quot;recon_FY26_total&quot;: 80600000.0,
+ &quot;recon_FY26_sw&quot;: 25700000.0,
+ &quot;recon_FY26_sw_growth&quot;: 0.381720430107527,
+ &quot;recon_gm_FY25&quot;: 0.71,
+ &quot;recon_gm_FY26&quot;: 0.77,
+ &quot;k1_series&quot;: [
+  {
+   &quot;month&quot;: &quot;2026-06&quot;,
+   &quot;r12&quot;: 80600000.0,
+   &quot;hw&quot;: 54300000.0,
+   &quot;sw&quot;: 25700000.0,
+   &quot;path&quot;: 80600000.0,
+   &quot;gap&quot;: 0.0,
+   &quot;gap_pct&quot;: 0.0
+  },
+  {
+   &quot;month&quot;: &quot;2026-07&quot;,
+   &quot;r12&quot;: 79957905.42,
+   &quot;hw&quot;: 54814492.190000005,
+   &quot;sw&quot;: 24525379.91,
+   &quot;path&quot;: 82033333.33333333,
+   &quot;gap&quot;: -2075427.9133333266,
+   &quot;gap_pct&quot;: -0.025299812027630986
+  },
+  {
+   &quot;month&quot;: &quot;2026-08&quot;,
+   &quot;r12&quot;: 81007987.42999999,
+   &quot;hw&quot;: 54994195.879999995,
+   &quot;sw&quot;: 25403341.54,
+   &quot;path&quot;: 83466666.66666667,
+   &quot;gap&quot;: -2458679.2366666794,
+   &quot;gap_pct&quot;: -0.029457019608626345
+  },
+  {
+   &quot;month&quot;: &quot;2026-09&quot;,
+   &quot;r12&quot;: 80537990.16,
+   &quot;hw&quot;: 54798103.120000005,
+   &quot;sw&quot;: 25136026.01,
+   &quot;path&quot;: 84900000.0,
+   &quot;gap&quot;: -4362009.840000004,
+   &quot;gap_pct&quot;: -0.0513782077738516
+  }
+ ],
+ &quot;k1&quot;: {
+  &quot;current&quot;: 80537990.16,
+  &quot;hw&quot;: 54798103.120000005,
+  &quot;sw&quot;: 25136026.01,
+  &quot;path&quot;: 84900000.0,
+  &quot;gap&quot;: -4362009.840000004,
+  &quot;gap_pct&quot;: -0.0513782077738516,
+  &quot;months_remaining&quot;: 21,
+  &quot;pace_needed_per_month&quot;: 1641048.0876190478,
+  &quot;run_rate_3m&quot;: -20669.94666666786,
+  &quot;path_pace_per_month&quot;: 1433333.3333333333,
+  &quot;peak_r12&quot;: 122086358.35,
+  &quot;peak_r12_month&quot;: &quot;2024-06&quot;
+ },
+ &quot;quarterly_rev&quot;: {
+  &quot;FY25-Q1&quot;: {
+   &quot;hw&quot;: 23793892.28,
+   &quot;sw&quot;: 4008164.61,
+   &quot;oth&quot;: 147055.52000000002
+  },
+  &quot;FY25-Q2&quot;: {
+   &quot;hw&quot;: 25573960.86,
+   &quot;sw&quot;: 4700587.31,
+   &quot;oth&quot;: 145608.0
+  },
+  &quot;FY25-Q3&quot;: {
+   &quot;hw&quot;: 24084293.96,
+   &quot;sw&quot;: 5981548.74,
+   &quot;oth&quot;: 147791.13
+  },
+  &quot;FY25-Q4&quot;: {
+   &quot;hw&quot;: 25747852.9,
+   &quot;sw&quot;: 3909699.34,
+   &quot;oth&quot;: 159545.35
+  },
+  &quot;FY26-Q1&quot;: {
+   &quot;hw&quot;: 12901896.88,
+   &quot;sw&quot;: 6413973.989999999,
+   &quot;oth&quot;: 146138.96999999997
+  },
+  &quot;FY26-Q2&quot;: {
+   &quot;hw&quot;: 14473638.579999998,
+   &quot;sw&quot;: 4177279.38,
+   &quot;oth&quot;: 147220.81
+  },
+  &quot;FY26-Q3&quot;: {
+   &quot;hw&quot;: 12572801.02,
+   &quot;sw&quot;: 10505003.99,
+   &quot;oth&quot;: 148649.96
+  },
+  &quot;FY26-Q4&quot;: {
+   &quot;hw&quot;: 14351663.52,
+   &quot;sw&quot;: 4603742.64,
+   &quot;oth&quot;: 157990.26
+  },
+  &quot;FY27-Q1&quot;: {
+   &quot;hw&quot;: 13400000.0,
+   &quot;sw&quot;: 5850000.0,
+   &quot;oth&quot;: 150000.0
+  }
+ },
+ &quot;plan_fy27_total&quot;: 92689999.99,
+ &quot;path_at_jun27&quot;: 97800000.0,
+ &quot;fy27_q1_actual&quot;: 19400000.0,
+ &quot;fy27_q1_plan&quot;: 22381311.31,
+ &quot;plan_vs_prior_year_ratio_min_max&quot;: [
+  1.1499999572904003,
+  1.150000077863064
+ ],
+ &quot;plan_sw_mar27&quot;: 9886566.78,
+ &quot;dq_lic_vs_gl_diff_FY26&quot;: 12854.730000004172,
+ &quot;dq_lic_vs_gl_diff_R12M&quot;: 33969.58999999985,
+ &quot;big_licence&quot;: {
+  &quot;id&quot;: &quot;LIC03074&quot;,
+  &quot;customer&quot;: &quot;Corvane&quot;,
+  &quot;oem&quot;: &quot;OEM0079&quot;,
+  &quot;value&quot;: 7400000.0,
+  &quot;start&quot;: &quot;2026-03-27&quot;,
+  &quot;type&quot;: &quot;perpetual&quot;,
+  &quot;seats&quot;: 0
+ },
+ &quot;k3&quot;: {
+  &quot;cur&quot;: 25136026.01,
+  &quot;prior&quot;: 21005809.38,
+  &quot;growth&quot;: 0.19662258926963583,
+  &quot;cur_ex&quot;: 17736026.01,
+  &quot;growth_ex&quot;: -0.15566090841104252,
+  &quot;fy26&quot;: 25700000.0,
+  &quot;fy25&quot;: 18600000.0,
+  &quot;fy24&quot;: 16400000.000000002,
+  &quot;fy26_growth&quot;: 0.381720430107527,
+  &quot;fy26_growth_ex&quot;: -0.016129032258064502,
+  &quot;fy25_growth&quot;: 0.13414634146341453,
+  &quot;big_share_of_fy26&quot;: 0.28793774319066145,
+  &quot;big_share_of_r12&quot;: 0.294398167675989,
+  &quot;months_remaining&quot;: 9,
+  &quot;growth_series&quot;: {
+   &quot;2026-06&quot;: 0.381720430107527,
+   &quot;2026-07&quot;: 0.14882111276797327,
+   &quot;2026-08&quot;: 0.17695551237287988,
+   &quot;2026-09&quot;: 0.19662258926963583
+  },
+  &quot;run_rate_pts_per_month&quot;: -6.169928027929705,
+  &quot;pace_needed_pts_per_month&quot;: 0.037526785892935365,
+  &quot;perp_cur&quot;: 21072509.909999996,
+  &quot;perp_prior&quot;: 17194859.89,
+  &quot;sub_cur&quot;: 4063516.1000000006,
+  &quot;sub_prior&quot;: 3810949.4899999998,
+  &quot;perp_cur_ex&quot;: 13672509.909999996,
+  &quot;lic_count_cur&quot;: 617,
+  &quot;lic_count_prior&quot;: 598,
+  &quot;new_cust_median_value_cur&quot;: 7193.915,
+  &quot;new_cust_median_value_prior&quot;: 7729.72,
+  &quot;bridge&quot;: {
+   &quot;prior&quot;: 21005809.38,
+   &quot;big_licence&quot;: 7400000.0,
+   &quot;perpetual_other&quot;: -3522349.8599999975,
+   &quot;sub_annual&quot;: 229670.99000000022,
+   &quot;sub_monthly&quot;: 48779.90000000002,
+   &quot;current&quot;: 25136026.01
+  },
+  &quot;bridge_sum_check&quot;: 25884.400000002235,
+  &quot;renewal_due_n&quot;: 491,
+  &quot;renewal_status_missing&quot;: 88,
+  &quot;renewal_rate_value&quot;: 0.6935971310251886,
+  &quot;renewal_rate_count&quot;: 0.7220843672456576,
+  &quot;renewal_rate_count_prior&quot;: 0.8816425120772947,
+  &quot;pending_in_due&quot;: 75,
+  &quot;renewal_decided_n&quot;: 328,
+  &quot;renewal_rate_decided&quot;: 0.8871951219512195,
+  &quot;renewal_rate_decided_prior&quot;: 0.8816425120772947,
+  &quot;renewal_decided_prior_n&quot;: 414,
+  &quot;lic_vs_gl_r12m_diff&quot;: 33969.58999999985
+ },
+ &quot;dq_lic_enddate_missing_subs&quot;: 0,
+ &quot;dq_lic_oem_missing&quot;: 1750,
+ &quot;dq_lic_total&quot;: 3096,
+ &quot;k3_1&quot;: {
+  &quot;total&quot;: 25169995.600000005,
+  &quot;largest&quot;: 7400000.0,
+  &quot;largest_share&quot;: 0.29400084599140724,
+  &quot;top5&quot;: 10185951.25,
+  &quot;top5_share&quot;: 0.40468625469286923,
+  &quot;largest_share_ex&quot;: 0.04861392931352218,
+  &quot;n&quot;: 617,
+  &quot;top5_share_ex&quot;: 0.18388929933105894,
+  &quot;largest_customer_is_oem&quot;: true,
+  &quot;prior_largest_share&quot;: 0.039275525403000056,
+  &quot;prior_top5_share&quot;: 0.1455953940288566,
+  &quot;by_fy_largest_share&quot;: {
+   &quot;2020&quot;: 0.049773932381785894,
+   &quot;2021&quot;: 0.03545343407021289,
+   &quot;2022&quot;: 0.03976703134198894,
+   &quot;2023&quot;: 0.03408294885345897,
+   &quot;2024&quot;: 0.06649509133897837,
+   &quot;2025&quot;: 0.04494108559275412,
+   &quot;2026&quot;: 0.28779379332650235
+  },
+  &quot;second_largest&quot;: 863869.31
+ },
+ &quot;dq_lic_zero_seats&quot;: 1,
+ &quot;k3_2&quot;: {
+  &quot;cur&quot;: 0.7650262808594528,
+  &quot;prior&quot;: 0.7230250583705315,
+  &quot;fy25&quot;: 0.71,
+  &quot;fy26&quot;: 0.77,
+  &quot;cur_rev&quot;: 80537990.16,
+  &quot;cur_cos&quot;: 18924311.08,
+  &quot;cur_ex_big&quot;: 0.7412519671568727,
+  &quot;fy26_ex_big&quot;: 0.7467486338797814,
+  &quot;hw_gm_cur&quot;: 0.6788346735898171,
+  &quot;hw_gm_prior&quot;: 0.6682170387426157,
+  &quot;sw_gm_cur&quot;: 0.9549999996200672,
+  &quot;sw_share_cur&quot;: 0.3121014810533981,
+  &quot;sw_share_prior&quot;: 0.19111323485378887,
+  &quot;var5010_cur&quot;: -260095.68000000005,
+  &quot;var5010_prior&quot;: 227562.96999999997,
+  &quot;target_fy27_board&quot;: 76.0,
+  &quot;r12_series&quot;: {
+   &quot;2026-06&quot;: 0.77,
+   &quot;2026-07&quot;: 0.7656008997290213,
+   &quot;2026-08&quot;: 0.7663878179129824,
+   &quot;2026-09&quot;: 0.7650262808594528
+  },
+  &quot;run_rate_pts_per_month&quot;: -0.16579063801824095,
+  &quot;pace_needed_pts_per_month_v11&quot;: -0.055847565105030895
+ },
+ &quot;dq_inv_oem_missing&quot;: 3161,
+ &quot;dq_inv_rows&quot;: 392709,
+ &quot;dq_inv_order_missing&quot;: 2200,
+ &quot;dq_inv_order_missing_hw&quot;: 1331,
+ &quot;dq_inv_oem_missing_families&quot;: {
+  &quot;software_subscription&quot;: 3161
+ },
+ &quot;dq_inv_fx_missing_nonaud&quot;: 34737,
+ &quot;dq_inv_fx_missing_nonaud_last24m&quot;: 0,
+ &quot;recon_invoice_vs_gl&quot;: {
+  &quot;2020&quot;: {
+   &quot;hw_diff&quot;: 0.0,
+   &quot;sw_diff&quot;: 0.0,
+   &quot;oth_diff&quot;: 0.0
+  },
+  &quot;2021&quot;: {
+   &quot;hw_diff&quot;: -7.450580596923828e-09,
+   &quot;sw_diff&quot;: 0.0,
+   &quot;oth_diff&quot;: 1.1641532182693481e-10
+  },
+  &quot;2022&quot;: {
+   &quot;hw_diff&quot;: -1.4901161193847656e-08,
+   &quot;sw_diff&quot;: 0.0,
+   &quot;oth_diff&quot;: 0.0
+  },
+  &quot;2023&quot;: {
+   &quot;hw_diff&quot;: 1.4901161193847656e-08,
+   &quot;sw_diff&quot;: 1.862645149230957e-09,
+   &quot;oth_diff&quot;: 0.0
+  },
+  &quot;2024&quot;: {
+   &quot;hw_diff&quot;: 0.0,
+   &quot;sw_diff&quot;: -1.862645149230957e-09,
+   &quot;oth_diff&quot;: 0.0
+  },
+  &quot;2025&quot;: {
+   &quot;hw_diff&quot;: 0.0,
+   &quot;sw_diff&quot;: 0.0,
+   &quot;oth_diff&quot;: 0.0
+  },
+  &quot;2026&quot;: {
+   &quot;hw_diff&quot;: 7.450580596923828e-09,
+   &quot;sw_diff&quot;: 0.0,
+   &quot;oth_diff&quot;: 0.0
+  }
+ },
+ &quot;recon_max_abs_diff&quot;: 1.4901161193847656e-08,
+ &quot;bridge_fy25_fy26&quot;: {
+  &quot;fy25&quot;: 118400000.0,
+  &quot;hw_volume&quot;: -49788168.25161144,
+  &quot;hw_price_mix&quot;: 388168.21161143546,
+  &quot;rebates&quot;: 4500000.04,
+  &quot;sw_big_licence&quot;: 7400000.0,
+  &quot;sw_other&quot;: -300000.0,
+  &quot;other&quot;: 0.0,
+  &quot;fy26&quot;: 80600000.0,
+  &quot;check_unexplained&quot;: 0.0,
+  &quot;hw_units_fy25&quot;: 4883606,
+  &quot;hw_units_fy26&quot;: 2590114,
+  &quot;hw_units_change_pct&quot;: -0.4696308424553496,
+  &quot;hw_avg_price_change_pct&quot;: 0.00925460812897283
+ },
+ &quot;sku_price_change_pct&quot;: {
+  &quot;LW-C100&quot;: 0.00381001064623665,
+  &quot;LW-C200&quot;: 0.0071703893703118915,
+  &quot;LW-K128&quot;: 0.014081581993650616,
+  &quot;LW-K64&quot;: 0.005258433131902329,
+  &quot;LW-M310&quot;: 0.0069652399076316485,
+  &quot;LW-M320&quot;: 0.005205537063714516,
+  &quot;LW-M410&quot;: 0.007013960454937962
+ },
+ &quot;fx_effect_fy26_hw&quot;: 606682.5837348849,
+ &quot;fx_rates&quot;: {
+  &quot;EUR_2025&quot;: 1.6800000000000004,
+  &quot;EUR_2026&quot;: 1.7399999999999995,
+  &quot;USD_2025&quot;: 1.5300000000000002,
+  &quot;USD_2026&quot;: 1.54
+ },
+ &quot;oem_breadth&quot;: {
+  &quot;oems_buying_fy25&quot;: 409,
+  &quot;oems_buying_fy26&quot;: 408,
+  &quot;lost_oems&quot;: 1,
+  &quot;oems_down&quot;: 409,
+  &quot;oems_total&quot;: 409,
+  &quot;median_oem_change_pct&quot;: -0.5198101271228002,
+  &quot;top10_share_fy25&quot;: 0.24598905042483946,
+  &quot;top10_share_fy26&quot;: 0.25696072636203865,
+  &quot;top1_oem&quot;: &quot;OEM0079&quot;,
+  &quot;top1_fy25&quot;: 5422466.05,
+  &quot;top1_fy26&quot;: 2524728.88
+ },
+ &quot;by_tier&quot;: {
+  &quot;A&quot;: -0.46046072473976196,
+  &quot;B&quot;: -0.4556208420070257,
+  &quot;C&quot;: -0.4934908347668122
+ },
+ &quot;by_region&quot;: {
+  &quot;AMER&quot;: -0.5285724066566841,
+  &quot;APAC&quot;: -0.4824335395463847,
+  &quot;EMEA&quot;: -0.5163412739000919,
+  &quot;GCHINA&quot;: -0.3479793980322986
+ },
+ &quot;by_sku_units&quot;: {
+  &quot;LW-C100&quot;: -0.47101352211710346,
+  &quot;LW-C200&quot;: -0.4760671547039018,
+  &quot;LW-K128&quot;: -0.47655074337427283,
+  &quot;LW-K64&quot;: -0.47511166591897636,
+  &quot;LW-M310&quot;: -0.48469941677226025,
+  &quot;LW-M320&quot;: -0.4361668272719702,
+  &quot;LW-M410&quot;: -0.4698514068280063
+ },
+ &quot;quarter_end&quot;: {
+  &quot;qe25&quot;: 49252733.68,
+  &quot;ot25&quot;: 57047266.35999999,
+  &quot;qe26&quot;: 21260855.41,
+  &quot;ot26&quot;: 35639144.59,
+  &quot;qe_share25&quot;: 0.4633370993552824,
+  &quot;qe_share26&quot;: 0.3736529949033392,
+  &quot;qe_avg_month25&quot;: 12313183.42,
+  &quot;ot_avg_month25&quot;: 7130908.294999999,
+  &quot;qe_avg_month26&quot;: 5315213.8525,
+  &quot;ot_avg_month26&quot;: 4454893.07375,
+  &quot;rebate_rate25&quot;: 0.0667920981874724,
+  &quot;rebate_rate26&quot;: 0.04569420035149385,
+  &quot;rebate_only_in_quarter_end_months&quot;: true
+ },
+ &quot;dq_orders_leadtime_missing&quot;: 11542,
+ &quot;dq_orders_rows&quot;: 391848,
+ &quot;dq_act_rows&quot;: 1198459,
+ &quot;dq_act_dup_serials&quot;: 5040,
+ &quot;dq_act_dup_serials_last24m&quot;: 1611,
+ &quot;dq_act_oem_missing&quot;: 107210,
+ &quot;dq_act_oem_missing_after_backfill&quot;: 85186,
+ &quot;dq_act_beta_rows&quot;: 2197,
+ &quot;dq_act_beta_in_last24m&quot;: 0,
+ &quot;dq_act_model_string_free_text&quot;: true,
+ &quot;k2&quot;: {
+  &quot;cur&quot;: 2492460.0,
+  &quot;prior&quot;: 2528350.0,
+  &quot;growth&quot;: -0.01419502837819131,
+  &quot;prior2&quot;: 2455380.0,
+  &quot;prior_growth&quot;: 0.029718414257670966,
+  &quot;raw_cur&quot;: 2505330.0,
+  &quot;raw_growth&quot;: -0.014099859906499423,
+  &quot;months_remaining&quot;: 9,
+  &quot;growth_series&quot;: {
+   &quot;2026-06&quot;: -0.033032549778435394,
+   &quot;2026-07&quot;: -0.024774473114043682,
+   &quot;2026-08&quot;: -0.019610861764740695,
+   &quot;2026-09&quot;: -0.01419502837819131
+  },
+  &quot;run_rate_pts_per_month&quot;: 0.6279173800081361,
+  &quot;pace_needed_pts_per_month&quot;: 0.7132780930910145,
+  &quot;fy_activations&quot;: {
+   &quot;2022&quot;: 1520470.0,
+   &quot;2023&quot;: 2304410.0,
+   &quot;2024&quot;: 2426060.0,
+   &quot;2025&quot;: 2547790.0,
+   &quot;2026&quot;: 2463630.0
+  },
+  &quot;dup_rate_cur&quot;: 0.005137047814060436,
+  &quot;by_group_growth&quot;: {
+   &quot;card&quot;: -0.013041545225510043,
+   &quot;chip&quot;: -0.01577194744793442,
+   &quot;module&quot;: -0.012537088494324888
+  },
+  &quot;country_growth_range&quot;: [
+   -0.03529633824084555,
+   0.013368055555555536
+  ],
+  &quot;countries_growing&quot;: 3,
+  &quot;countries_total&quot;: 21,
+  &quot;top_country_growth&quot;: {
+   &quot;United States&quot;: -0.014642649622312653,
+   &quot;Italy&quot;: -0.026059592880322557,
+   &quot;Japan&quot;: -0.020485626569913484,
+   &quot;Brazil&quot;: -0.0036032619002465127,
+   &quot;China&quot;: -0.007943988151339676,
+   &quot;Germany&quot;: -0.019595788826558103,
+   &quot;Canada&quot;: -0.015394233023364845,
+   &quot;Sweden&quot;: -0.007039774727208736
+  },
+  &quot;oems_growing&quot;: 130,
+  &quot;oems_total&quot;: 319,
+  &quot;oem_growth_median&quot;: -0.012658227848101222,
+  &quot;quarterly&quot;: {
+   &quot;FY25-Q2&quot;: 662050.0,
+   &quot;FY25-Q3&quot;: 616520.0,
+   &quot;FY25-Q4&quot;: 658610.0,
+   &quot;FY26-Q1&quot;: 591170.0,
+   &quot;FY26-Q2&quot;: 640290.0,
+   &quot;FY26-Q3&quot;: 591280.0,
+   &quot;FY26-Q4&quot;: 640890.0,
+   &quot;FY27-Q1&quot;: 620000.0
+  },
+  &quot;dup_serial_share_all&quot;: 0.004205400435058688
+ },
+ &quot;sellin_vs_installs&quot;: {
+  &quot;2023&quot;: {
+   &quot;invoiced&quot;: 3985844.0,
+   &quot;activated&quot;: 2304410.0,
+   &quot;ratio&quot;: 1.7296592186286295
+  },
+  &quot;2024&quot;: {
+   &quot;invoiced&quot;: 5279584.0,
+   &quot;activated&quot;: 2426060.0,
+   &quot;ratio&quot;: 2.17619679645186
+  },
+  &quot;2025&quot;: {
+   &quot;invoiced&quot;: 4883606.0,
+   &quot;activated&quot;: 2547790.0,
+   &quot;ratio&quot;: 1.9168008352336732
+  },
+  &quot;2026&quot;: {
+   &quot;invoiced&quot;: 2590114.0,
+   &quot;activated&quot;: 2463630.0,
+   &quot;ratio&quot;: 1.051340501617532
+  },
+  &quot;R12M&quot;: {
+   &quot;invoiced&quot;: 2598870.0,
+   &quot;activated&quot;: 2492460.0,
+   &quot;ratio&quot;: 1.0426927613682868
+  },
+  &quot;R12M_prior&quot;: {
+   &quot;invoiced&quot;: 4310658.0,
+   &quot;activated&quot;: 2528350.0,
+   &quot;ratio&quot;: 1.704929301718512
+  },
+  &quot;ratio_jan25_jun25_avg&quot;: 1.9135225427995577,
+  &quot;ratio_jul25_sep26_avg&quot;: 1.040281745864452,
+  &quot;cum_excess_jul22_jun25&quot;: 6870774.0,
+  &quot;ratio_fy22&quot;: 2.2615513624076766
+ },
+ &quot;timeline&quot;: {
+  &quot;2022-06&quot;: {
+   &quot;ord_qty&quot;: 447031.0,
+   &quot;lead_wk&quot;: 47.59616677874916,
+   &quot;inv_qty&quot;: 316375.0,
+   &quot;act&quot;: 178720.0
+  },
+  &quot;2023-03&quot;: {
+   &quot;ord_qty&quot;: 352647.0,
+   &quot;lead_wk&quot;: 47.65900649953575,
+   &quot;inv_qty&quot;: 391624.0,
+   &quot;act&quot;: 183900.0
+  },
+  &quot;2023-09&quot;: {
+   &quot;ord_qty&quot;: 219561.0,
+   &quot;lead_wk&quot;: 43.742088032011644,
+   &quot;inv_qty&quot;: 533249.0,
+   &quot;act&quot;: 194400.0
+  },
+  &quot;2023-12&quot;: {
+   &quot;ord_qty&quot;: 10742.0,
+   &quot;lead_wk&quot;: 18.764705882352942,
+   &quot;inv_qty&quot;: 590605.0,
+   &quot;act&quot;: 213480.0
+  },
+  &quot;2024-03&quot;: {
+   &quot;ord_qty&quot;: 9382.0,
+   &quot;lead_wk&quot;: 10.674528301886792,
+   &quot;inv_qty&quot;: 554228.0,
+   &quot;act&quot;: 193800.0
+  },
+  &quot;2024-09&quot;: {
+   &quot;ord_qty&quot;: 336703.0,
+   &quot;lead_wk&quot;: 7.878391472868217,
+   &quot;inv_qty&quot;: 552417.0,
+   &quot;act&quot;: 201680.0
+  },
+  &quot;2025-06&quot;: {
+   &quot;ord_qty&quot;: 194068.0,
+   &quot;lead_wk&quot;: 7.752707581227437,
+   &quot;inv_qty&quot;: 577771.0,
+   &quot;act&quot;: 221930.0
+  },
+  &quot;2025-09&quot;: {
+   &quot;ord_qty&quot;: 211188.0,
+   &quot;lead_wk&quot;: 7.745762711864407,
+   &quot;inv_qty&quot;: 224569.0,
+   &quot;act&quot;: 196740.0
+  },
+  &quot;2026-09&quot;: {
+   &quot;ord_qty&quot;: 131424.0,
+   &quot;lead_wk&quot;: 7.836626506024096,
+   &quot;inv_qty&quot;: 208143.0,
+   &quot;act&quot;: 205590.0
+  }
+ },
+ &quot;orders_drought&quot;: {
+  &quot;ord_qty_oct23_jun24&quot;: 245944.0,
+  &quot;ord_qty_prev9m&quot;: 3362811.0,
+  &quot;lead_before&quot;: 47.65900649953575,
+  &quot;lead_after&quot;: 8.506602641056423,
+  &quot;backlog_invoiced_jul24_jun25_vs_orders&quot;: 4883606.0
+ },
+ &quot;dq_inv_reports_rows&quot;: 1087,
+ &quot;dq_inv_reports_unmatched&quot;: 0,
+ &quot;dq_inv_reports_raw_names&quot;: 235,
+ &quot;dq_inv_reports_clean_names&quot;: 35,
+ &quot;dq_inv_reports_kinds&quot;: {
+  &quot;reel&quot;: 88,
+  &quot;finished&quot;: 229
+ },
+ &quot;dq_inv_reports_dups&quot;: 0,
+ &quot;inv_by_quarter&quot;: {
+  &quot;2021-Q3&quot;: {
+   &quot;units&quot;: 301889.0,
+   &quot;oems&quot;: 22,
+   &quot;parts&quot;: 275066.0
+  },
+  &quot;2021-Q4&quot;: {
+   &quot;units&quot;: 350229.0,
+   &quot;oems&quot;: 22,
+   &quot;parts&quot;: 258466.0
+  },
+  &quot;2022-Q1&quot;: {
+   &quot;units&quot;: 308782.0,
+   &quot;oems&quot;: 23,
+   &quot;parts&quot;: 213574.0
+  },
+  &quot;2022-Q2&quot;: {
+   &quot;units&quot;: 311629.0,
+   &quot;oems&quot;: 23,
+   &quot;parts&quot;: 218735.0
+  },
+  &quot;2022-Q3&quot;: {
+   &quot;units&quot;: 402067.0,
+   &quot;oems&quot;: 27,
+   &quot;parts&quot;: 276900.0
+  },
+  &quot;2022-Q4&quot;: {
+   &quot;units&quot;: 408856.0,
+   &quot;oems&quot;: 23,
+   &quot;parts&quot;: 290707.0
+  },
+  &quot;2023-Q1&quot;: {
+   &quot;units&quot;: 518776.0,
+   &quot;oems&quot;: 27,
+   &quot;parts&quot;: 367161.0
+  },
+  &quot;2023-Q2&quot;: {
+   &quot;units&quot;: 448505.0,
+   &quot;oems&quot;: 28,
+   &quot;parts&quot;: 327635.0
+  },
+  &quot;2023-Q3&quot;: {
+   &quot;units&quot;: 657439.0,
+   &quot;oems&quot;: 31,
+   &quot;parts&quot;: 458663.0
+  },
+  &quot;2023-Q4&quot;: {
+   &quot;units&quot;: 711208.0,
+   &quot;oems&quot;: 23,
+   &quot;parts&quot;: 513115.0
+  },
+  &quot;2024-Q1&quot;: {
+   &quot;units&quot;: 868256.0,
+   &quot;oems&quot;: 27,
+   &quot;parts&quot;: 643444.0
+  },
+  &quot;2024-Q2&quot;: {
+   &quot;units&quot;: 785292.0,
+   &quot;oems&quot;: 26,
+   &quot;parts&quot;: 712944.0
+  },
+  &quot;2024-Q3&quot;: {
+   &quot;units&quot;: 1072762.0,
+   &quot;oems&quot;: 25,
+   &quot;parts&quot;: 883964.0
+  },
+  &quot;2024-Q4&quot;: {
+   &quot;units&quot;: 975940.0,
+   &quot;oems&quot;: 24,
+   &quot;parts&quot;: 832390.0
+  },
+  &quot;2025-Q1&quot;: {
+   &quot;units&quot;: 1376758.0,
+   &quot;oems&quot;: 28,
+   &quot;parts&quot;: 969385.0
+  },
+  &quot;2025-Q2&quot;: {
+   &quot;units&quot;: 1590583.0,
+   &quot;oems&quot;: 31,
+   &quot;parts&quot;: 1152555.0
+  },
+  &quot;2025-Q3&quot;: {
+   &quot;units&quot;: 1284416.0,
+   &quot;oems&quot;: 26,
+   &quot;parts&quot;: 903991.0
+  },
+  &quot;2025-Q4&quot;: {
+   &quot;units&quot;: 980357.0,
+   &quot;oems&quot;: 28,
+   &quot;parts&quot;: 736506.0
+  },
+  &quot;2026-Q1&quot;: {
+   &quot;units&quot;: 1066952.0,
+   &quot;oems&quot;: 26,
+   &quot;parts&quot;: 787237.0
+  },
+  &quot;2026-Q2&quot;: {
+   &quot;units&quot;: 777310.0,
+   &quot;oems&quot;: 22,
+   &quot;parts&quot;: 620820.0
+  },
+  &quot;2026-Q3&quot;: {
+   &quot;units&quot;: 841883.0,
+   &quot;oems&quot;: 28,
+   &quot;parts&quot;: 580074.0
+  }
+ },
+ &quot;inv_lfl&quot;: {
+  &quot;2021-Q4&quot;: {
+   &quot;prev&quot;: &quot;2021-Q3&quot;,
+   &quot;both&quot;: 13,
+   &quot;prev_units&quot;: 210294.0,
+   &quot;units&quot;: 220117.0,
+   &quot;change&quot;: 0.04671079536268263
+  },
+  &quot;2022-Q1&quot;: {
+   &quot;prev&quot;: &quot;2021-Q4&quot;,
+   &quot;both&quot;: 18,
+   &quot;prev_units&quot;: 251668.0,
+   &quot;units&quot;: 260967.0,
+   &quot;change&quot;: 0.03694947311537433
+  },
+  &quot;2022-Q2&quot;: {
+   &quot;prev&quot;: &quot;2022-Q1&quot;,
+   &quot;both&quot;: 16,
+   &quot;prev_units&quot;: 208713.0,
+   &quot;units&quot;: 214984.0,
+   &quot;change&quot;: 0.030046044089251822
+  },
+  &quot;2022-Q3&quot;: {
+   &quot;prev&quot;: &quot;2022-Q2&quot;,
+   &quot;both&quot;: 17,
+   &quot;prev_units&quot;: 245734.0,
+   &quot;units&quot;: 262422.0,
+   &quot;change&quot;: 0.06791083041011836
+  },
+  &quot;2022-Q4&quot;: {
+   &quot;prev&quot;: &quot;2022-Q3&quot;,
+   &quot;both&quot;: 16,
+   &quot;prev_units&quot;: 250765.0,
+   &quot;units&quot;: 266946.0,
+   &quot;change&quot;: 0.064526548760792
+  },
+  &quot;2023-Q1&quot;: {
+   &quot;prev&quot;: &quot;2022-Q4&quot;,
+   &quot;both&quot;: 18,
+   &quot;prev_units&quot;: 345928.0,
+   &quot;units&quot;: 370112.0,
+   &quot;change&quot;: 0.06991050160727097
+  },
+  &quot;2023-Q2&quot;: {
+   &quot;prev&quot;: &quot;2023-Q1&quot;,
+   &quot;both&quot;: 23,
+   &quot;prev_units&quot;: 359256.0,
+   &quot;units&quot;: 380839.0,
+   &quot;change&quot;: 0.060076936780457446
+  },
+  &quot;2023-Q3&quot;: {
+   &quot;prev&quot;: &quot;2023-Q2&quot;,
+   &quot;both&quot;: 26,
+   &quot;prev_units&quot;: 422108.0,
+   &quot;units&quot;: 523976.0,
+   &quot;change&quot;: 0.24133160233873796
+  },
+  &quot;2023-Q4&quot;: {
+   &quot;prev&quot;: &quot;2023-Q3&quot;,
+   &quot;both&quot;: 20,
+   &quot;prev_units&quot;: 445185.0,
+   &quot;units&quot;: 535844.0,
+   &quot;change&quot;: 0.2036434291362017
+  },
+  &quot;2024-Q1&quot;: {
+   &quot;prev&quot;: &quot;2023-Q4&quot;,
+   &quot;both&quot;: 17,
+   &quot;prev_units&quot;: 532583.0,
+   &quot;units&quot;: 625767.0,
+   &quot;change&quot;: 0.17496615551003325
+  },
+  &quot;2024-Q2&quot;: {
+   &quot;prev&quot;: &quot;2024-Q1&quot;,
+   &quot;both&quot;: 20,
+   &quot;prev_units&quot;: 514766.0,
+   &quot;units&quot;: 589438.0,
+   &quot;change&quot;: 0.14506008555343586
+  },
+  &quot;2024-Q3&quot;: {
+   &quot;prev&quot;: &quot;2024-Q2&quot;,
+   &quot;both&quot;: 18,
+   &quot;prev_units&quot;: 586642.0,
+   &quot;units&quot;: 639868.0,
+   &quot;change&quot;: 0.09072995114567317
+  },
+  &quot;2024-Q4&quot;: {
+   &quot;prev&quot;: &quot;2024-Q3&quot;,
+   &quot;both&quot;: 17,
+   &quot;prev_units&quot;: 712405.0,
+   &quot;units&quot;: 758840.0,
+   &quot;change&quot;: 0.06518062057397134
+  },
+  &quot;2025-Q1&quot;: {
+   &quot;prev&quot;: &quot;2024-Q4&quot;,
+   &quot;both&quot;: 19,
+   &quot;prev_units&quot;: 801405.0,
+   &quot;units&quot;: 838853.0,
+   &quot;change&quot;: 0.046727934065796894
+  },
+  &quot;2025-Q2&quot;: {
+   &quot;prev&quot;: &quot;2025-Q1&quot;,
+   &quot;both&quot;: 24,
+   &quot;prev_units&quot;: 1240064.0,
+   &quot;units&quot;: 1326652.0,
+   &quot;change&quot;: 0.06982542836498751
+  },
+  &quot;2025-Q3&quot;: {
+   &quot;prev&quot;: &quot;2025-Q2&quot;,
+   &quot;both&quot;: 24,
+   &quot;prev_units&quot;: 1299038.0,
+   &quot;units&quot;: 1196671.0,
+   &quot;change&quot;: -0.07880215975206273
+  },
+  &quot;2025-Q4&quot;: {
+   &quot;prev&quot;: &quot;2025-Q3&quot;,
+   &quot;both&quot;: 19,
+   &quot;prev_units&quot;: 778449.0,
+   &quot;units&quot;: 717172.0,
+   &quot;change&quot;: -0.07871678170310448
+  },
+  &quot;2026-Q1&quot;: {
+   &quot;prev&quot;: &quot;2025-Q4&quot;,
+   &quot;both&quot;: 19,
+   &quot;prev_units&quot;: 704585.0,
+   &quot;units&quot;: 646589.0,
+   &quot;change&quot;: -0.08231228311701211
+  },
+  &quot;2026-Q2&quot;: {
+   &quot;prev&quot;: &quot;2026-Q1&quot;,
+   &quot;both&quot;: 18,
+   &quot;prev_units&quot;: 735779.0,
+   &quot;units&quot;: 651301.0,
+   &quot;change&quot;: -0.11481436681394819
+  },
+  &quot;2026-Q3&quot;: {
+   &quot;prev&quot;: &quot;2026-Q2&quot;,
+   &quot;both&quot;: 18,
+   &quot;prev_units&quot;: 665812.0,
+   &quot;units&quot;: 552255.0,
+   &quot;change&quot;: -0.17055415042083955
+  }
+ },
+ &quot;inv_peak&quot;: {
+  &quot;quarter&quot;: &quot;2025-Q2&quot;,
+  &quot;units&quot;: 1590583.0,
+  &quot;oems&quot;: 31
+ },
+ &quot;inv_lfl_peak_to_latest&quot;: {
+  &quot;oems&quot;: 25,
+  &quot;peak&quot;: 1387997.0,
+  &quot;latest&quot;: 758319.0,
+  &quot;change&quot;: -0.4536594819729437
+ },
+ &quot;inv_share_of_oems&quot;: {
+  &quot;reporting_latest&quot;: 28,
+  &quot;total_active&quot;: 418
+ },
+ &quot;inv_coverage_fy26_hw_share&quot;: 0.461172899824253,
+ &quot;inv_months_cover_latest&quot;: 9.272792357511051,
+ &quot;inv_months_cover_peak&quot;: 7.8731988615270385,
+ &quot;inv_notes_counts&quot;: {
+  &quot;none&quot;: 482,
+  &quot;includes goods in transit&quot;: 163,
+  &quot;excludes Mexico plant&quot;: 162,
+  &quot;estimate&quot;: 157,
+  &quot;as at month end&quot;: 123
+ },
+ &quot;dq_crm_rows&quot;: 8990,
+ &quot;dq_crm_no_dates_at_all&quot;: 2932,
+ &quot;dq_crm_undated_last_modified_max&quot;: &quot;2023-01-25&quot;,
+ &quot;dq_crm_undated_by_stage&quot;: {
+  &quot;lost&quot;: 1018,
+  &quot;design_win&quot;: 915,
+  &quot;shipping&quot;: 530,
+  &quot;pre_production&quot;: 469
+ },
+ &quot;dq_crm_undated_past_dw_stage&quot;: 1914,
+ &quot;dq_crm_dated_dw&quot;: 3840,
+ &quot;dq_crm_ship_without_dw_date&quot;: 349,
+ &quot;dq_crm_dw_without_design_in&quot;: 245,
+ &quot;dq_crm_dw_without_design_in_after_2023q2&quot;: 0,
+ &quot;dq_crm_stage_dates_start&quot;: &quot;2023-01-01&quot;,
+ &quot;dq_crm_missing_share_k4&quot;: 0.33263816475495306,
+ &quot;k4_cutoff&quot;: &quot;2025-03-30&quot;,
+ &quot;k4&quot;: {
+  &quot;n&quot;: 2131,
+  &quot;shipped&quot;: 672,
+  &quot;rate&quot;: 0.3153449084936649,
+  &quot;lost&quot;: 151,
+  &quot;lost_rate&quot;: 0.07085875175973722,
+  &quot;still_open&quot;: 1308,
+  &quot;cohort_from&quot;: &quot;2023-01-01&quot;,
+  &quot;cohort_to&quot;: &quot;2025-03-30&quot;,
+  &quot;shipped_within_18m&quot;: 470,
+  &quot;rate_within_18m&quot;: 0.22055373064289066,
+  &quot;rate_within_24m_cohort&quot;: 0.29778051787916154,
+  &quot;n24&quot;: 1622,
+  &quot;sens_include_undated_stage_based&quot;: 0.2971569839307787,
+  &quot;months_remaining&quot;: 9
+ },
+ &quot;k4_cohorts&quot;: [
+  {
+   &quot;q&quot;: &quot;2023Q3&quot;,
+   &quot;n&quot;: 211,
+   &quot;shipped&quot;: 69,
+   &quot;lost&quot;: 13,
+   &quot;age_months&quot;: 43.56110381077529,
+   &quot;s12&quot;: 0.07582938388625593,
+   &quot;s18&quot;: 0.22274881516587677,
+   &quot;pp12&quot;: 0.44075829383886256,
+   &quot;lost12&quot;: 0.02843601895734597,
+   &quot;rev_median&quot;: 62500.0,
+   &quot;last_week_share&quot;: 0.037914691943127965,
+   &quot;no_design_in&quot;: 0.9052132701421801
+  },
+  {
+   &quot;q&quot;: &quot;2023Q4&quot;,
+   &quot;n&quot;: 219,
+   &quot;shipped&quot;: 69,
+   &quot;lost&quot;: 10,
+   &quot;age_months&quot;: 40.57161629434954,
+   &quot;s12&quot;: 0.0639269406392694,
+   &quot;s18&quot;: 0.1963470319634703,
+   &quot;pp12&quot;: 0.3972602739726027,
+   &quot;lost12&quot;: 0.0228310502283105,
+   &quot;rev_median&quot;: 62500.0,
+   &quot;last_week_share&quot;: 0.0593607305936073,
+   &quot;no_design_in&quot;: 0.2465753424657534
+  },
+  {
+   &quot;q&quot;: &quot;2024Q1&quot;,
+   &quot;n&quot;: 248,
+   &quot;shipped&quot;: 96,
+   &quot;lost&quot;: 16,
+   &quot;age_months&quot;: 37.450722733245726,
+   &quot;s12&quot;: 0.0967741935483871,
+   &quot;s18&quot;: 0.23387096774193547,
+   &quot;pp12&quot;: 0.4153225806451613,
+   &quot;lost12&quot;: 0.028225806451612902,
+   &quot;rev_median&quot;: 62500.0,
+   &quot;last_week_share&quot;: 0.06451612903225806,
+   &quot;no_design_in&quot;: 0.0
+  },
+  {
+   &quot;q&quot;: &quot;2024Q2&quot;,
+   &quot;n&quot;: 242,
+   &quot;shipped&quot;: 85,
+   &quot;lost&quot;: 14,
+   &quot;age_months&quot;: 34.526938239159,
+   &quot;s12&quot;: 0.06198347107438017,
+   &quot;s18&quot;: 0.2190082644628099,
+   &quot;pp12&quot;: 0.4090909090909091,
+   &quot;lost12&quot;: 0.03305785123966942,
+   &quot;rev_median&quot;: 62500.0,
+   &quot;last_week_share&quot;: 0.045454545454545456,
+   &quot;no_design_in&quot;: 0.0
+  },
+  {
+   &quot;q&quot;: &quot;2024Q3&quot;,
+   &quot;n&quot;: 224,
+   &quot;shipped&quot;: 79,
+   &quot;lost&quot;: 15,
+   &quot;age_months&quot;: 31.471747700394218,
+   &quot;s12&quot;: 0.09821428571428571,
+   &quot;s18&quot;: 0.25892857142857145,
+   &quot;pp12&quot;: 0.46875,
+   &quot;lost12&quot;: 0.022321428571428572,
+   &quot;rev_median&quot;: 50000.0,
+   &quot;last_week_share&quot;: 0.05803571428571429,
+   &quot;no_design_in&quot;: 0.0
+  },
+  {
+   &quot;q&quot;: &quot;2024Q4&quot;,
+   &quot;n&quot;: 236,
+   &quot;shipped&quot;: 61,
+   &quot;lost&quot;: 12,
+   &quot;age_months&quot;: 28.48226018396846,
+   &quot;s12&quot;: 0.08050847457627118,
+   &quot;s18&quot;: 0.1652542372881356,
+   &quot;pp12&quot;: 0.4110169491525424,
+   &quot;lost12&quot;: 0.01694915254237288,
+   &quot;rev_median&quot;: 37500.0,
+   &quot;last_week_share&quot;: 0.0847457627118644,
+   &quot;no_design_in&quot;: 0.0
+  },
+  {
+   &quot;q&quot;: &quot;2025Q1&quot;,
+   &quot;n&quot;: 242,
+   &quot;shipped&quot;: 81,
+   &quot;lost&quot;: 15,
+   &quot;age_months&quot;: 25.427069645203677,
+   &quot;s12&quot;: 0.09090909090909091,
+   &quot;s18&quot;: 0.24380165289256198,
+   &quot;pp12&quot;: 0.4214876033057851,
+   &quot;lost12&quot;: 0.004132231404958678,
+   &quot;rev_median&quot;: 37500.0,
+   &quot;last_week_share&quot;: 0.09504132231404959,
+   &quot;no_design_in&quot;: 0.0
+  },
+  {
+   &quot;q&quot;: &quot;2025Q2&quot;,
+   &quot;n&quot;: 245,
+   &quot;shipped&quot;: 72,
+   &quot;lost&quot;: 26,
+   &quot;age_months&quot;: 22.437582128777922,
+   &quot;s12&quot;: 0.09387755102040816,
+   &quot;s18&quot;: 0.23673469387755103,
+   &quot;pp12&quot;: 0.37551020408163266,
+   &quot;lost12&quot;: 0.0653061224489796,
+   &quot;rev_median&quot;: 37500.0,
+   &quot;last_week_share&quot;: 0.053061224489795916,
+   &quot;no_design_in&quot;: 0.0
+  },
+  {
+   &quot;q&quot;: &quot;2025Q3&quot;,
+   &quot;n&quot;: 267,
+   &quot;shipped&quot;: 60,
+   &quot;lost&quot;: 30,
+   &quot;age_months&quot;: 19.513797634691194,
+   &quot;s12&quot;: 0.07865168539325842,
+   &quot;s18&quot;: 0.20599250936329588,
+   &quot;pp12&quot;: 0.40823970037453183,
+   &quot;lost12&quot;: 0.056179775280898875,
+   &quot;rev_median&quot;: 25000.0,
+   &quot;last_week_share&quot;: 0.06741573033707865,
+   &quot;no_design_in&quot;: 0.0
+  },
+  {
+   &quot;q&quot;: &quot;2025Q4&quot;,
+   &quot;n&quot;: 266,
+   &quot;shipped&quot;: 49,
+   &quot;lost&quot;: 49,
+   &quot;age_months&quot;: 16.491458607095925,
+   &quot;s12&quot;: 0.07142857142857142,
+   &quot;s18&quot;: null,
+   &quot;pp12&quot;: 0.37969924812030076,
+   &quot;lost12&quot;: 0.08270676691729323,
+   &quot;rev_median&quot;: 22500.0,
+   &quot;last_week_share&quot;: 0.06766917293233082,
+   &quot;no_design_in&quot;: 0.0
+  },
+  {
+   &quot;q&quot;: &quot;2026Q1&quot;,
+   &quot;n&quot;: 278,
+   &quot;shipped&quot;: 32,
+   &quot;lost&quot;: 68,
+   &quot;age_months&quot;: 13.567674113009199,
+   &quot;s12&quot;: 0.08273381294964029,
+   &quot;s18&quot;: null,
+   &quot;pp12&quot;: 0.3597122302158273,
+   &quot;lost12&quot;: 0.11151079136690648,
+   &quot;rev_median&quot;: 25000.0,
+   &quot;last_week_share&quot;: 0.039568345323741004,
+   &quot;no_design_in&quot;: 0.0
+  },
+  {
+   &quot;q&quot;: &quot;2026Q2&quot;,
+   &quot;n&quot;: 300,
+   &quot;shipped&quot;: 12,
+   &quot;lost&quot;: 98,
+   &quot;age_months&quot;: 10.545335085413928,
+   &quot;s12&quot;: null,
+   &quot;s18&quot;: null,
+   &quot;pp12&quot;: null,
+   &quot;lost12&quot;: null,
+   &quot;rev_median&quot;: 37500.0,
+   &quot;last_week_share&quot;: 0.06333333333333334,
+   &quot;no_design_in&quot;: 0.0
+  },
+  {
+   &quot;q&quot;: &quot;2026Q3&quot;,
+   &quot;n&quot;: 311,
+   &quot;shipped&quot;: 6,
+   &quot;lost&quot;: 0,
+   &quot;age_months&quot;: 7.457293035479632,
+   &quot;s12&quot;: null,
+   &quot;s18&quot;: null,
+   &quot;pp12&quot;: null,
+   &quot;lost12&quot;: null,
+   &quot;rev_median&quot;: 50000.0,
+   &quot;last_week_share&quot;: 0.08681672025723473,
+   &quot;no_design_in&quot;: 0.0
+  },
+  {
+   &quot;q&quot;: &quot;2026Q4&quot;,
+   &quot;n&quot;: 291,
+   &quot;shipped&quot;: 0,
+   &quot;lost&quot;: 0,
+   &quot;age_months&quot;: 4.533508541392904,
+   &quot;s12&quot;: null,
+   &quot;s18&quot;: null,
+   &quot;pp12&quot;: null,
+   &quot;lost12&quot;: null,
+   &quot;rev_median&quot;: 62500.0,
+   &quot;last_week_share&quot;: 0.06529209621993128,
+   &quot;no_design_in&quot;: 0.0
+  },
+  {
+   &quot;q&quot;: &quot;2027Q1&quot;,
+   &quot;n&quot;: 260,
+   &quot;shipped&quot;: 0,
+   &quot;lost&quot;: 0,
+   &quot;age_months&quot;: 1.3469119579500657,
+   &quot;s12&quot;: null,
+   &quot;s18&quot;: null,
+   &quot;pp12&quot;: null,
+   &quot;lost12&quot;: null,
+   &quot;rev_median&quot;: 50000.0,
+   &quot;last_week_share&quot;: 0.08461538461538462,
+   &quot;no_design_in&quot;: 0.0
+  }
+ ],
+ &quot;k4_fy_dw&quot;: {
+  &quot;2023&quot;: 430,
+  &quot;2024&quot;: 950,
+  &quot;2025&quot;: 1020,
+  &quot;2026&quot;: 1180,
+  &quot;FY27_Q1&quot;: 260
+ },
+ &quot;k4_bonus_test&quot;: {
+  &quot;ship12&quot;: {
+   &quot;pre_n&quot;: 1380,
+   &quot;post_n&quot;: 1298,
+   &quot;pre&quot;: 0.07971014492753623,
+   &quot;post&quot;: 0.08320493066255778
+  },
+  &quot;ship18&quot;: {
+   &quot;pre_n&quot;: 1380,
+   &quot;post_n&quot;: 754,
+   &quot;pre&quot;: 0.21594202898550724,
+   &quot;post&quot;: 0.22811671087533156
+  },
+  &quot;preprod12&quot;: {
+   &quot;pre&quot;: 0.42318840579710143,
+   &quot;post&quot;: 0.3882896764252696
+  },
+  &quot;lost12&quot;: {
+   &quot;pre&quot;: 0.025362318840579712,
+   &quot;post&quot;: 0.06548536209553159
+  },
+  &quot;dw_per_quarter_pre&quot;: 230.0,
+  &quot;dw_per_quarter_post&quot;: 273.3333333333333,
+  &quot;est_rev_median_pre&quot;: 50000.0,
+  &quot;est_rev_median_post&quot;: 37500.0,
+  &quot;last_week_share_pre&quot;: 0.058695652173913045,
+  &quot;last_week_share_post&quot;: 0.06910569105691057,
+  &quot;last_week_expected&quot;: 0.07692307692307693
+ },
+ &quot;k4_bonus_payout_estimate_fy26&quot;: 472000.0,
+ &quot;k4_bonus_payout_lost_after_dw_fy26_cohort&quot;: 66400,
+ &quot;k4_bonus_dw_fy26_not_shipped&quot;: 1130,
+ &quot;k4_spread&quot;: {
+  &quot;owner_min&quot;: 0.2422360248447205,
+  &quot;owner_max&quot;: 0.4140127388535032,
+  &quot;owners&quot;: 14,
+  &quot;region&quot;: {
+   &quot;Americas&quot;: 0.3132867132867133,
+   &quot;Asia Pacific&quot;: 0.35094339622641507,
+   &quot;Europe&quot;: 0.3232169954476479,
+   &quot;Greater China&quot;: 0.2886178861788618
+  },
+  &quot;tier&quot;: {
+   &quot;A&quot;: 0.33583489681050654,
+   &quot;B&quot;: 0.3107569721115538,
+   &quot;C&quot;: 0.30650887573964497
+  },
+  &quot;owner_n_min&quot;: 83
+ },
+ &quot;k4_invoice_crosscheck&quot;: {
+  &quot;shipped_opps&quot;: 672,
+  &quot;oem_invoiced_after_ship&quot;: 664
+ },
+ &quot;k4_1&quot;: {
+  &quot;median&quot;: 15.013140604467806,
+  &quot;p25&quot;: 11.925098554533507,
+  &quot;p75&quot;: 18.89783180026281,
+  &quot;n&quot;: 672,
+  &quot;all_shipped_median&quot;: 14.257555847568987,
+  &quot;all_n&quot;: 771,
+  &quot;by_cohort&quot;: [
+   {
+    &quot;q&quot;: &quot;2023Q3&quot;,
+    &quot;n_ship&quot;: 69,
+    &quot;median&quot;: 15.078843626806833
+   },
+   {
+    &quot;q&quot;: &quot;2023Q4&quot;,
+    &quot;n_ship&quot;: 69,
+    &quot;median&quot;: 15.571616294349539
+   },
+   {
+    &quot;q&quot;: &quot;2024Q1&quot;,
+    &quot;n_ship&quot;: 96,
+    &quot;median&quot;: 15.555190538764784
+   },
+   {
+    &quot;q&quot;: &quot;2024Q2&quot;,
+    &quot;n_ship&quot;: 85,
+    &quot;median&quot;: 16.16294349540079
+   },
+   {
+    &quot;q&quot;: &quot;2024Q3&quot;,
+    &quot;n_ship&quot;: 79,
+    &quot;median&quot;: 14.520367936925098
+   },
+   {
+    &quot;q&quot;: &quot;2024Q4&quot;,
+    &quot;n_ship&quot;: 61,
+    &quot;median&quot;: 15.111695137976346
+   },
+   {
+    &quot;q&quot;: &quot;2025Q1&quot;,
+    &quot;n_ship&quot;: 81,
+    &quot;median&quot;: 15.473061760840999
+   },
+   {
+    &quot;q&quot;: &quot;2025Q2&quot;,
+    &quot;n_ship&quot;: 72,
+    &quot;median&quot;: 14.224704336399475
+   },
+   {
+    &quot;q&quot;: &quot;2025Q3&quot;,
+    &quot;n_ship&quot;: 60,
+    &quot;median&quot;: 13.304862023653087
+   }
+  ],
+  &quot;run_rate_months_per_cohort&quot;: -0.6022777047744198
+ },
+ &quot;k4_2&quot;: {
+  &quot;2023Q3&quot;: 211,
+  &quot;2023Q4&quot;: 219,
+  &quot;2024Q1&quot;: 248,
+  &quot;2024Q2&quot;: 242,
+  &quot;2024Q3&quot;: 224,
+  &quot;2024Q4&quot;: 236,
+  &quot;2025Q1&quot;: 242,
+  &quot;2025Q2&quot;: 245,
+  &quot;2025Q3&quot;: 267,
+  &quot;2025Q4&quot;: 266,
+  &quot;2026Q1&quot;: 278,
+  &quot;2026Q2&quot;: 300,
+  &quot;2026Q3&quot;: 311,
+  &quot;2026Q4&quot;: 291,
+  &quot;2027Q1&quot;: 260
+ },
+ &quot;k4_2_fy26&quot;: 1180,
+ &quot;k4_2_fy25&quot;: 1020,
+ &quot;k4_2_run_rate_per_quarter&quot;: 4.333333333333333,
+ &quot;dq_fc_rows&quot;: 84,
+ &quot;dq_fc_thousands_rows&quot;: 12,
+ &quot;dq_fc_thousands_quarters&quot;: [
+  &quot;FY24-Q1&quot;,
+  &quot;FY24-Q2&quot;,
+  &quot;FY24-Q3&quot;,
+  &quot;FY24-Q4&quot;
+ ],
+ &quot;k5_quarters&quot;: {
+  &quot;finance_run_rate&quot;: {
+   &quot;FY24-Q1&quot;: {
+    &quot;forecast&quot;: 26479800.0,
+    &quot;actual&quot;: 30567522.37,
+    &quot;err&quot;: -0.13372763158625606
+   },
+   &quot;FY24-Q2&quot;: {
+    &quot;forecast&quot;: 29551500.0,
+    &quot;actual&quot;: 28956308.99,
+    &quot;err&quot;: 0.020554795509522626
+   },
+   &quot;FY24-Q3&quot;: {
+    &quot;forecast&quot;: 27893900.0,
+    &quot;actual&quot;: 31545948.52,
+    &quot;err&quot;: -0.11576917770231623
+   },
+   &quot;FY24-Q4&quot;: {
+    &quot;forecast&quot;: 30936500.0,
+    &quot;actual&quot;: 31016578.47,
+    &quot;err&quot;: -0.0025817957347375594
+   },
+   &quot;FY25-Q1&quot;: {
+    &quot;forecast&quot;: 39782781.0,
+    &quot;actual&quot;: 27949112.41,
+    &quot;err&quot;: 0.42340051506487175
+   },
+   &quot;FY25-Q2&quot;: {
+    &quot;forecast&quot;: 34415706.0,
+    &quot;actual&quot;: 30420156.169999998,
+    &quot;err&quot;: 0.13134547395717733
+   },
+   &quot;FY25-Q3&quot;: {
+    &quot;forecast&quot;: 36223439.0,
+    &quot;actual&quot;: 30213633.830000002,
+    &quot;err&quot;: 0.19891037284077648
+   },
+   &quot;FY25-Q4&quot;: {
+    &quot;forecast&quot;: 32093863.0,
+    &quot;actual&quot;: 29817097.59,
+    &quot;err&quot;: 0.07635771399707185
+   },
+   &quot;FY26-Q1&quot;: {
+    &quot;forecast&quot;: 27153991.0,
+    &quot;actual&quot;: 19462009.84,
+    &quot;err&quot;: 0.39523056576565785
+   },
+   &quot;FY26-Q2&quot;: {
+    &quot;forecast&quot;: 28386775.0,
+    &quot;actual&quot;: 18798138.77,
+    &quot;err&quot;: 0.5100843411850183
+   },
+   &quot;FY26-Q3&quot;: {
+    &quot;forecast&quot;: 25096753.0,
+    &quot;actual&quot;: 23226454.97,
+    &quot;err&quot;: 0.08052447230607235
+   },
+   &quot;FY26-Q4&quot;: {
+    &quot;forecast&quot;: 22298088.0,
+    &quot;actual&quot;: 19113396.419999998,
+    &quot;err&quot;: 0.16662091394010872
+   },
+   &quot;FY27-Q1&quot;: {
+    &quot;forecast&quot;: 16070686.0,
+    &quot;actual&quot;: 19400000.0,
+    &quot;err&quot;: -0.17161412371134022
+   }
+  },
+  &quot;sales_crm&quot;: {
+   &quot;FY24-Q1&quot;: {
+    &quot;forecast&quot;: 33015801.0,
+    &quot;actual&quot;: 30567522.37,
+    &quot;err&quot;: 0.08009411428133352
+   },
+   &quot;FY24-Q2&quot;: {
+    &quot;forecast&quot;: 33789118.0,
+    &quot;actual&quot;: 28956308.99,
+    &quot;err&quot;: 0.16690003590129537
+   },
+   &quot;FY24-Q3&quot;: {
+    &quot;forecast&quot;: 34333343.0,
+    &quot;actual&quot;: 31545948.52,
+    &quot;err&quot;: 0.08835982466124942
+   },
+   &quot;FY24-Q4&quot;: {
+    &quot;forecast&quot;: 36452329.0,
+    &quot;actual&quot;: 31016578.47,
+    &quot;err&quot;: 0.1752530678152522
+   },
+   &quot;FY25-Q1&quot;: {
+    &quot;forecast&quot;: 34022513.0,
+    &quot;actual&quot;: 27949112.41,
+    &quot;err&quot;: 0.21730209177687443
+   },
+   &quot;FY25-Q2&quot;: {
+    &quot;forecast&quot;: 35783928.0,
+    &quot;actual&quot;: 30420156.169999998,
+    &quot;err&quot;: 0.17632295508363272
+   },
+   &quot;FY25-Q4&quot;: {
+    &quot;forecast&quot;: 33666036.0,
+    &quot;actual&quot;: 29817097.59,
+    &quot;err&quot;: 0.12908494525271466
+   },
+   &quot;FY26-Q1&quot;: {
+    &quot;forecast&quot;: 25812261.0,
+    &quot;actual&quot;: 19462009.84,
+    &quot;err&quot;: 0.3262895873656593
+   },
+   &quot;FY26-Q2&quot;: {
+    &quot;forecast&quot;: 26151613.0,
+    &quot;actual&quot;: 18798138.77,
+    &quot;err&quot;: 0.39118097381722866
+   },
+   &quot;FY26-Q3&quot;: {
+    &quot;forecast&quot;: 31264955.0,
+    &quot;actual&quot;: 23226454.97,
+    &quot;err&quot;: 0.34609242092186576
+   },
+   &quot;FY26-Q4&quot;: {
+    &quot;forecast&quot;: 26326926.0,
+    &quot;actual&quot;: 19113396.419999998,
+    &quot;err&quot;: 0.377406998813244
+   },
+   &quot;FY27-Q1&quot;: {
+    &quot;forecast&quot;: 24376083.0,
+    &quot;actual&quot;: 19400000.0,
+    &quot;err&quot;: 0.2564991237113402
+   }
+  }
+ },
+ &quot;k5_order&quot;: [
+  &quot;FY24-Q1&quot;,
+  &quot;FY24-Q2&quot;,
+  &quot;FY24-Q3&quot;,
+  &quot;FY24-Q4&quot;,
+  &quot;FY25-Q1&quot;,
+  &quot;FY25-Q2&quot;,
+  &quot;FY25-Q3&quot;,
+  &quot;FY25-Q4&quot;,
+  &quot;FY26-Q1&quot;,
+  &quot;FY26-Q2&quot;,
+  &quot;FY26-Q3&quot;,
+  &quot;FY26-Q4&quot;,
+  &quot;FY27-Q1&quot;
+ ],
+ &quot;k5_missing_source_quarters&quot;: [
+  &quot;sales_crm FY25-Q3&quot;
+ ],
+ &quot;dq_fc_late_snapshots&quot;: [
+  {
+   &quot;source&quot;: &quot;sales_crm&quot;,
+   &quot;q&quot;: &quot;FY26-Q2&quot;
+  }
+ ],
+ &quot;dq_fc_snapshot_days_before_start&quot;: [
+  2,
+  5
+ ],
+ &quot;k5_last4&quot;: [
+  &quot;FY26-Q2&quot;,
+  &quot;FY26-Q3&quot;,
+  &quot;FY26-Q4&quot;,
+  &quot;FY27-Q1&quot;
+ ],
+ &quot;k5&quot;: {
+  &quot;finance_run_rate&quot;: {
+   &quot;latest_q&quot;: &quot;FY27-Q1&quot;,
+   &quot;latest_err&quot;: -0.17161412371134022,
+   &quot;latest_abs&quot;: 0.17161412371134022,
+   &quot;mape_last4&quot;: 0.2322109627856349,
+   &quot;mape_all&quot;: 0.18667091486930212,
+   &quot;n_all&quot;: 13,
+   &quot;within5&quot;: 2,
+   &quot;within10&quot;: 4,
+   &quot;bias_all&quot;: 0.12148741814089441,
+   &quot;bias_last4&quot;: 0.1464039009299648,
+   &quot;worst_q&quot;: &quot;FY26-Q2&quot;,
+   &quot;worst_err&quot;: 0.5100843411850183,
+   &quot;mape_before_break&quot;: 0.13783093454909123,
+   &quot;mape_after_break&quot;: 0.2648148833816395,
+   &quot;bias_before_break&quot;: 0.07481128329326378,
+   &quot;bias_after_break&quot;: 0.19616923389710342,
+   &quot;n_over&quot;: 9,
+   &quot;n_quarters&quot;: 13,
+   &quot;abs_err_latest&quot;: 0.17161412371134022,
+   &quot;run_rate_pts_per_quarter&quot;: -11.282340582455937,
+   &quot;pace_needed_pts_per_quarter&quot;: -4.05380412371134,
+   &quot;abs_err_series_last4&quot;: {
+    &quot;FY26-Q2&quot;: 0.5100843411850183,
+    &quot;FY26-Q3&quot;: 0.08052447230607235,
+    &quot;FY26-Q4&quot;: 0.16662091394010872,
+    &quot;FY27-Q1&quot;: 0.17161412371134022
+   },
+   &quot;pace_needed_pts_per_quarter_v11&quot;: -2.3871374570446737
+  },
+  &quot;sales_crm&quot;: {
+   &quot;latest_q&quot;: &quot;FY27-Q1&quot;,
+   &quot;latest_err&quot;: 0.2564991237113402,
+   &quot;latest_abs&quot;: 0.2564991237113402,
+   &quot;mape_last4&quot;: 0.3427948793159197,
+   &quot;mape_all&quot;: 0.2275655116168075,
+   &quot;n_all&quot;: 12,
+   &quot;within5&quot;: 0,
+   &quot;within10&quot;: 2,
+   &quot;bias_all&quot;: 0.2275655116168075,
+   &quot;bias_last4&quot;: 0.3427948793159197,
+   &quot;worst_q&quot;: &quot;FY26-Q2&quot;,
+   &quot;worst_err&quot;: 0.39118097381722866,
+   &quot;mape_before_break&quot;: 0.1476167192531932,
+   &quot;mape_after_break&quot;: 0.3394938209258676,
+   &quot;bias_before_break&quot;: 0.1476167192531932,
+   &quot;bias_after_break&quot;: 0.3394938209258676,
+   &quot;n_over&quot;: 12,
+   &quot;n_quarters&quot;: 12,
+   &quot;abs_err_latest&quot;: 0.2564991237113402,
+   &quot;run_rate_pts_per_quarter&quot;: -4.489395003529615,
+   &quot;pace_needed_pts_per_quarter&quot;: -6.883304123711341,
+   &quot;abs_err_series_last4&quot;: {
+    &quot;FY26-Q2&quot;: 0.39118097381722866,
+    &quot;FY26-Q3&quot;: 0.34609242092186576,
+    &quot;FY26-Q4&quot;: 0.377406998813244,
+    &quot;FY27-Q1&quot;: 0.2564991237113402
+   },
+   &quot;pace_needed_pts_per_quarter_v11&quot;: -5.216637457044674
+  }
+ },
+ &quot;k5_unit_trap&quot;: {
+  &quot;fy24q1_raw&quot;: 26479.800000000003,
+  &quot;fy24q1_fixed&quot;: 26479800.0
+ },
+ &quot;k5_family&quot;: {
+  &quot;finance_run_rate&quot;: {
+   &quot;hardware&quot;: {
+    &quot;mape&quot;: 0.274978217947371,
+    &quot;bias&quot;: 0.1533137681710926
+   },
+   &quot;other&quot;: {
+    &quot;mape&quot;: 0.05739869519249771,
+    &quot;bias&quot;: 0.0010761977901988678
+   },
+   &quot;software&quot;: {
+    &quot;mape&quot;: 0.42625106043922045,
+    &quot;bias&quot;: 0.16511495193170297
+   }
+  },
+  &quot;sales_crm&quot;: {
+   &quot;hardware&quot;: {
+    &quot;mape&quot;: 0.26652408225375007,
+    &quot;bias&quot;: 0.26652408225375007
+   },
+   &quot;other&quot;: {
+    &quot;mape&quot;: 0.013831903623421031,
+    &quot;bias&quot;: -0.004838369051362156
+   },
+   &quot;software&quot;: {
+    &quot;mape&quot;: 0.14286909205352213,
+    &quot;bias&quot;: 0.14286909205352213
+   }
+  }
+ },
+ &quot;k5_family_last4&quot;: {
+  &quot;finance_run_rate&quot;: {
+   &quot;hardware&quot;: {
+    &quot;mape&quot;: 0.39969606807070523,
+    &quot;bias&quot;: 0.163212038219959
+   },
+   &quot;other&quot;: {
+    &quot;mape&quot;: 0.025458319854064052,
+    &quot;bias&quot;: 0.0005084719032206978
+   },
+   &quot;software&quot;: {
+    &quot;mape&quot;: 0.39181781900737056,
+    &quot;bias&quot;: 0.21309466033106428
+   }
+  },
+  &quot;sales_crm&quot;: {
+   &quot;hardware&quot;: {
+    &quot;mape&quot;: 0.43810692228205467,
+    &quot;bias&quot;: 0.43810692228205467
+   },
+   &quot;other&quot;: {
+    &quot;mape&quot;: 0.011582567905349233,
+    &quot;bias&quot;: -0.008382646644217732
+   },
+   &quot;software&quot;: {
+    &quot;mape&quot;: 0.1351361626610999,
+    &quot;bias&quot;: 0.1351361626610999
+   }
+  }
+ },
+ &quot;k5_finance_vs_naive&quot;: {
+  &quot;FY24-Q1&quot;: {
+   &quot;f_vs_prev&quot;: 0.09296566693314756,
+   &quot;naive_err&quot;: -0.20741117985481017,
+   &quot;err&quot;: -0.1337276315862561
+  },
+  &quot;FY24-Q2&quot;: {
+   &quot;f_vs_prev&quot;: -0.03323862358557261,
+   &quot;naive_err&quot;: 0.0556429129332896,
+   &quot;err&quot;: 0.02055479550952266
+  },
+  &quot;FY24-Q3&quot;: {
+   &quot;f_vs_prev&quot;: -0.036690069523947266,
+   &quot;naive_err&quot;: -0.08209103392019357,
+   &quot;err&quot;: -0.1157691777023162
+  },
+  &quot;FY24-Q4&quot;: {
+   &quot;f_vs_prev&quot;: -0.01931939119261583,
+   &quot;naive_err&quot;: 0.017067325801652267,
+   &quot;err&quot;: -0.002581795734737602
+  },
+  &quot;FY25-Q1&quot;: {
+   &quot;f_vs_prev&quot;: 0.28262957948372325,
+   &quot;naive_err&quot;: 0.10975182377893611,
+   &quot;err&quot;: 0.42340051506487186
+  },
+  &quot;FY25-Q2&quot;: {
+   &quot;f_vs_prev&quot;: 0.23137026661663485,
+   &quot;naive_err&quot;: -0.08123047581316867,
+   &quot;err&quot;: 0.13134547395717733
+  },
+  &quot;FY25-Q3&quot;: {
+   &quot;f_vs_prev&quot;: 0.1907709742701167,
+   &quot;naive_err&quot;: 0.006835402228080767,
+   &quot;err&quot;: 0.1989103728407764
+  },
+  &quot;FY25-Q4&quot;: {
+   &quot;f_vs_prev&quot;: 0.06223114970477539,
+   &quot;naive_err&quot;: 0.01329895503085421,
+   &quot;err&quot;: 0.07635771399707192
+  },
+  &quot;FY26-Q1&quot;: {
+   &quot;f_vs_prev&quot;: -0.08931474909526904,
+   &quot;naive_err&quot;: 0.5320667205047513,
+   &quot;err&quot;: 0.39523056576565785
+  },
+  &quot;FY26-Q2&quot;: {
+   &quot;f_vs_prev&quot;: 0.45857366394179144,
+   &quot;naive_err&quot;: 0.03531578727674223,
+   &quot;err&quot;: 0.5100843411850182
+  },
+  &quot;FY26-Q3&quot;: {
+   &quot;f_vs_prev&quot;: 0.33506584386173244,
+   &quot;naive_err&quot;: -0.1906582905449733,
+   &quot;err&quot;: 0.08052447230607229
+  },
+  &quot;FY26-Q4&quot;: {
+   &quot;f_vs_prev&quot;: -0.03997023959097956,
+   &quot;naive_err&quot;: 0.21519244720400144,
+   &quot;err&quot;: 0.1666209139401087
+  },
+  &quot;FY27-Q1&quot;: {
+   &quot;f_vs_prev&quot;: -0.15919255547989086,
+   &quot;naive_err&quot;: -0.014773380412371195,
+   &quot;err&quot;: -0.17161412371134022
+  }
+ },
+ &quot;k5_naive&quot;: {
+  &quot;finance_mape_all&quot;: 0.18667091486930204,
+  &quot;naive_mape_all&quot;: 0.120102748869525,
+  &quot;median_abs_gap_to_prev&quot;: 0.09296566693314756,
+  &quot;corr&quot;: 0.7117748471901201,
+  &quot;finance_mape_ex_break&quot;: 0.16907974580217539,
+  &quot;naive_mape_ex_break&quot;: 0.09222687585333658
+ },
+ &quot;k5_software_miss_q&quot;: {
+  &quot;finance_run_rate FY24-Q2&quot;: 1.4773835729188105,
+  &quot;finance_run_rate FY25-Q1&quot;: 0.5809006407049735,
+  &quot;finance_run_rate FY25-Q2&quot;: -0.5741995908166633,
+  &quot;finance_run_rate FY26-Q2&quot;: 0.5363545064108209,
+  &quot;finance_run_rate FY27-Q1&quot;: 0.5149263247863248
+ },
+ &quot;k5_fy26q3_software_actual&quot;: 10505003.99,
+ &quot;k5_fy26q3_software_actual_ex&quot;: 3105003.99,
+ &quot;k5_fy26q3_software&quot;: {
+  &quot;finance_run_rate&quot;: {
+   &quot;forecast&quot;: 6750029.0,
+   &quot;err&quot;: -0.35744631735261245,
+   &quot;err_ex&quot;: 1.173919589713635
+  },
+  &quot;sales_crm&quot;: {
+   &quot;forecast&quot;: 12319688.0,
+   &quot;err&quot;: 0.17274472353627346,
+   &quot;err_ex&quot;: 2.967688299170269
+  }
+ },
+ &quot;k5_break&quot;: {
+  &quot;finance_run_rate&quot;: {
+   &quot;forecast&quot;: 22461090.0,
+   &quot;actual&quot;: 12901896.88
+  },
+  &quot;sales_crm&quot;: {
+   &quot;forecast&quot;: 18236559.0,
+   &quot;actual&quot;: 12901896.88
+  }
+ },
+ &quot;k5_fy27q1_hw&quot;: {
+  &quot;finance_run_rate&quot;: {
+   &quot;forecast&quot;: 7062228.0,
+   &quot;actual&quot;: 13400000.0
+  },
+  &quot;sales_crm&quot;: {
+   &quot;forecast&quot;: 17806060.0,
+   &quot;actual&quot;: 13400000.0
+  }
+ },
+ &quot;k5_fin_fy27q1_hw_vs_actual_prev_q&quot;: 14351663.52,
+ &quot;k5_disagreement&quot;: {
+  &quot;FY24-Q1&quot;: 0.2138217458675896,
+  &quot;FY24-Q2&quot;: 0.14634524039177274,
+  &quot;FY24-Q3&quot;: 0.20412900236356565,
+  &quot;FY24-Q4&quot;: 0.17783486354998976,
+  &quot;FY25-Q1&quot;: -0.20609842328799735,
+  &quot;FY25-Q2&quot;: 0.044977481126455374,
+  &quot;FY25-Q4&quot;: 0.05272723125564281,
+  &quot;FY26-Q1&quot;: -0.06894097839999859,
+  &quot;FY26-Q2&quot;: -0.11890336736778968,
+  &quot;FY26-Q3&quot;: 0.26556794861579347,
+  &quot;FY26-Q4&quot;: 0.2107860848731353,
+  &quot;FY27-Q1&quot;: 0.4281132474226804
+ },
+ &quot;k5_disagreement_median_abs&quot;: 0.1909819329567777,
+ &quot;k5_target_checks&quot;: {
+  &quot;latest_q&quot;: &quot;FY27-Q1&quot;,
+  &quot;months_remaining&quot;: 9
+ },
+ &quot;k5_blend_mape&quot;: 0.17805408096185496,
+ &quot;k5_blend_quarters&quot;: 12,
+ &quot;k5_sales_mape_same_quarters&quot;: 0.2275655116168075,
+ &quot;k5_finance_mape_same_quarters&quot;: 0.1856509600383459,
+ &quot;incentive&quot;: {
+  &quot;plan_fy&quot;: &quot;FY25&quot;,
+  &quot;role&quot;: &quot;Account manager&quot;,
+  &quot;component&quot;: &quot;Design wins&quot;,
+  &quot;weight_pct&quot;: 25,
+  &quot;payout_rule&quot;: &quot;A$400 per opportunity moved to design_win in the CRM, paid quarterly, no clawback if later lost&quot;
+ },
+ &quot;board_targets&quot;: [
+  {
+   &quot;target_id&quot;: &quot;BT-01&quot;,
+   &quot;metric&quot;: &quot;Total revenue&quot;,
+   &quot;period&quot;: &quot;FY28&quot;,
+   &quot;target_value&quot;: 115000000.0,
+   &quot;unit&quot;: &quot;AUD&quot;,
+   &quot;set_by&quot;: &quot;Board&quot;,
+   &quot;set_date&quot;: &quot;2026-08-26&quot;,
+   &quot;basis&quot;: &quot;Board strategy day: back to FY25 revenue within two years&quot;
+  },
+  {
+   &quot;target_id&quot;: &quot;BT-02&quot;,
+   &quot;metric&quot;: &quot;Total revenue&quot;,
+   &quot;period&quot;: &quot;FY27&quot;,
+   &quot;target_value&quot;: 92689999.99,
+   &quot;unit&quot;: &quot;AUD&quot;,
+   &quot;set_by&quot;: &quot;Finance&quot;,
+   &quot;set_date&quot;: &quot;2026-06-15&quot;,
+   &quot;basis&quot;: &quot;FY26 actual plus 15% (board_plan_fy27)&quot;
+  },
+  {
+   &quot;target_id&quot;: &quot;BT-03&quot;,
+   &quot;metric&quot;: &quot;Gross margin&quot;,
+   &quot;period&quot;: &quot;FY27&quot;,
+   &quot;target_value&quot;: 76.0,
+   &quot;unit&quot;: &quot;percent&quot;,
+   &quot;set_by&quot;: &quot;Finance&quot;,
+   &quot;set_date&quot;: &quot;2026-06-15&quot;,
+   &quot;basis&quot;: &quot;FY27 budget assumption&quot;
+  },
+  {
+   &quot;target_id&quot;: &quot;BT-04&quot;,
+   &quot;metric&quot;: &quot;Underlying EBITDA&quot;,
+   &quot;period&quot;: &quot;FY27&quot;,
+   &quot;target_value&quot;: 8889540.0,
+   &quot;unit&quot;: &quot;AUD&quot;,
+   &quot;set_by&quot;: &quot;Finance&quot;,
+   &quot;set_date&quot;: &quot;2026-06-15&quot;,
+   &quot;basis&quot;: &quot;FY27 budget (board_budget_fy27)&quot;
+  }
+ ],
+ &quot;dq_heartbeat_rows&quot;: 1236586,
+ &quot;dq_heartbeat_devices&quot;: 58917,
+ &quot;dq_heartbeat_first_month&quot;: &quot;2022-07-01&quot;,
+ &quot;k1_flat_jun27&quot;: {
+  &quot;value&quot;: 73137990.16,
+  &quot;with_big&quot;: 80537990.16,
+  &quot;path&quot;: 97800000.0,
+  &quot;gap_to_path&quot;: -24662009.840000004
+ },
+ &quot;plan_corvane_repeat&quot;: 8510000.0,
+ &quot;plan_ex_corvane_repeat&quot;: 84179999.99,
+ &quot;k1_hw_q_vs_prior_year&quot;: {
+  &quot;FY27-Q1&quot;: 0.03860696800112695,
+  &quot;FY26-Q4&quot;: -0.4426073670787516
+ },
+ &quot;k1_hw_q_vs_prev_q&quot;: {
+  &quot;FY26-Q1&quot;: -0.4989136791285613,
+  &quot;FY27-Q1&quot;: -0.06631032832352801
+ },
+ &quot;hw_q_series&quot;: {
+  &quot;FY25-Q1&quot;: 23793892.28,
+  &quot;FY25-Q2&quot;: 25573960.86,
+  &quot;FY25-Q3&quot;: 24084293.96,
+  &quot;FY25-Q4&quot;: 25747852.9,
+  &quot;FY26-Q1&quot;: 12901896.88,
+  &quot;FY26-Q2&quot;: 14473638.579999998,
+  &quot;FY26-Q3&quot;: 12572801.02,
+  &quot;FY26-Q4&quot;: 14351663.52,
+  &quot;FY27-Q1&quot;: 13400000.0
+ },
+ &quot;hw_volume_split&quot;: {
+  &quot;units_change&quot;: -2293492.0,
+  &quot;installs_change&quot;: -84160.0,
+  &quot;gap_change&quot;: -2209332.0,
+  &quot;avg_price_fy25&quot;: 21.766702727451804,
+  &quot;installs_effect&quot;: -1831885.701542344,
+  &quot;gap_effect&quot;: -48089872.87024655,
+  &quot;total_effect_at_avg_price&quot;: -49921758.57178889,
+  &quot;sku_level_volume_effect&quot;: -49788168.25161144,
+  &quot;installs_share_of_units_fall&quot;: 0.03669513562724439
+ },
+ &quot;k2_quarter_yoy&quot;: {
+  &quot;FY25-Q1&quot;: 0.050439539644583586,
+  &quot;FY25-Q2&quot;: 0.04309122420040956,
+  &quot;FY25-Q3&quot;: 0.058421603804357236,
+  &quot;FY25-Q4&quot;: 0.04944389559896756,
+  &quot;FY26-Q1&quot;: -0.03183701544357287,
+  &quot;FY26-Q2&quot;: -0.032867608186692876,
+  &quot;FY26-Q3&quot;: -0.040939466683968084,
+  &quot;FY26-Q4&quot;: -0.02690514872230909,
+  &quot;FY27-Q1&quot;: 0.04876769795490299
+ },
+ &quot;k2_month_yoy_2025_07_to_2026_06_mean&quot;: -0.033073593182029175,
+ &quot;k2_month_yoy_2024_07_to_2025_06_mean&quot;: 0.0503732104535348,
+ &quot;k2_latest_q_units&quot;: 620000.0,
+ &quot;k2_latest_q_prior_units&quot;: 591170.0,
+ &quot;k2_latest_q_yoy_exact&quot;: 0.04876769795490299,
+ &quot;k2_dip_breadth&quot;: {
+  &quot;countries_down&quot;: 20,
+  &quot;countries&quot;: 21,
+  &quot;min&quot;: -0.06323454266734796,
+  &quot;max&quot;: 0.008042066192391006,
+  &quot;groups&quot;: {
+   &quot;card&quot;: -0.03823716848865144,
+   &quot;chip&quot;: -0.03420842029281157,
+   &quot;module&quot;: -0.030638011334941928
+  }
+ },
+ &quot;k2_latest_q_breadth&quot;: {
+  &quot;countries_up&quot;: 19,
+  &quot;countries&quot;: 21
+ },
+ &quot;k2_firmware_first_month&quot;: {
+  &quot;4.0.0&quot;: &quot;2021-06&quot;,
+  &quot;4.0.0-beta&quot;: &quot;2021-01&quot;,
+  &quot;4.0.2&quot;: &quot;2022-01&quot;,
+  &quot;4.1.0&quot;: &quot;2022-08&quot;,
+  &quot;4.1.3&quot;: &quot;2023-03&quot;,
+  &quot;4.2.1&quot;: &quot;2023-10&quot;,
+  &quot;4.3.0&quot;: &quot;2024-05&quot;,
+  &quot;4.4.2&quot;: &quot;2024-12&quot;,
+  &quot;4.5.0&quot;: &quot;2025-07&quot;,
+  &quot;4.6.1&quot;: &quot;2026-02&quot;
+ },
+ &quot;k2_dup_share_by_period&quot;: {
+  &quot;dip&quot;: 0.005289232173066871,
+  &quot;before&quot;: 0.0046956610060903126
+ },
+ &quot;k2_quarter_share_of_year&quot;: {
+  &quot;2023&quot;: [
+   0.2404,
+   0.2603,
+   0.2398,
+   0.2595
+  ],
+  &quot;2024&quot;: [
+   0.2396,
+   0.2616,
+   0.2401,
+   0.2587
+  ],
+  &quot;2025&quot;: [
+   0.2397,
+   0.2599,
+   0.242,
+   0.2585
+  ]
+ },
+ &quot;k2_heartbeat_devices_seen&quot;: {
+  &quot;2025-06-01&quot;: 31183,
+  &quot;2025-07-01&quot;: 31608,
+  &quot;2026-06-01&quot;: 37374,
+  &quot;2026-07-01&quot;: 37852,
+  &quot;2026-09-01&quot;: 38726
+ },
+ &quot;k3_perp&quot;: {
+  &quot;cur_n&quot;: 81,
+  &quot;prior_n&quot;: 105,
+  &quot;cur_value&quot;: 13672509.979999999,
+  &quot;prior_value&quot;: 17194859.839999996,
+  &quot;cur_median&quot;: 106019.01,
+  &quot;prior_median&quot;: 120430.01,
+  &quot;cur_over_500k&quot;: 4,
+  &quot;prior_over_500k&quot;: 5,
+  &quot;cur_over_500k_value&quot;: 2785951.25,
+  &quot;prior_over_500k_value&quot;: 3059526.26,
+  &quot;small_cur&quot;: 10886558.729999999,
+  &quot;small_prior&quot;: 14135333.58
+ },
+ &quot;big_oem_hw&quot;: {
+  &quot;fy25&quot;: 5422466.05,
+  &quot;fy26&quot;: 2524728.88,
+  &quot;change&quot;: -0.5343947095805238,
+  &quot;rank_fy25&quot;: 1
+ },
+ &quot;k4_old36&quot;: {
+  &quot;n&quot;: 678,
+  &quot;shipped&quot;: 0.34513274336283184,
+  &quot;lost&quot;: 0.05752212389380531,
+  &quot;open&quot;: 0.5973451327433629
+ },
+ &quot;k4_ship_curve_2023h1&quot;: {
+  &quot;6&quot;: 0.002325581395348837,
+  &quot;12&quot;: 0.06976744186046512,
+  &quot;18&quot;: 0.20930232558139536,
+  &quot;24&quot;: 0.2744186046511628,
+  &quot;30&quot;: 0.313953488372093,
+  &quot;36&quot;: 0.3186046511627907,
+  &quot;42&quot;: 0.3209302325581395
+ },
+ &quot;k4_ship_curve_2023h1_n&quot;: 430,
+ &quot;k5_finance_vs_yearago&quot;: {
+  &quot;FY24-Q1&quot;: {
+   &quot;f_vs_yago&quot;: 0.16789239376675602,
+   &quot;yago_err&quot;: -0.258260116225442
+  },
+  &quot;FY24-Q2&quot;: {
+   &quot;f_vs_yago&quot;: 0.22660530961785774,
+   &quot;yago_err&quot;: -0.16798436505425618
+  },
+  &quot;FY24-Q3&quot;: {
+   &quot;f_vs_yago&quot;: 0.22540500075902314,
+   &quot;yago_err&quot;: -0.2784174850355712
+  },
+  &quot;FY24-Q4&quot;: {
+   &quot;f_vs_yago&quot;: 0.27691796596187723,
+   &quot;yago_err&quot;: -0.21888623165081178
+  },
+  &quot;FY25-Q1&quot;: {
+   &quot;f_vs_yago&quot;: 0.301472213496903,
+   &quot;yago_err&quot;: 0.09368490568105314
+  },
+  &quot;FY25-Q2&quot;: {
+   &quot;f_vs_yago&quot;: 0.18853911981272864,
+   &quot;yago_err&quot;: -0.048120962029893466
+  },
+  &quot;FY25-Q3&quot;: {
+   &quot;f_vs_yago&quot;: 0.14827547433022947,
+   &quot;yago_err&quot;: 0.04409647305241071
+  },
+  &quot;FY25-Q4&quot;: {
+   &quot;f_vs_yago&quot;: 0.03473253927869502,
+   &quot;yago_err&quot;: 0.040227955668035165
+  },
+  &quot;FY26-Q1&quot;: {
+   &quot;f_vs_yago&quot;: -0.02844889663528316,
+   &quot;yago_err&quot;: 0.4360856170443699
+  },
+  &quot;FY26-Q2&quot;: {
+   &quot;f_vs_yago&quot;: -0.06684321929962,
+   &quot;yago_err&quot;: 0.6182536229888678
+  },
+  &quot;FY26-Q3&quot;: {
+   &quot;f_vs_yago&quot;: -0.16935668376702506,
+   &quot;yago_err&quot;: 0.3008284677547588
+  },
+  &quot;FY26-Q4&quot;: {
+   &quot;f_vs_yago&quot;: -0.25217107625263,
+   &quot;yago_err&quot;: 0.5600104206911021
+  },
+  &quot;FY27-Q1&quot;: {
+   &quot;f_vs_yago&quot;: -0.1742535261198902,
+   &quot;yago_err&quot;: 0.0031963835051547207
+  }
+ },
+ &quot;k5_yearago&quot;: {
+  &quot;corr&quot;: 0.5603201742939866,
+  &quot;yago_mape&quot;: 0.23600407741397897,
+  &quot;finance_mape&quot;: 0.18667091486930204,
+  &quot;median_gap_to_yago&quot;: 0.1742535261198902
+ },
+ &quot;k5_aud_error_last4&quot;: {
+  &quot;finance_run_rate&quot;: {
+   &quot;hardware&quot;: 9085904.880000003,
+   &quot;other&quot;: 663.9700000000012,
+   &quot;software&quot;: 2227742.99
+  },
+  &quot;sales_crm&quot;: {
+   &quot;hardware&quot;: 24013658.880000003,
+   &quot;other&quot;: -5120.029999999999,
+   &quot;software&quot;: 3573047.99
+  }
+ },
+ &quot;k5_aud_actual_last4&quot;: 80537990.16,
+ &quot;k4_asof&quot;: {
+  &quot;2025-12-31&quot;: {
+   &quot;rate&quot;: 0.3079710144927536,
+   &quot;n&quot;: 1380
+  },
+  &quot;2026-03-31&quot;: {
+   &quot;rate&quot;: 0.31381011097410605,
+   &quot;n&quot;: 1622
+  },
+  &quot;2026-06-30&quot;: {
+   &quot;rate&quot;: 0.3165236051502146,
+   &quot;n&quot;: 1864
+  },
+  &quot;2026-09-30&quot;: {
+   &quot;rate&quot;: 0.3153449084936649,
+   &quot;n&quot;: 2131
+  }
+ },
+ &quot;k4_run_rate_pts_per_month&quot;: 0.08193215556568131,
+ &quot;k4_pace_needed_pts_per_month&quot;: 5.385056572292612,
+ &quot;k3_fy27_need&quot;: {
+  &quot;need_fy27&quot;: 30840000.0,
+  &quot;q1_actual&quot;: 5850000.0,
+  &quot;rest_per_month&quot;: 2776666.6666666665,
+  &quot;fy26_ex_big_per_month&quot;: 1525000.0,
+  &quot;ex_big_trailing_per_month&quot;: 1478002.1675000002
+ },
+ &quot;k3_flat_jun27&quot;: {
+  &quot;value&quot;: 17736026.01,
+  &quot;growth&quot;: -0.30988225642023337
+ },
+ &quot;k2_pace_note&quot;: {
+  &quot;target_units_jun27&quot;: 2654767.5
+ },
+ &quot;k5_plan_vs_forecast_q1&quot;: {
+  &quot;plan_hw&quot;: 14837181.41,
+  &quot;finance_forecast_hw&quot;: 7062228.0,
+  &quot;sales_forecast_hw&quot;: 17806060.0,
+  &quot;actual_hw&quot;: 13400000.0,
+  &quot;plan_set&quot;: &quot;2026-06-15&quot;,
+  &quot;forecast_dated&quot;: &quot;2026-06-26&quot;
+ },
+ &quot;k5_plan_q1_all&quot;: 22381311.31,
+ &quot;k5_plan_q1_err&quot;: 0.15367584072164941,
+ &quot;gary_hw_codes_check&quot;: {
+  &quot;plan_other_codes_match&quot;: true,
+  &quot;other_fy26&quot;: 600000.0,
+  &quot;dev_kits_fy26&quot;: 349596.5800000001,
+  &quot;freight_fy26&quot;: 250403.42
+ },
+ &quot;fy27_plan_vs_path_gap&quot;: -5110000.010000005,
+ &quot;fy27_plan_vs_path_gap_pct&quot;: -0.05224948885480574,
+ &quot;board_target_fy27_gm&quot;: 76.0,
+ &quot;orders_vs_installs&quot;: {
+  &quot;shortage_2022_07_to_2023_09&quot;: {
+   &quot;orders&quot;: 400189.8,
+   &quot;installs&quot;: 192380.0,
+   &quot;invoiced&quot;: 351249.8
+  },
+  &quot;drought_2023_10_to_2024_06&quot;: {
+   &quot;orders&quot;: 27327.11111111111,
+   &quot;installs&quot;: 204974.44444444444,
+   &quot;invoiced&quot;: 444075.6666666667
+  },
+  &quot;rebuy_2024_07_to_2025_04&quot;: {
+   &quot;orders&quot;: 412051.5,
+   &quot;installs&quot;: 210839.0,
+   &quot;invoiced&quot;: 396712.6
+  },
+  &quot;reset_2025_05_to_2026_09&quot;: {
+   &quot;orders&quot;: 214392.4705882353,
+   &quot;installs&quot;: 207237.0588235294,
+   &quot;invoiced&quot;: 242607.29411764705
+  }
+ },
+ &quot;lic_vs_gl_monthly&quot;: {
+  &quot;max_abs_diff&quot;: 26979.080000000016,
+  &quot;months_over_1pct&quot;: 28,
+  &quot;months&quot;: 87
+ },
+ &quot;k2_1&quot;: {
+  &quot;latest_q&quot;: &quot;2026-Q3&quot;,
+  &quot;latest_units&quot;: 841883.0,
+  &quot;latest_oems&quot;: 28,
+  &quot;latest_parts&quot;: 580074.0,
+  &quot;peak_q&quot;: &quot;2025-Q2&quot;,
+  &quot;peak_units&quot;: 1590583.0,
+  &quot;peak_oems&quot;: 31,
+  &quot;lfl_latest&quot;: {
+   &quot;prev&quot;: &quot;2026-Q2&quot;,
+   &quot;both&quot;: 18,
+   &quot;prev_units&quot;: 665812.0,
+   &quot;units&quot;: 552255.0,
+   &quot;change&quot;: -0.17055415042083955
+  },
+  &quot;lfl_prev&quot;: {
+   &quot;prev&quot;: &quot;2026-Q1&quot;,
+   &quot;both&quot;: 18,
+   &quot;prev_units&quot;: 735779.0,
+   &quot;units&quot;: 651301.0,
+   &quot;change&quot;: -0.11481436681394819
+  },
+  &quot;lfl_prev2&quot;: {
+   &quot;prev&quot;: &quot;2025-Q4&quot;,
+   &quot;both&quot;: 19,
+   &quot;prev_units&quot;: 704585.0,
+   &quot;units&quot;: 646589.0,
+   &quot;change&quot;: -0.08231228311701211
+  },
+  &quot;raw_sum_no_reel_fix_latest&quot;: 755556.0,
+  &quot;run_rate_lfl_per_quarter&quot;: -0.12256026678393328
+ },
+ &quot;counter&quot;: {
+  &quot;k1_gm&quot;: 0.7650262808594528,
+  &quot;k1_rebate_rate_fy26&quot;: 0.04569420035149385,
+  &quot;k2_dup&quot;: 0.005137047814060436,
+  &quot;k3_renewal&quot;: 0.8871951219512195,
+  &quot;k4_lost&quot;: 0.07085875175973722,
+  &quot;k5_bias_fin&quot;: 0.1464039009299648,
+  &quot;k5_bias_sales&quot;: 0.3427948793159197
+ },
+ &quot;k3_v11&quot;: {
+  &quot;growth_ex&quot;: -0.15566090841104252,
+  &quot;excluded_cur&quot;: 7400000.0,
+  &quot;excluded_prior&quot;: 0.0,
+  &quot;cur&quot;: 17736026.01,
+  &quot;prior&quot;: 21005809.38,
+  &quot;limit&quot;: 1000000,
+  &quot;n_over_limit_cur&quot;: 1,
+  &quot;n_over_limit_prior&quot;: 0,
+  &quot;series&quot;: {
+   &quot;2026-06&quot;: -0.016129032258064502,
+   &quot;2026-07&quot;: -0.1978106729853918,
+   &quot;2026-08&quot;: -0.1658919345996145,
+   &quot;2026-09&quot;: -0.15566090841104252
+  },
+  &quot;months_remaining&quot;: 9,
+  &quot;run_rate_pts_per_month&quot;: -4.651062538432601,
+  &quot;pace_needed_pts_per_month&quot;: 1.7295656490115836,
+  &quot;fy26_ex&quot;: -0.016129032258064502
+ },
+ &quot;k2_1_cover&quot;: {
+  &quot;2021-Q3&quot;: {
+   &quot;stock&quot;: 301889.0,
+   &quot;oems&quot;: 22,
+   &quot;invoiced_per_month&quot;: 85068.0,
+   &quot;activated_per_month&quot;: 18423.333333333332,
+   &quot;months_invoiced&quot;: 3.5487962571119573,
+   &quot;months_activated&quot;: 16.386231228514568
+  },
+  &quot;2021-Q4&quot;: {
+   &quot;stock&quot;: 350229.0,
+   &quot;oems&quot;: 22,
+   &quot;invoiced_per_month&quot;: 100883.33333333333,
+   &quot;activated_per_month&quot;: 38570.0,
+   &quot;months_invoiced&quot;: 3.471623988105072,
+   &quot;months_activated&quot;: 9.080347420274824
+  },
+  &quot;2022-Q1&quot;: {
+   &quot;stock&quot;: 308782.0,
+   &quot;oems&quot;: 23,
+   &quot;invoiced_per_month&quot;: 79452.33333333333,
+   &quot;activated_per_month&quot;: 40273.333333333336,
+   &quot;months_invoiced&quot;: 3.886380513263718,
+   &quot;months_activated&quot;: 7.667157755338519
+  },
+  &quot;2022-Q2&quot;: {
+   &quot;stock&quot;: 311629.0,
+   &quot;oems&quot;: 23,
+   &quot;invoiced_per_month&quot;: 83819.66666666667,
+   &quot;activated_per_month&quot;: 42346.666666666664,
+   &quot;months_invoiced&quot;: 3.717850623759738,
+   &quot;months_activated&quot;: 7.358997166246851
+  },
+  &quot;2022-Q3&quot;: {
+   &quot;stock&quot;: 402067.0,
+   &quot;oems&quot;: 27,
+   &quot;invoiced_per_month&quot;: 109877.33333333333,
+   &quot;activated_per_month&quot;: 66160.0,
+   &quot;months_invoiced&quot;: 3.6592351470730997,
+   &quot;months_activated&quot;: 6.0771916565900845
+  },
+  &quot;2022-Q4&quot;: {
+   &quot;stock&quot;: 408856.0,
+   &quot;oems&quot;: 23,
+   &quot;invoiced_per_month&quot;: 116362.0,
+   &quot;activated_per_month&quot;: 65063.333333333336,
+   &quot;months_invoiced&quot;: 3.51365566078273,
+   &quot;months_activated&quot;: 6.2839694656488545
+  },
+  &quot;2023-Q1&quot;: {
+   &quot;stock&quot;: 518776.0,
+   &quot;oems&quot;: 27,
+   &quot;invoiced_per_month&quot;: 128382.0,
+   &quot;activated_per_month&quot;: 77956.66666666667,
+   &quot;months_invoiced&quot;: 4.04087800470471,
+   &quot;months_activated&quot;: 6.65467139864027
+  },
+  &quot;2023-Q2&quot;: {
+   &quot;stock&quot;: 448505.0,
+   &quot;oems&quot;: 28,
+   &quot;invoiced_per_month&quot;: 112608.66666666667,
+   &quot;activated_per_month&quot;: 66633.33333333333,
+   &quot;months_invoiced&quot;: 3.9828639595531428,
+   &quot;months_activated&quot;: 6.730940470235118
+  },
+  &quot;2023-Q3&quot;: {
+   &quot;stock&quot;: 657439.0,
+   &quot;oems&quot;: 31,
+   &quot;invoiced_per_month&quot;: 161129.66666666666,
+   &quot;activated_per_month&quot;: 69516.66666666667,
+   &quot;months_invoiced&quot;: 4.080185937205853,
+   &quot;months_activated&quot;: 9.457286022536561
+  },
+  &quot;2023-Q4&quot;: {
+   &quot;stock&quot;: 711208.0,
+   &quot;oems&quot;: 23,
+   &quot;invoiced_per_month&quot;: 157530.33333333334,
+   &quot;activated_per_month&quot;: 76400.0,
+   &quot;months_invoiced&quot;: 4.514736844332625,
+   &quot;months_activated&quot;: 9.309005235602093
+  },
+  &quot;2024-Q1&quot;: {
+   &quot;stock&quot;: 868256.0,
+   &quot;oems&quot;: 27,
+   &quot;invoiced_per_month&quot;: 150034.0,
+   &quot;activated_per_month&quot;: 67010.0,
+   &quot;months_invoiced&quot;: 5.787061599370809,
+   &quot;months_activated&quot;: 12.957110878973287
+  },
+  &quot;2024-Q2&quot;: {
+   &quot;stock&quot;: 785292.0,
+   &quot;oems&quot;: 26,
+   &quot;invoiced_per_month&quot;: 123872.0,
+   &quot;activated_per_month&quot;: 51983.333333333336,
+   &quot;months_invoiced&quot;: 6.339544045466288,
+   &quot;months_activated&quot;: 15.106611093299133
+  },
+  &quot;2024-Q3&quot;: {
+   &quot;stock&quot;: 1072762.0,
+   &quot;oems&quot;: 25,
+   &quot;invoiced_per_month&quot;: 142181.0,
+   &quot;activated_per_month&quot;: 67996.66666666667,
+   &quot;months_invoiced&quot;: 7.545044696548765,
+   &quot;months_activated&quot;: 15.776685131624099
+  },
+  &quot;2024-Q4&quot;: {
+   &quot;stock&quot;: 975940.0,
+   &quot;oems&quot;: 24,
+   &quot;invoiced_per_month&quot;: 124317.0,
+   &quot;activated_per_month&quot;: 70606.66666666667,
+   &quot;months_invoiced&quot;: 7.8504146657335685,
+   &quot;months_activated&quot;: 13.822207534699272
+  },
+  &quot;2025-Q1&quot;: {
+   &quot;stock&quot;: 1376758.0,
+   &quot;oems&quot;: 28,
+   &quot;invoiced_per_month&quot;: 160789.66666666666,
+   &quot;activated_per_month&quot;: 81810.0,
+   &quot;months_invoiced&quot;: 8.562478102863162,
+   &quot;months_activated&quot;: 16.828725094731695
+  },
+  &quot;2025-Q2&quot;: {
+   &quot;stock&quot;: 1590583.0,
+   &quot;oems&quot;: 31,
+   &quot;invoiced_per_month&quot;: 188761.33333333334,
+   &quot;activated_per_month&quot;: 96796.66666666667,
+   &quot;months_invoiced&quot;: 8.426423843866328,
+   &quot;months_activated&quot;: 16.432208409380486
+  },
+  &quot;2025-Q3&quot;: {
+   &quot;stock&quot;: 1284416.0,
+   &quot;oems&quot;: 26,
+   &quot;invoiced_per_month&quot;: 83561.66666666667,
+   &quot;activated_per_month&quot;: 71746.66666666667,
+   &quot;months_invoiced&quot;: 15.370875800307157,
+   &quot;months_activated&quot;: 17.902099981416093
+  },
+  &quot;2025-Q4&quot;: {
+   &quot;stock&quot;: 980357.0,
+   &quot;oems&quot;: 28,
+   &quot;invoiced_per_month&quot;: 76050.0,
+   &quot;activated_per_month&quot;: 64873.333333333336,
+   &quot;months_invoiced&quot;: 12.890953320184089,
+   &quot;months_activated&quot;: 15.111864145514335
+  },
+  &quot;2026-Q1&quot;: {
+   &quot;stock&quot;: 1066952.0,
+   &quot;oems&quot;: 26,
+   &quot;invoiced_per_month&quot;: 80904.33333333333,
+   &quot;activated_per_month&quot;: 72673.33333333333,
+   &quot;months_invoiced&quot;: 13.187822654740373,
+   &quot;months_activated&quot;: 14.681478763416202
+  },
+  &quot;2026-Q2&quot;: {
+   &quot;stock&quot;: 777310.0,
+   &quot;oems&quot;: 22,
+   &quot;invoiced_per_month&quot;: 73738.33333333333,
+   &quot;activated_per_month&quot;: 63610.0,
+   &quot;months_invoiced&quot;: 10.541464186424973,
+   &quot;months_activated&quot;: 12.21993397264581
+  },
+  &quot;2026-Q3&quot;: {
+   &quot;stock&quot;: 841883.0,
+   &quot;oems&quot;: 28,
+   &quot;invoiced_per_month&quot;: 77004.66666666667,
+   &quot;activated_per_month&quot;: 85343.33333333333,
+   &quot;months_invoiced&quot;: 10.93288285558451,
+   &quot;months_activated&quot;: 9.864660391360388
+  }
+ },
+ &quot;k2_1_cover_summary&quot;: {
+  &quot;latest&quot;: {
+   &quot;stock&quot;: 841883.0,
+   &quot;oems&quot;: 28,
+   &quot;invoiced_per_month&quot;: 77004.66666666667,
+   &quot;activated_per_month&quot;: 85343.33333333333,
+   &quot;months_invoiced&quot;: 10.93288285558451,
+   &quot;months_activated&quot;: 9.864660391360388
+  },
+  &quot;peak_q&quot;: &quot;2025-Q3&quot;,
+  &quot;run_rate_per_quarter&quot;: -0.6526901548665265,
+  &quot;pace_needed_per_quarter&quot;: -1.6442942851948363,
+  &quot;quarters_remaining&quot;: 3,
+  &quot;activation_share_oem_known&quot;: 0.9289203885990259,
+  &quot;activated_vs_invoiced_ratio_latest&quot;: 0.9022927000742103,
+  &quot;peak&quot;: {
+   &quot;stock&quot;: 1284416.0,
+   &quot;oems&quot;: 26,
+   &quot;invoiced_per_month&quot;: 83561.66666666667,
+   &quot;activated_per_month&quot;: 71746.66666666667,
+   &quot;months_invoiced&quot;: 15.370875800307157,
+   &quot;months_activated&quot;: 17.902099981416093
+  }
+ },
+ &quot;k4_pace_needed_pts_per_month_v11&quot;: 0.3850565722926117
+}</code></pre></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>

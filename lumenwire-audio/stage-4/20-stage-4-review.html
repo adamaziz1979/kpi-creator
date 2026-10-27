@@ -1,0 +1,88 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lumenwire Audio: Stage 4 Review</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">Lumenwire Audio: Stage 4 Standards and Validation</label></nav><section id="s0"><p class="src">File: 2026.10.27 - Lumenwire Audio - 04 Standards and Validation.md</p><h1 id="s0-top">Lumenwire Audio: Stage 4 Standards and Validation</h1><div class="toc" role="navigation" aria-label="Contents"><b>In this document</b><ol><li><a href="#s0-h0" data-jump="s0-h0">Palette</a></li><li><a href="#s0-h1" data-jump="s0-h1">What I fixed (clear-cut)</a></li><li><a href="#s0-h2" data-jump="s0-h2">Standards review results</a></li><li><a href="#s0-h3" data-jump="s0-h3">Validation checklist</a></li><li><a href="#s0-h4" data-jump="s0-h4">Adam's decisions (applied)</a></li><li><a href="#s0-h5" data-jump="s0-h5">Content fix sent from Visalli (applied)</a></li></ol></div>
+<p>Jennifer, 27-Oct-26. Dashboard: <code>02 - Deliverables/2026.10.27 - Lumenwire Audio - 04 Dashboard.html</code>. Built from Visalli's Experimental A (dot swarm), which Adam chose. His five Stage 3 versions are untouched. Business Requirements v1.2, Calculation Pack v1.1, Sample data. Not published.</p>
+<p>Story, KPIs, charts and numbers are unchanged. Stage 3 whitespace feedback (front page spacing, Why page spacing, fewer boxes) is kept as built.</p>
+<h2 id="s0-h0">1. Palette</h2>
+<p>Monochrome blue, as Visalli built it (dark by default, light on the toggle). No chart has 3 or more categories, so Charcoal and teal is not needed. Status colours (green, amber, red) stay semantic and always carry a word and an icon.</p>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h1">2. What I fixed (clear-cut)</h2>
+<table><thead><tr><th>#</th><th>What</th><th>Standard</th></tr></thead><tbody><tr><td style="white-space:nowrap">1</td><td>Page title, eyebrow and footer no longer say "Experimental A" or "Built by Visalli". Title is now "Lumenwire Audio: board view". Footer reads Business Requirements v1.2, KPI Calculation Pack v1.1, Sample data</td><td>Web Build 1 (short title); Stage 4 brief</td></tr><tr><td style="white-space:nowrap">2</td><td>Design-win curve: invisible tap circles grew from 28px to 44px, so the 7 points are easy to tap</td><td>UX 2 (44px touch targets)</td></tr><tr><td style="white-space:nowrap">3</td><td>Bullet bars on the Back page: tap area 24px to 44px on touch screens and phones (mouse stays compact)</td><td>UX 2</td></tr><tr><td style="white-space:nowrap">4</td><td>One visible keyboard focus ring on every Tab stop, including chart points, dots and bars</td><td>Web Build 2 (keyboard)</td></tr><tr><td style="white-space:nowrap">5</td><td>Each of the five tiles on the front page now says who owns it (CEO, VP Sales, CFO), in the empty row that was already there. Tile heights unchanged</td><td>Validation checklist 3</td></tr><tr><td style="white-space:nowrap">6</td><td><code>noindex</code> added, and a plain "needs JavaScript" message if scripts are blocked</td><td>Web Build 4 and 6</td></tr></tbody></table>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h2">3. Standards review results</h2>
+<p>Both reviews were run by hand against the two standards files, then checked in the Browser pane.</p>
+<table><thead><tr><th>Check</th><th>Result</th></tr></thead><tbody><tr><td>Re-run after Adam's decisions, both colour modes, all 6 pages: 0 sideways scroll, 0 controls under 44px on phones (bottom bar included), 0 console errors</td><td style="white-space:nowrap">Pass</td></tr><tr><td>Sideways scrolling at 320, 375, 568x320, 740x360, 768, 1100 and 1600 wide, all 6 pages, Back page sections open</td><td>0 pages scroll sideways</td></tr><tr><td>Controls under 44px at 375 wide, all 6 pages</td><td>0 (was 9 before fixes 2 and 3)</td></tr><tr><td>Console errors, loading and switching all pages and both colour modes</td><td style="white-space:nowrap">0</td></tr><tr><td>Browser zoom 200% (a 640px-wide window)</td><td>No sideways scroll</td></tr><tr><td>Contrast in dark mode (text, icons, lines, chart colours)</td><td>All 4.5:1 or better for text; chart colours 5.7:1 or better</td></tr><tr><td>Contrast in light mode, text</td><td>All 4.8:1 or better; chart colours 3.98:1 or better after decision 3</td></tr><tr><td>Semantic HTML: one h1, h2 per page, header, nav, main, footer, details/summary, lang en-AU, viewport</td><td style="white-space:nowrap">Pass</td></tr><tr><td>Reduced motion, colour tokens on <code>:root</code>, no <code>alert()</code>, storage in try/catch, fonts limited to the 4 weights used</td><td style="white-space:nowrap">Pass</td></tr><tr><td>Meaning carried by colour alone</td><td>Pass: status chips have a word and icon; bars are labelled and have a legend</td></tr><tr><td>Side summaries over the 30-word bullet limit</td><td>Not changed: Adam rated the summaries "good"</td></tr></tbody></table>
+<p>Screenshots: taken in the Browser pane at desktop (1100 wide) and phone (375 wide) and reviewed on screen. The pane tool does not save image files, so none are written to disk.</p>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h3">4. Validation checklist</h2>
+<table><thead><tr><th>#</th><th>Check</th><th>Result</th></tr></thead><tbody><tr><td style="white-space:nowrap">1</td><td>Every Must Have KPI is on the dashboard, calculated as documented</td><td>Pass. All five Top 5 KPIs are on the front page and the five sub-KPIs are on the Back page (10 in Definitions). Every number is generated from the Calculation Pack results, and Visalli's build script checks each figure quoted in the text against them</td></tr><tr><td style="white-space:nowrap">2</td><td>Every business objective shows actual, target, gap and pace needed</td><td>Pass. Revenue back to A$115m (tiles for total revenue and forecast accuracy), growing underneath the fall (new devices activated), software growing (software growth), design wins to shipping (design wins that ship): each tile shows target, gap, needs and trend</td></tr><tr><td style="white-space:nowrap">3</td><td>Every action owner can see their KPI's status at a glance</td><td>Pass after fix 5. CEO: total revenue and software growth. VP Sales: new devices activated and design wins that ship. CFO: forecast accuracy</td></tr><tr><td style="white-space:nowrap">4</td><td>The 30-second test</td><td>Pass. The headline and five tiles show where the business is (A$80.5m), the target (A$115m by 30-Jun-28) and the gap and monthly pace needed, without scrolling on desktop</td></tr><tr><td style="white-space:nowrap">5</td><td>Footer version matches the latest Business Requirements</td><td>Pass. Business Requirements v1.2 in the header and footer; v1.2 is the latest in the change log</td></tr></tbody></table>
+<p>Validation: 5 of 5. Standards: 6 clear-cut fixes and Adam's 4 decisions applied (one a known exception).</p>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h4">5. Adam's decisions (applied)</h2>
+<table><thead><tr><th>#</th><th>Before</th><th>After</th><th>Status</th></tr></thead><tbody><tr><td style="white-space:nowrap">1</td><td>Page changes by Previous and Next at the top only</td><td>Quiet bottom bar of six page names on phones (Front, Changed, Why, To do, Demand, Back), each 48px tall, with Previous and Next kept at the top. Page content has matching bottom padding (footer clears the bar by 64px). Held sideways, the bar becomes a left rail</td><td style="white-space:nowrap">Done</td></tr><tr><td style="white-space:nowrap">2</td><td>Always opened dark</td><td>Opens in the device's light or dark setting, follows it if it changes, and the Dark / Light switch overrides it and is remembered</td><td style="white-space:nowrap">Done</td></tr><tr><td style="white-space:nowrap">3</td><td>Light-mode pale blue #93bdf2 (hue 211, 1.8:1 on the light page) for Added revenue, Sales forecast and Software</td><td>Teal #0f8a7e from the saved Charcoal and teal palette (its light-mode accent), same value in both modes. Hue 174 against the main blue's 213 (dark) and 216 (light). Contrast: light page 3.98:1, white card 4.24:1, dark page 4.44:1, dark card 4.05:1, all above the 3:1 needed. It also colours the Software line on the hardware and software view, which is the second series there</td><td>Done. Saved palette colour, so no new colour proposed</td></tr><tr><td style="white-space:nowrap">4</td><td>Clicking a chart replays its animation; mouse and touch only</td><td>No change</td><td>Known exception, approved by Adam: replay is decoration, and all data stays in tooltips and the See data tables</td></tr></tbody></table>
+<p>Also noted: the design-wins-per-quarter tap circles stay at 28px, because 44px circles would overlap at phone width. Those points have no keyboard stop, and every value is in the See data table.</p>
+<a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a><h2 id="s0-h5">6. Content fix sent from Visalli (applied)</h2>
+<p>Visalli confirmed the list of six is right and the count was wrong, because the telemetry question was answered at v1.2.</p>
+<table><thead><tr><th>#</th><th>Before</th><th>After</th></tr></thead><tbody><tr><td style="white-space:nowrap">1</td><td>Finding: "Three owners, three targets, and seven decisions that unlock them."</td><td>"Three owners, three targets, and six decisions that unlock them."</td></tr><tr><td style="white-space:nowrap">2</td><td>Story: "Seven open questions decide how the targets are read."</td><td>"Six open questions decide how the targets are read."</td></tr></tbody></table><a class="btt" href="#s0-top" data-jump="s0-top">↑ Back to top</a></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>

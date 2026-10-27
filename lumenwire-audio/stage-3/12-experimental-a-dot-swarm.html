@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Lumenwire Audio board dashboard (Experimental A: dot swarm): are we still growing underneath the fall? Test case, Sample data.">
+<title>Lumenwire Audio: the board's monthly view (Experimental A: dot swarm)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+/* Monochrome blue (dark by default). JS swaps the values for light mode. */
+:root{--bg:#0c121a;--surface:#141c27;--fg:#e8edf3;--muted:#94a1b2;--line:#243042;--accent:#4f9dff;--accent-soft:#16263d;
+ --grey:#8b96a5;--pos:#bcd9ff;--neg:#4f9dff;--s-ok:#5fd38d;--s-warn:#f2a65a;--s-bad:#f87171;
+ --font-body:"Lexend",Arial,sans-serif;--font-mono:"IBM Plex Mono",Consolas,monospace;color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-weight:300;font-size:15px;line-height:1.5}
+.wrap{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{text-wrap:balance;margin:0;font-weight:600;letter-spacing:-0.01em}
+.eyebrow{font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0}
+.tag{display:inline-block;font-family:var(--font-mono);font-size:.66rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:1px 7px;border-radius:6px;border:1px solid var(--line);color:var(--fg);width:max-content}
+
+/* A. Masthead (sticky) */
+.mast{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:3px double var(--line)}
+.mast .row{display:flex;flex-wrap:wrap;gap:6px 20px;align-items:center;justify-content:space-between;padding:8px 0 6px}
+.mast h1{font-size:clamp(1.15rem,2.2vw,1.5rem);letter-spacing:-.02em}
+.mast .meta{display:flex;flex-wrap:wrap;gap:2px 12px;font-family:var(--font-mono);font-size:.68rem;color:var(--muted);margin-top:2px}
+.ctrls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{font:inherit;font-size:.82rem;font-weight:400;color:var(--muted);background:none;border:0;min-height:44px;padding:0 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{color:var(--fg);background:var(--accent-soft);font-weight:500}
+.seg button:disabled{opacity:.4;cursor:default}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.ctr{font-family:var(--font-mono);font-size:.74rem;color:var(--muted);min-width:56px;text-align:center}
+.tabs{display:flex;flex-wrap:wrap;gap:0 4px;border-top:1px solid var(--line)}
+.tabs a{font-size:.8rem;color:var(--muted);text-decoration:none;padding:0 10px;min-height:36px;display:flex;align-items:center;border-bottom:2px solid transparent}
+.tabs a[aria-current="page"]{color:var(--fg);border-bottom-color:var(--accent);font-weight:500}
+.tabs a:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+@media (max-width:760px){.tabs{display:none}.mast{position:static}}
+
+/* Pages */
+main{padding:14px 0 40px}
+.page{display:grid;gap:18px;align-content:start}
+.pghead{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.pghead h2{font-size:1.25rem}
+.pghead span{font-family:var(--font-mono);font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+
+/* B. Front page */
+/* Front page: clear space between the three blocks (headline and deck, Top 3 actions, In brief); deck stays close to its headline */
+.front{display:grid;--fgap:44px;--lede:10px;gap:var(--fgap)}
+.front .standfirst{margin-top:calc(var(--lede) - var(--fgap))}
+.headline{margin:0;font-size:clamp(1.15rem,2.1vw,1.45rem);font-weight:500;line-height:1.3}
+.headline b{color:var(--accent);font-weight:600}
+.standfirst{margin:0;color:var(--muted);font-size:.92rem;max-width:none}
+.act-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;list-style:none;margin:0;padding:0}
+.act-cards li{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:10px;padding:8px 12px;display:grid;gap:3px;align-content:start}
+.own{font-family:var(--font-mono);font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
+.act-cards .own{display:flex;justify-content:space-between;gap:10px}
+.own .ast{color:var(--muted);text-transform:none;letter-spacing:0;font-weight:400;font-variant:normal;white-space:nowrap}
+.acts .ast-line{font-size:.78rem;color:var(--muted)}
+@media (max-width:640px){.act-cards{grid-template-columns:minmax(0,1fr)}}
+.act-cards p{margin:0;font-size:.86rem;line-height:1.35}
+.act-cards .tgt{font-size:.84rem;font-weight:600;line-height:1.3}
+.brief{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.brief>.eyebrow{padding:6px 12px;border-bottom:1px solid var(--line);background:var(--surface)}
+
+/* C. Standard KPI tile: number and sparkline side by side, detail lines underneath; 9 rows line up across tiles */
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--line)}
+.stat{background:var(--surface);padding:10px 14px 10px;display:grid;grid-row:span 9;grid-template-rows:subgrid;row-gap:3px;align-content:start;min-width:0;cursor:help}
+.stat>*{align-self:start}
+.stat:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.stat .nm{font-size:.8rem;color:var(--muted);line-height:1.3}
+.tile-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:end;align-self:end}
+.tile-top .v{font-size:clamp(1.7rem,2.6vw,2.4rem);font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1;white-space:nowrap}
+.tile-top .v.two{display:grid;font-size:1.2rem;line-height:1.1}
+.tile-top .v.two small{font-size:.66rem;font-weight:500;color:var(--muted);display:inline-block;min-width:3.6em}
+.stat .ln{font-family:var(--font-mono);font-size:.68rem;color:var(--muted);line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .ln b{color:var(--fg);font-weight:500}
+.stat .ln.trend[data-s="bad"]{color:var(--s-bad)}
+.stat .note{font-size:.72rem;color:var(--muted);line-height:1.35}
+.spk{position:relative;min-width:56px}
+.spark{display:block;width:100%;height:40px}
+.spark path{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.spark .area{fill:var(--accent);fill-opacity:.1;stroke:none}
+.spark .tgt-s{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.spk .end{position:absolute;right:-4px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.spark path.s2{stroke:var(--pos)}.spk .end.s2{background:var(--pos)}
+.sts{display:flex;gap:6px;flex-wrap:wrap}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:500;padding:2px 8px;border-radius:6px;border:1px solid var(--line);border-left:4px solid var(--sc);color:var(--fg);white-space:nowrap;width:max-content}
+.st .ic{color:var(--sc);font-weight:600}
+.st[data-s="ok"]{--sc:var(--s-ok)}.st[data-s="warn"]{--sc:var(--s-warn)}.st[data-s="bad"]{--sc:var(--s-bad)}.st[data-s="none"]{--sc:var(--muted)}
+@media (max-width:1100px){.stats{grid-template-columns:repeat(6,minmax(0,1fr))}.stat{grid-column:span 2}.stat:nth-child(-n+2){grid-column:span 3}}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat,.stat:nth-child(-n+2){grid-column:span 1}.stat{padding:8px 10px}
+ .tile-top{grid-template-columns:minmax(0,1fr);gap:4px}.tile-top .v{font-size:1.6rem}.spark{height:28px}.stat .ln{white-space:normal}}
+@media (max-width:640px){.front{display:flex;flex-direction:column;--fgap:32px}.front .standfirst{margin-top:0}.front .brief{order:2}.front .standfirst{order:3}.front .acts-wrap{order:4}.front .headline{order:1}}
+
+/* Articles: side-summary card (a third, left) and the chart */
+.art{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;align-items:start}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}
+.cols>.art{grid-template-columns:minmax(0,1fr)}
+@media (max-width:900px){.art{grid-template-columns:minmax(0,1fr)}.cols{grid-template-columns:minmax(0,1fr)}}
+.side{display:grid;gap:8px;align-content:start;border-left:3px solid var(--accent);padding-left:12px}
+.side .find{margin:0;font-weight:600;font-size:1.02rem;line-height:1.35}
+.side .story{margin:0;font-size:.88rem;line-height:1.5}
+.side .meas{margin:0;font-size:.72rem;color:var(--muted);line-height:1.45}
+.fig{min-width:0;display:grid;gap:8px}
+.chart{min-width:0}
+.chart.replay{cursor:pointer}
+.chart svg{display:block;overflow:visible}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.74rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:2px;background:var(--c);display:inline-block}
+.legend i.ln{height:2px;width:14px;border-radius:1px}
+.legend i.dash{height:0;width:14px;border-top:2px dashed var(--c);background:none}
+.legend i.ring{border-radius:50%;background:var(--surface);border:2px solid var(--c)}
+.legend i.dt{border-radius:50%}
+.cap{margin:0;color:var(--muted);font-size:.72rem;line-height:1.45}
+.pq{display:grid;gap:2px;border-top:3px solid var(--fg);border-bottom:1px solid var(--line);padding:10px 0}
+.pq b{font-size:clamp(2.2rem,5vw,3.4rem);font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.pq span{font-size:.9rem;color:var(--muted)}
+.lead2{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.lead2{grid-template-columns:minmax(0,1fr)}}
+details.data>summary{cursor:pointer;font-size:.78rem;color:var(--accent);width:max-content;min-height:44px;display:flex;align-items:center;list-style:none}
+details.data>summary::-webkit-details-marker{display:none}
+details.data>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+table.t{width:100%;table-layout:fixed;border-collapse:collapse;font-size:.76rem;margin-top:4px}
+table.t th,table.t td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);overflow-wrap:break-word;vertical-align:top}
+table.t th{font-family:var(--font-mono);font-weight:500;font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+table.t td{font-variant-numeric:tabular-nums}
+
+/* SVG parts */
+.grid-l{stroke:var(--line);stroke-width:1}
+.ax{fill:var(--muted);font-family:var(--font-mono);font-size:11px}
+.lab{fill:var(--fg);font-family:var(--font-body);font-size:12px}
+.lab .b,.b{font-weight:600}
+.dot{stroke:var(--surface);stroke-width:2}
+.hit{fill:transparent}
+.cross{stroke:var(--muted);stroke-width:1}
+
+/* Bullet rows */
+.bnd{display:grid;gap:16px}
+.bnd-r{display:grid;grid-template-columns:170px minmax(0,1fr) 110px;gap:6px 12px;align-items:center}
+.bnd-n{font-size:.84rem;line-height:1.3}
+.bnd-n small{display:block;color:var(--muted);font-size:.7rem}
+.bnd-t{position:relative;height:24px;border-radius:2px;overflow:hidden}
+.bnd-t span.z{position:absolute;top:0;bottom:0}
+.bnd-a{position:absolute;left:0;top:8px;height:8px;background:var(--fg);border-radius:0 4px 4px 0;transform-origin:left center}
+.bnd-k{position:absolute;top:2px;width:3px;height:20px;background:var(--accent);margin-left:-1px}
+.bnd-v{display:grid;gap:3px;font-family:var(--font-mono);font-size:.8rem}
+@media (max-width:560px){.bnd-r{grid-template-columns:minmax(0,1fr) auto}.bnd-t{grid-column:1/-1;grid-row:2}}
+
+/* Hex swarm (Experimental A) */
+.hx{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:end}
+@media (max-width:560px){.hx{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.hx figure{margin:0;display:grid;gap:4px;justify-items:center;text-align:center}
+.hx figcaption{font-size:.74rem;color:var(--muted);line-height:1.35}
+.hx figcaption b{color:var(--fg);font-weight:600}
+
+/* F. Actions in full */
+.acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}
+.acts li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;align-content:start}
+.acts p{margin:0;font-size:.9rem}
+.acts .tgt{font-weight:600}
+.acts small{color:var(--muted);font-size:.74rem;line-height:1.45}
+@media (max-width:900px){.acts{grid-template-columns:minmax(0,1fr)}}
+.dec{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px;list-style:none;margin:0;padding:0}
+.dec li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;border-bottom:1px solid var(--line);padding:6px 0;font-size:.84rem}
+.dec li small{grid-column:1/-1;color:var(--muted);font-size:.72rem}
+.dec li .due{font-family:var(--font-mono);font-size:.72rem;color:var(--muted)}
+@media (max-width:760px){.dec{grid-template-columns:minmax(0,1fr)}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px}
+
+/* G and H. Collapsed detail */
+details.sec{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+details.sec>summary{list-style:none;cursor:pointer;padding:10px 16px;min-height:48px;display:flex;align-items:center;gap:10px;font-weight:500}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:10px}
+details.sec>summary .cnt{font-family:var(--font-mono);font-size:.68rem;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 6px}
+.chev{width:7px;height:7px;flex:none;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .15s}
+details[open]>summary .chev{transform:rotate(45deg)}
+details.sec .body{padding:0 16px 16px;display:grid;gap:14px}
+details.sec .art{background:var(--bg)}
+dl.defs{margin:0;display:grid;grid-template-columns:250px minmax(0,1fr);gap:8px 16px;font-size:.84rem}
+dl.defs dt{font-weight:500}
+dl.defs dd{margin:0;color:var(--muted)}
+@media (max-width:640px){dl.defs{grid-template-columns:minmax(0,1fr)}dl.defs dd{margin-bottom:6px}}
+footer{color:var(--muted);font-size:.72rem;border-top:1px solid var(--line);padding:12px 0 24px;display:grid;gap:4px}
+
+/* Tooltip */
+#tip{position:fixed;z-index:50;pointer-events:none;max-width:270px;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.28);font-size:.78rem;line-height:1.45;opacity:0;transition:opacity .1s}
+#tip.on{opacity:1}
+#tip .tr{display:flex;justify-content:space-between;gap:12px;font-family:var(--font-mono);font-size:.72rem;color:var(--muted)}
+#tip .tr b{color:var(--fg);font-weight:500}
+#tip .why{margin-top:4px;padding-top:4px;border-top:1px solid var(--line)}
+#tip .why:first-child{margin-top:0;padding-top:0;border-top:0}
+
+/* Motion */
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes growy{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.play .draw{stroke-dasharray:1;animation:draw 1.6s ease-out both}
+.play .fade{animation:fadein .4s ease-out both;animation-delay:var(--d,0s)}
+.play .bnd-a{animation:grow .9s ease-out both;animation-delay:var(--d,0s)}
+.play .col{transform-box:fill-box;transform-origin:bottom;animation:growy .7s ease-out both;animation-delay:var(--d,0s)}
+.play .coln{transform-box:fill-box;transform-origin:top;animation:growy .7s ease-out both;animation-delay:var(--d,0s)}
+@media (prefers-reduced-motion:reduce){.play *{animation:none!important}.chev,#tip{transition:none}}
+
+/* Experimental B: broadsheet, every page on one scroll */
+body.broad .tabs,body.broad #pager{display:none}
+body.broad main{display:grid;gap:34px}
+body.broad .page{border-top:3px solid var(--fg);padding-top:10px}
+body.broad .page#front{border-top:0}
+body.broad #why .why3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px}
+body.broad #why .why3>.art{grid-template-columns:minmax(0,1fr)}
+@media (max-width:1100px){body.broad #why .why3{grid-template-columns:minmax(0,1fr)}}
+body.broad .headline{font-size:clamp(1.3rem,2.6vw,1.9rem)}
+body.broad .mast h1{font-size:clamp(1.4rem,3vw,2.1rem)}
+
+/* Declutter pass (Adam, 27-Oct-26): more space, fewer boxes and rules, one quiet caption line per chart */
+main{padding:22px 0 64px}
+.page{gap:44px}
+.cols{gap:44px}
+.art{background:none;border:0;border-radius:0;padding:0;gap:36px}
+.side{border-left:0;padding-left:0;gap:10px}
+.side .meas{font-size:.7rem;color:var(--muted);opacity:.85}
+.fig{gap:10px}
+.pghead{border-bottom:0;padding-bottom:0}
+.box{background:none;border:0;padding:0}
+details.sec{background:none;border:0;border-top:1px solid var(--line);border-radius:0}
+details.sec>summary{padding:12px 0}
+details.sec .body{gap:36px;padding:8px 0 28px}
+details.sec .art{background:none}
+.acts{gap:32px}
+.acts li{background:none;border:0;border-radius:0;padding:0}
+.dec{gap:4px 36px}
+.dec li{border-bottom:0;padding:4px 0}
+.pq{border-bottom:0}
+footer{border-top:0;padding-top:28px}
+@media (max-width:640px){.page{gap:32px}.cols{gap:32px}.art{gap:16px}details.sec .body{gap:24px}}
+/* Why page: each finding (side card, chart, See data) reads as its own block: 80px apart with a quiet rule halfway (48px on a phone) */
+#why .why3{display:grid;gap:40px}
+#why .why3>.art+.art{border-top:1px solid var(--line);padding-top:40px}
+@media (max-width:640px){#why .why3{gap:24px}#why .why3>.art+.art{padding-top:24px}}
+body.broad #why .why3{column-gap:36px}
+@media (max-width:640px){body.broad #why .why3{gap:24px}}
+@media (min-width:1101px){body.broad #why .why3>.art+.art{border-top:0;padding-top:0;border-left:1px solid var(--line);padding-left:36px}}
+@media print{.mast{position:static}.ctrls,.tabs{display:none}.page{display:grid!important;break-before:page}.page#front{break-before:auto}details.sec{break-inside:avoid}details.sec .body{display:grid!important}#tip{display:none}}
+</style>
+</head>
+<body class="">
+<header class="mast">
+ <div class="wrap">
+  <div class="row">
+   <div>
+    <p class="eyebrow">Board edition · Experimental A: dot swarm</p>
+    <h1>Lumenwire Audio: the board's monthly view</h1>
+    <div class="meta"><span class="tag">Sample data</span><span>Edition 27-Oct-26</span><span>12 months to Sep-26</span><span>Data to 30-Sep-26</span><span>Business Requirements v1.2</span></div>
+   </div>
+   <div class="ctrls">
+    <div class="seg" id="pager" role="group" aria-label="Turn the page"><button type="button" id="prev" aria-label="Previous page">‹ Previous</button><span class="ctr" id="ctr" aria-live="polite" style="display:flex;align-items:center;justify-content:center">1 of 6</span><button type="button" id="next" aria-label="Next page">Next ›</button></div>
+    <div class="seg" id="mode" role="group" aria-label="Colour mode"><button type="button" data-m="dark" aria-pressed="true">Dark</button><button type="button" data-m="light" aria-pressed="false">Light</button></div>
+   </div>
+  </div>
+  <nav class="tabs" id="tabs" aria-label="Pages"></nav>
+ </div>
+</header>
+
+<main class="wrap">
+
+<!-- ============ Page 1: Front page ============ -->
+<section class="page" id="front" data-title="Front page" aria-label="Front page">
+ <div class="front">
+  <p class="headline">Revenue over the last 12 months is <b>A$80.5m, 5.1% below the path</b> to A$115m. Most of the fall is OEMs cutting their buying by <b>47%</b> after two years of buying ahead, and the only software growth is <b>one A$7.4m licence</b>.</p>
+  <p class="standfirst">Hardware has held at A$12.6m to A$14.5m a quarter for five quarters: the fall has stopped, but nothing has replaced it. Without the licence, software is down 15.6%, and 31.5% of design wins have shipped against a 35% target. The business isn't yet growing underneath the fall. Buying ahead is a Strong Inference; the bridge is Observed Fact.</p>
+  <div class="acts-wrap" style="display:grid;gap:6px">
+   <p class="eyebrow" id="t-acts">Top 3 actions</p>
+   <ol class="act-cards" aria-labelledby="t-acts">
+    <li><span class="own">CEO, with the CFO<span class="ast">○ No update</span></span><p>CFO rebuilds the forecast OEM by OEM; CEO resets the sales plan and effort</p><span class="tgt">Revenue A$115m by 30-Jun-28</span></li>
+    <li><span class="own">CEO, with Platform Engineering and Sales<span class="ast">○ No update</span></span><p>Checks the product and sales effort behind software, without the big licence</p><span class="tgt">Software growth 0% or more by 30-Jun-27</span></li>
+    <li><span class="own">VP Sales<span class="ast">○ No update</span></span><p>Refocuses on design wins that will ship, not ones that earn a bonus</p><span class="tgt">35% of design wins shipped by 30-Jun-27</span></li>
+   </ol>
+  </div>
+  <div class="brief">
+   <p class="eyebrow">In brief: the Top 5</p>
+   <div class="stats" id="tiles" role="list" aria-label="Top 5 KPIs"></div>
+  </div>
+ </div>
+</section>
+
+<!-- ============ Page 2: What changed ============ -->
+<section class="page" id="changed" data-title="What changed" aria-label="What changed">
+ <div class="pghead"><h2>What changed</h2><span>Page 2 · Total revenue</span></div>
+ <article class="art">
+  <div class="side">
+   <p class="find">Revenue for the last 12 months is A$80.5m, A$4.36m below the path to A$115m.</p>
+   <p class="story">It peaked at A$122.1m in Jun-24 and dropped through FY26. Since Jun-26 it has been flat, while the path rises A$1.43m a month. Even the FY27 board plan, A$92.7m, would sit 5.2% below the path at Jun-27. So what took a third off revenue?</p>
+   <p class="meas">Total revenue, last 12 months, by month, Jul-22 to Sep-26. Path: straight line from A$80.6m (Jun-26) to A$115m (Jun-28). Observed Fact.</p>
+  </div>
+  <div class="fig">
+   <div class="ctrls"><div class="seg" id="split" role="group" aria-label="Show revenue as"><button type="button" data-s="total" aria-pressed="true">Total</button><button type="button" data-s="split" aria-pressed="false">Hardware and software</button></div></div>
+   <div class="chart replay" data-c="path" data-why="The board's headline target. It shows early whether the gap is closing, so the board hears it from the CEO first."></div>
+   <div class="legend" id="lg-path"></div>
+   <p class="cap">Without the one A$7.4m licence the board plan is A$84.2m, not A$92.7m: the plan repeats it. The CFO is to say which line the board measures against. Click the chart to replay.</p>
+   <div data-t="path"></div>
+  </div>
+ </article>
+ <article class="art">
+   <div class="side">
+    <p class="find">OEMs buying fewer units than they installed took A$48.0m off revenue.</p>
+    <p class="story">Revenue fell A$37.8m, from A$118.4m in FY25 to A$80.6m in FY26. End customers installing 3.3% fewer devices cost only A$1.8m. The one A$7.4m licence and A$4.5m less paid in rebates softened the fall. Nothing is left unexplained.</p>
+    <p class="meas">Revenue bridge, FY25 to FY26, by effect, A$m. Bridge arithmetic: Observed Fact. Installs come from the telemetry.</p>
+   </div>
+   <div class="fig">
+    <div class="chart replay" data-c="bridge" data-why="The board's headline target. It shows early whether the gap is closing, so the board hears it from the CEO first."></div>
+    <div class="legend"><span><i style="--c:var(--fg)"></i>Total</span><span><i style="--c:var(--neg)"></i>Took revenue off</span><span><i style="--c:var(--pos)"></i>Added revenue</span></div>
+    <div data-t="bridge"></div>
+   </div>
+  </article>
+ <aside class="pq" aria-label="Pull quote"><b>A$48.0m</b><span>taken off FY26 revenue when OEMs stopped buying ahead of installs. Installs themselves cost A$1.8m.</span></aside>
+</section>
+
+<!-- ============ Page 3: Why ============ -->
+<section class="page" id="why" data-title="Why" aria-label="Why">
+ <div class="pghead"><h2>Why</h2><span>Page 3 · Largest cause first</span></div>
+ <div class="why3">
+  <article class="art">
+  <div class="side">
+   <p class="find">OEMs bought 5.28m units in FY24 for 2.43m devices installed; in FY26, 2.59m for 2.46m.</p>
+   <p class="story">The blue dots are what OEMs bought beyond what end customers installed: about 6.9 million units from Jul-22 to Jun-25. Once lead times fell from about 48 weeks to 8, that buffer stopped. In FY26 the blue all but disappears, which is the A$48.0m in the bridge.</p>
+   <p class="meas">Experimental: one dot is 50,000 units, rounded, so exact values can't be read (see data below). Units invoiced and devices installed, by financial year. Strong Inference.</p>
+  </div>
+  <div class="fig">
+   <div class="chart replay" data-c="swarm" data-why="The board's headline target. It shows whether hardware is still being pulled down by OEMs buying less than they install."></div>
+   <div class="legend"><span><i class="dt" style="--c:var(--grey);opacity:.6"></i>Installed by end customers</span><span><i class="dt" style="--c:var(--accent)"></i>Bought beyond installs</span><span>One dot = 50,000 units</span></div>
+   <div data-t="swarm"></div>
+  </div>
+ </article>
+
+ <article class="art">
+  <div class="side">
+   <p class="find">Software grew to A$25.1m only because of one A$7.4m licence.</p>
+   <p class="story">Without it, software fell 15.6%, from A$21.0m to A$17.7m. Other perpetual licences took A$3.52m off, from 105 deals to 81. Subscriptions added only A$0.23m and A$0.05m. So the FY26 software growth rests on one contract, and the FY27 plan repeats it.</p>
+   <p class="meas">Software revenue bridge, 12 months to Sep-25 against 12 months to Sep-26, A$m. Observed Fact. No customer is named.</p>
+  </div>
+  <div class="fig">
+   <div class="chart replay" data-c="swbridge" data-why="It decides whether to keep pushing software."></div>
+   <div class="legend"><span><i style="--c:var(--fg)"></i>Total</span><span><i style="--c:var(--neg)"></i>Took revenue off</span><span><i style="--c:var(--pos)"></i>Added revenue</span></div>
+   <div data-t="swbridge"></div>
+  </div>
+ </article>
+ <article class="art">
+  <div class="side">
+   <p class="find">About a third of design wins ship, and the share stops rising after three years.</p>
+   <p class="story">Of 430 design wins from Jan to Jun 2023, 21% had shipped at 18 months and 32% at 42. The 80% belief was never measured. Today 31.5% of wins old enough have shipped, against 35%. Since Jul-24 reps earn A$400 per win with no clawback: wins rose from 230 to 273 a quarter, but the shipping rate stayed flat.</p>
+   <p class="meas">Share shipped by months since design win, Jan to Jun 2023 design wins (430). Working Hypothesis: 33% of CRM records have no stage dates.</p>
+  </div>
+  <div class="fig">
+   <div class="chart replay" data-c="curve" data-why="Never measured before. Record design wins only matter if they ship."></div>
+   <div class="legend"><span><i class="ln" style="--c:var(--accent)"></i>Share shipped</span><span><i class="dash" style="--c:var(--fg)"></i>Target 35%</span><span><i class="dash" style="--c:var(--muted)"></i>The 80% belief</span></div>
+   <div data-t="curve"></div>
+  </div>
+ </article>
+ </div>
+</section>
+
+<!-- ============ Page 4: What to do ============ -->
+<section class="page" id="do" data-title="What to do" aria-label="What to do">
+ <div class="pghead"><h2>What to do</h2><span>Page 4 · Owners and targets from the Business Requirements v1.2</span></div>
+ <div class="art">
+  <div class="side">
+   <p class="find">Three owners, three targets, and six decisions that unlock them.</p>
+   <p class="story">Revenue needs A$1.64m a month more to reach A$115m by Jun-28, and today it is moving −A$0.02m a month. The first move is a forecast built OEM by OEM. Software and design wins each have one owner and a date of 30-Jun-27. Six open questions decide how the targets are read.</p>
+   <p class="meas">Actions, owners and targets from the Business Requirements v1.2. Pace and trend from the KPI Calculation Pack v1.1.</p>
+  </div>
+  <ol class="acts" id="acts-full"></ol>
+ </div>
+ <div class="box">
+  <p class="eyebrow">Decisions the board is waiting on · due 6-Nov-26</p>
+  <ul class="dec">
+   <li><span>Does "within two years" mean 30-Jun-28, and how was A$115m set?</span><span class="due">Chair, via the CEO</span></li>
+   <li><span>The FY27 targets, and whether the plan should repeat the one-off licence</span><span class="due">CFO</span></li>
+   <li><span>What size makes a software licence "large" (A$1m proposed)</span><span class="due">VP Sales with the CFO</span></li>
+   <li><span>Which forecast counts for forecast accuracy</span><span class="due">CFO</span></li>
+   <li><span>Can OEMs and customers be named on the board page</span><span class="due">CFO with legal</span></li>
+   <li><span>How long after a design win a product should ship (18 months proposed)</span><span class="due">VP Sales with Platform Engineering</span></li>
+  </ul>
+ </div>
+</section>
+
+<!-- ============ Page 5: Demand and forecasts ============ -->
+<section class="page" id="demand" data-title="Demand and forecasts" aria-label="Demand and forecasts">
+ <div class="pghead"><h2>Demand and forecasts</h2><span>Page 5 · New devices activated and forecast accuracy</span></div>
+ <div class="box" style="grid-template-columns:minmax(0,1fr)">
+  <div class="side">
+   <p class="find">End customers kept installing; it was OEM buying that fell, and neither forecast saw it.</p>
+   <p class="story">New devices activated is the closest view of end-customer demand. It barely moved while OEMs cut their buying by 47%. Stock at the OEMs that report is still high, so buying may stay low. Both forecasts missed that step, and the CFO is still to choose which one counts, so both are shown.</p>
+   <p class="meas">Signed off 27-Oct-26: new devices activated by the Head of Platform Engineering, forecast accuracy by the CFO.</p>
+  </div>
+ </div>
+ <div class="cols">
+  <article class="art">
+   <div class="side">
+    <p class="find">Installs fell 1.4% over 12 months, but the latest quarter is up 4.9%.</p>
+    <p class="story">Every quarter of FY26 was down on the year before, by 2.7% to 4.1%. Jul to Sep 26 turned up again, in 19 of 21 countries. The dip began the month firmware 4.5.0 shipped, so Engineering needs to rule that out. The cause is not settled: Working Hypothesis.</p>
+    <p class="meas">New devices activated, change on the same quarter a year before. 12 months: 2,492,460 against 2,528,350. Target +5% by 30-Jun-27. Sample is 1 in 10 devices.</p>
+   </div>
+   <div class="fig">
+    <div class="chart replay" data-c="k2q" data-why="If installs hold while hardware revenue falls, OEMs are running down stock; if installs fall too, it's demand."></div>
+    <div data-t="k2q"></div>
+   </div>
+  </article>
+  <article class="art">
+   <div class="side">
+    <p class="find">Reporting OEMs hold 10.9 months of stock, down from 15.4 at the peak.</p>
+    <p class="story">Cover jumped when OEMs stopped buying, peaking in 2025-Q3. Their stock has since fallen 45% like for like, but purchases stayed low, so cover is still above the 9-month red line. More destocking is possible before hardware buying recovers.</p>
+    <p class="meas">Months of stock cover at the 28 OEMs that reported in 2026-Q3 (reporters cover 46% of FY26 hardware revenue). Target 6 or less by 30-Jun-27.</p>
+   </div>
+   <div class="fig">
+    <div class="chart replay" data-c="cover" data-why="Shows whether OEMs are still sitting on stock or about to reorder."></div>
+    <div class="legend"><span><i class="ln" style="--c:var(--accent)"></i>Months of cover</span><span><i class="dash" style="--c:var(--fg)"></i>Target 6</span><span><i class="dash" style="--c:var(--muted)"></i>Red line 9</span></div>
+    <div data-t="cover"></div>
+   </div>
+  </article>
+ </div>
+ <article class="art">
+  <div class="side">
+   <p class="find">Neither forecast called the hardware step, and Sales has been too high in 12 of 12 quarters.</p>
+   <p class="story">Last quarter Finance was 17.2% under and Sales 25.6% over. Since Jul-25 the misses roughly doubled. Over the last four quarters Finance missed by 23.2% on average and Sales by 34.3%, against a 10% target. Most of the miss is hardware, the same cause as the revenue fall.</p>
+   <p class="meas">Forecast accuracy: forecast minus actual, as a % of actual, by quarter, FY24-Q1 to FY27-Q1. No Sales forecast for FY25-Q3. Observed Fact.</p>
+  </div>
+  <div class="fig">
+   <div class="chart replay" data-c="k5" data-why="Forecasts aren't trusted and Sales and Finance argue. It stops the board being blindsided again."></div>
+   <div class="legend"><span><i class="ln" style="--c:var(--accent)"></i>Finance forecast</span><span><i class="ln" style="--c:var(--pos)"></i>Sales forecast</span><span><i style="--c:var(--accent-soft)"></i>Within 10% (target)</span></div>
+   <div data-t="k5"></div>
+  </div>
+ </article>
+</section>
+
+<!-- ============ Page 6: Back page ============ -->
+<section class="page" id="back" data-title="Back page" aria-label="Back page">
+ <div class="pghead"><h2>Back page</h2><span>Page 6 · Drill-down and definitions</span></div>
+ <details class="sec"><summary><span class="chev"></span>Software: largest licence share and gross margin, with and without the licence <span class="cnt">2 sub-KPIs</span></summary><div class="body">
+  <article class="art">
+   <div class="side">
+    <p class="find">One licence is 29.4% of new software contract value; without it the largest is 4.9%.</p>
+    <p class="story">Gross margin is 76.5%, above the board's 76%, but 74.1% without the licence, which reads Behind. Both readings change by themselves in Mar-27, when the licence leaves the 12-month window, so neither will show whether sales behaviour changed.</p>
+    <p class="meas">Share of software contract value started in the 12 months to Sep-26 (617 contracts); gross margin %, 12 months to Sep-26. Observed Fact.</p>
+   </div>
+   <div class="fig">
+    <div class="ctrls"><div class="seg" id="lic" role="group" aria-label="Software figures"><button type="button" data-l="with" aria-pressed="true">With the A$7.4m licence</button><button type="button" data-l="without" aria-pressed="false">Without it</button></div></div>
+    <div class="chart" data-c="k3sub"></div>
+    <p class="cap">Bands, light to dark: off track, behind, on track. The tick is the target line (largest licence under 10%; gross margin 76% or more).</p>
+    <div data-t="k3sub" id="tbl-k3sub"></div>
+   </div>
+  </article>
+ </div></details>
+ <details class="sec"><summary><span class="chev"></span>Design wins: count per quarter and months to first shipment <span class="cnt">2 sub-KPIs</span></summary><div class="body">
+  <article class="art">
+   <div class="side">
+    <p class="find">Design wins rose to 1,180 in FY26 while the share that ships stayed flat.</p>
+    <p class="story">Since Jul-24 reps earn A$400 per design win, with no clawback. Wins per quarter rose from 230 to 273 and the median deal got smaller, but the shipping rate didn't move. Wins that do ship take a median 15.0 months.</p>
+    <p class="meas">Design wins by financial quarter, FY23-Q3 to FY27-Q1; median months from design win to first shipment, wins at least 18 months old (672 shipped).</p>
+   </div>
+   <div class="fig">
+    <div class="chart replay" data-c="k42" data-why="The count the CEO watches, read against how many ship."></div>
+    <div class="legend"><span><i style="--c:var(--grey)"></i>Before the bonus</span><span><i style="--c:var(--accent)"></i>With the A$400 bonus</span></div>
+    <div data-t="k42"></div>
+    <div class="chart replay" data-c="k41" data-why="Shows how long a design win takes to turn into revenue."></div>
+    <div data-t="k41"></div>
+   </div>
+  </article>
+ </div></details>
+ <details class="sec"><summary><span class="chev"></span>Definitions <span class="cnt">10 KPIs</span></summary><div class="body">
+  <dl class="defs">
+   <dt>Total revenue, last 12 months, against the path to A$115m</dt><dd>Sum of ledger revenue over the last 12 months (hardware sales less rebates, software licences and subscriptions, developer kits and freight), each month, against a straight line from A$80.6m (Jun-26) to A$115m (Jun-28). Owner: CEO. Counter-metric: gross margin %.</dd>
+   <dt>New devices activated in the field</dt><dd>Devices joining a network for the first time in the last 12 months, against the 12 months before, earliest date per device. Sample is 1 in 10 devices, counts × 10. Owner: VP Sales. Signed off by the Head of Platform Engineering, 27-Oct-26.</dd>
+   <dt>Software revenue growth without one-off large licences</dt><dd>Software revenue over the last 12 months ÷ the 12 months before, minus 1, leaving out any single licence over A$1m (to agree with the CFO). Growth including them shown alongside. Owner: CEO.</dd>
+   <dt>Design wins that ship</dt><dd>Of design wins at least 18 months old, the share that have reached shipping. Lost after design win counts as not shipped. Records with no stage dates are left out and counted. Owner: VP Sales.</dd>
+   <dt>Forecast accuracy</dt><dd>Each quarter, (forecast − actual) ÷ actual, using the forecast made on or before the first day of the quarter, for Finance and Sales. Owner: CFO. Signed off by the CFO, 27-Oct-26; Finance and Sales both shown until the CFO chooses one.</dd>
+   <dt>Months of stock cover at the OEMs that report</dt><dd>Units on hand at the OEMs that reported in the quarter (reels × 500) ÷ their average monthly units invoiced in the same quarter. Owner: VP Sales.</dd>
+   <dt>Share of software revenue from the largest licences</dt><dd>Largest licence (and largest five) as a share of all software contract value started in the last 12 months. Owner: VP Sales.</dd>
+   <dt>Gross margin %, last 12 months</dt><dd>(Revenue − cost of sales) ÷ revenue over the last 12 months. Target 76% (the board's FY27 figure). Owner: CFO.</dd>
+   <dt>Months from design win to first shipment</dt><dd>Median months between design win and shipping, for design wins at least 18 months old. Target set after the baseline. Owner: Head of Platform Engineering.</dd>
+   <dt>Design wins per quarter</dt><dd>Count of opportunities reaching design win in the financial quarter. Read with design wins that ship. Owner: VP Sales.</dd>
+  </dl>
+ </div></details>
+</section>
+
+<footer>
+ <span>Built by Visalli from the Business Requirements v1.2 and the KPI Calculation Pack v1.1 (Stage 2, 26-Oct-26). Every number matches the Calculation Pack. Sample data.</span>
+ <span>Lumenwire Audio is a test case: all names and numbers are invented. Data to 30-Sep-26. Financial year July to June. Check against real data before go-live.</span>
+</footer>
+</main>
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script>
+const D={"allMonths":["2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09","2026-10","2026-11","2026-12","2027-01","2027-02","2027-03","2027-04","2027-05","2027-06","2027-07","2027-08","2027-09","2027-10","2027-11","2027-12","2028-01","2028-02","2028-03","2028-04","2028-05","2028-06"],"k1":{"cur":80537990.16,"hw":54798103.120000005,"sw":25136026.01,"path":84900000.0,"gap":-4362009.840000004,"gapPct":-0.0513782077738516,"pace":1641048.0876190478,"run":-20669.94666666786,"peak":122086358.35,"peakMonth":"2024-06","plan":92689999.99},"r12":{"months":["2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09"],"tot":[81088079.15,81378636.48,83168219.26,84774443.53,85396625.55,86916021.16,87398059.84,87901363.5,90324044.23,91309361.39,91894245.9,93755733.66,96578867.11,99234884.54,101650105.54,102367866.53,104085702.3,106514312.72,108448564.49,110422369.29,115297256.37,116737569.95,119000488.62,122086358.35,119206782.46,117640182.59,119467948.39,120169314.52,120716043.52,120931795.57,120703031.63,120664385.95,119599480.88,119171887.42,117900918.34,118400000.0,118411415.22,116328822.48,109912897.43,106607261.14,104177645.44,98290880.03,94753668.38,91009756.97,91303701.17,88656669.4,87495348.95,80600000.0,79957905.42,81007987.43,80537990.16],"hw":[70698482.19,71163687.42,72599869.28,73490732.63,74033237.4,75217890.22,75622395.45,76040824.44,77582030.22,78209188.19,78781204.64,80155733.66,81702331.8,83524649.14,86186438.25,87376144.81,89295940.58,92308240.44,93981846.93,95709129.36,98586647.2,100212606.33,101757959.88,105086358.35,104066098.21,102969167.73,103475436.81,102758933.99,101711643.48,102191743.58,101760497.52,101019616.75,100684628.59,100035601.62,99347364.83,99200000.0,96477352.72,94156640.14,88308004.6,85580378.42,83121536.29,77207682.32,74033293.71,71410920.68,65696189.38,62796387.41,60314657.42,54300000.0,54814492.19,54994195.88,54798103.12],"sw":[9774411.43,9621171.14,9967098.06,10707072.93,10792782.51,11105518.2,11177257.3,11258469.8,12136357.19,12478529.88,12496910.88,13000000.0,14293409.31,15102494.94,14876421.39,14384948.81,14173830.7,13599459.91,13869281.77,14122102.84,16110705.77,15935733.39,16655352.91,16400000.0,14536147.66,14066569.34,15385321.29,16812097.04,18410608.06,18150600.7,18345688.89,19061285.82,18330032.22,18542836.75,17963039.59,18600000.0,21348301.87,21583943.72,21005809.38,20417917.96,20458791.4,20482501.45,20111007.3,18983475.47,25005956.7,25270735.34,26580469.28,25700000.0,24525379.91,25403341.54,25136026.01]},"spark":{"k1":[120169314.52,120716043.52,120931795.57,120703031.63,120664385.95,119599480.88,119171887.42,117900918.34,118400000.0,118411415.22,116328822.48,109912897.43,106607261.14,104177645.44,98290880.03,94753668.38,91009756.97,91303701.17,88656669.4,87495348.95,80600000.0,79957905.42,81007987.43,80537990.16],"k3":[0.09282780339626395,0.2218844288862576,0.2543715546715415,0.24403441693145456,0.27243520271659505,0.22046592800896025,0.24918830676478265,0.15417530835560123,0.21503706591093374,0.5879046090699176,0.6635351883863057,0.4696061060151002,0.29882726882917354,0.1813065250924848,0.20070172949287612,0.16559441196379066,0.05642988912412439,-0.039502141147900294,-0.03624587861401518,0.06777414723718289,-0.016129032258064502,-0.1978106729853918,-0.1658919345996145,-0.15566090841104252]},"bridge":[["FY25 revenue",118.4,1,"FY25"],["End customers installed 3.3% fewer",-1.831885701542344,0,"Fewer installs"],["OEMs bought fewer than they installed",-47.95628255006909,0,"OEMs bought less"],["Price and product mix",0.38816821161143544,0,"Price, mix"],["Smaller volume rebates",4.50000004,0,"Rebates"],["The one A$7.4m licence",7.4,0,"One licence"],["Other software",-0.3,0,"Other software"],["FY26 revenue",80.6,1,"FY26"]],"swbridge":[["Software, 12 months to Sep-25",21.00580938,1,"To Sep-25"],["The one A$7.4m licence",7.4,0,"One licence"],["Other perpetual licences",-3.5223498599999976,0,"Other perpetual"],["Annual subscriptions",0.2296709900000002,0,"Annual subs"],["Monthly subscriptions",0.04877990000000002,0,"Monthly subs"],["Licence table against ledger",-0.025884400000002236,0,"Table vs ledger"],["Software, 12 months to Sep-26",25.136026010000002,1,"To Sep-26"]],"phases":[{"key":"shortage","name":"Long lead times","when":"Jul-22 to Sep-23","lead":"about 48 weeks","orders":400189.8,"installs":192380.0,"invoiced":351249.8,"ratio":"about 2 times installs"},{"key":"drought","name":"Orders stop","when":"Oct-23 to Jun-24","lead":"falling to 8.5 weeks","orders":27327.11111111111,"installs":204974.44444444444,"invoiced":444075.6666666667,"ratio":"0.13 times installs"},{"key":"rebuy","name":"Buying ahead","when":"Jul-24 to Apr-25","lead":"about 8 weeks","orders":412051.5,"installs":210839.0,"invoiced":396712.6,"ratio":"about 2 times installs"},{"key":"reset","name":"Back to installs","when":"May-25 to Sep-26","lead":"about 8 weeks","orders":214392.4705882353,"installs":207237.0588235294,"invoiced":242607.29411764705,"ratio":"1.03 times installs"}],"sellin":[{"fy":"FY23","invoiced":3985844.0,"activated":2304410.0,"ratio":1.7296592186286295},{"fy":"FY24","invoiced":5279584.0,"activated":2426060.0,"ratio":2.17619679645186},{"fy":"FY25","invoiced":4883606.0,"activated":2547790.0,"ratio":1.9168008352336732},{"fy":"FY26","invoiced":2590114.0,"activated":2463630.0,"ratio":1.051340501617532}],"k3":{"growthEx":-0.15566090841104252,"growth":0.19662258926963583,"pace":1.7295656490115836,"run":-4.651062538432601},"k31":{"with":29.400084599140726,"without":4.861392931352218,"top5":40.46862546928692,"top5ex":18.388929933105892},"k32":{"with":76.50262808594528,"without":74.12519671568727},"k4":{"rate":0.3153449084936649,"n":2131,"shipped":672,"pace":0.3850565722926117,"run":0.08193215556568131,"asof":[["2025-12-31",0.3079710144927536],["2026-03-31",0.31381011097410605],["2026-06-30",0.3165236051502146],["2026-09-30",0.3153449084936649]],"curve":[[6,0.002325581395348837],[12,0.06976744186046512],[18,0.20930232558139536],[24,0.2744186046511628],[30,0.313953488372093],[36,0.3186046511627907],[42,0.3209302325581395]],"curveN":430,"fy":{"FY24":950,"FY25":1020,"FY26":1180}},"k42":[["2023Q3",211],["2023Q4",219],["2024Q1",248],["2024Q2",242],["2024Q3",224],["2024Q4",236],["2025Q1",242],["2025Q2",245],["2025Q3",267],["2025Q4",266],["2026Q1",278],["2026Q2",300],["2026Q3",311],["2026Q4",291],["2027Q1",260]],"k41":{"median":15.013140604467806,"p25":11.925098554533507,"p75":18.89783180026281,"n":672,"cohorts":[["2023Q3",15.078843626806833,69],["2023Q4",15.571616294349539,69],["2024Q1",15.555190538764784,96],["2024Q2",16.16294349540079,85],["2024Q3",14.520367936925098,79],["2024Q4",15.111695137976346,61],["2025Q1",15.473061760840999,81],["2025Q2",14.224704336399475,72],["2025Q3",13.304862023653087,60]]},"k2":{"q":[["FY25-Q1",0.050439539644583586],["FY25-Q2",0.04309122420040956],["FY25-Q3",0.058421603804357236],["FY25-Q4",0.04944389559896756],["FY26-Q1",-0.03183701544357287],["FY26-Q2",-0.032867608186692876],["FY26-Q3",-0.040939466683968084],["FY26-Q4",-0.02690514872230909],["FY27-Q1",0.04876769795490299]],"units":{"FY25-Q2":662050.0,"FY25-Q3":616520.0,"FY25-Q4":658610.0,"FY26-Q1":591170.0,"FY26-Q2":640290.0,"FY26-Q3":591280.0,"FY26-Q4":640890.0,"FY27-Q1":620000.0},"growth":-0.01419502837819131,"pace":0.7132780930910145,"run":0.6279173800081361,"latestQ":0.04876769795490299,"spark":[-3.3032549778435394,-2.4774473114043682,-1.9610861764740695,-1.419502837819131]},"k21":{"cover":[["2021-Q3",3.5487962571119573,301889.0,22],["2021-Q4",3.471623988105072,350229.0,22],["2022-Q1",3.886380513263718,308782.0,23],["2022-Q2",3.717850623759738,311629.0,23],["2022-Q3",3.6592351470730997,402067.0,27],["2022-Q4",3.51365566078273,408856.0,23],["2023-Q1",4.04087800470471,518776.0,27],["2023-Q2",3.9828639595531428,448505.0,28],["2023-Q3",4.080185937205853,657439.0,31],["2023-Q4",4.514736844332625,711208.0,23],["2024-Q1",5.787061599370809,868256.0,27],["2024-Q2",6.339544045466288,785292.0,26],["2024-Q3",7.545044696548765,1072762.0,25],["2024-Q4",7.8504146657335685,975940.0,24],["2025-Q1",8.562478102863162,1376758.0,28],["2025-Q2",8.426423843866328,1590583.0,31],["2025-Q3",15.370875800307157,1284416.0,26],["2025-Q4",12.890953320184089,980357.0,28],["2026-Q1",13.187822654740373,1066952.0,26],["2026-Q2",10.541464186424973,777310.0,22],["2026-Q3",10.93288285558451,841883.0,28]],"peakQ":"2025-Q3"},"k5":{"order":["FY24-Q1","FY24-Q2","FY24-Q3","FY24-Q4","FY25-Q1","FY25-Q2","FY25-Q3","FY25-Q4","FY26-Q1","FY26-Q2","FY26-Q3","FY26-Q4","FY27-Q1"],"fin":[-0.13372763158625606,0.020554795509522626,-0.11576917770231623,-0.0025817957347375594,0.42340051506487175,0.13134547395717733,0.19891037284077648,0.07635771399707185,0.39523056576565785,0.5100843411850183,0.08052447230607235,0.16662091394010872,-0.17161412371134022],"sales":[0.08009411428133352,0.16690003590129537,0.08835982466124942,0.1752530678152522,0.21730209177687443,0.17632295508363272,null,0.12908494525271466,0.3262895873656593,0.39118097381722866,0.34609242092186576,0.377406998813244,0.2564991237113402],"actual":[30567522.37,28956308.99,31545948.52,31016578.47,27949112.41,30420156.169999998,30213633.830000002,29817097.59,19462009.84,18798138.77,23226454.97,19113396.419999998,19400000.0],"tile":{"finance_run_rate":{"err":-0.17161412371134022,"abs":0.17161412371134022,"pace":-2.3871374570446737,"run":-11.282340582455937,"spark":[51.00843411850183,8.052447230607235,16.662091394010872,17.16141237113402]},"sales_crm":{"err":0.2564991237113402,"abs":0.2564991237113402,"pace":-5.216637457044674,"run":-4.489395003529615,"spark":[39.11809738172287,34.60924209218658,37.7406998813244,25.649912371134022]}}}};
+const VARIANT='A';
+const PAL={dark:{bg:'#0c121a',surface:'#141c27',fg:'#e8edf3',muted:'#94a1b2',line:'#243042',accent:'#4f9dff',soft:'#16263d',grey:'#8b96a5',pos:'#bcd9ff',neg:'#4f9dff'},
+ light:{bg:'#f5f8fc',surface:'#ffffff',fg:'#121a24',muted:'#556273',line:'#dbe3ee',accent:'#1f64c8',soft:'#e3eefc',grey:'#6b7685',pos:'#93bdf2',neg:'#1f64c8'}};
+const STATUS={dark:{ok:'#5fd38d',warn:'#f2a65a',bad:'#f87171'},light:{ok:'#15803d',warn:'#b45309',bad:'#b91c1c'}};
+let mode='dark';try{const m=localStorage.getItem('lwDashMode');if(m==='light'||m==='dark')mode=m}catch(e){}
+function applyMode(){const t=PAL[mode],s=STATUS[mode],r=document.documentElement.style;document.documentElement.dataset.theme=mode;
+ const set={bg:t.bg,surface:t.surface,fg:t.fg,muted:t.muted,line:t.line,accent:t.accent,'accent-soft':t.soft,grey:t.grey,pos:t.pos,neg:t.neg,'s-ok':s.ok,'s-warn':s.warn,'s-bad':s.bad};
+ for(const k in set)r.setProperty('--'+k,set[k]);
+ document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));try{localStorage.setItem('lwDashMode',mode)}catch(e){}}
+document.getElementById('mode').addEventListener('click',e=>{const b=e.target.closest('button');if(b){mode=b.dataset.m;applyMode()}});
+
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MN='−';
+const sg=(v,dp=1)=>(v>0?'+':v<0?MN:'')+Math.abs(v).toFixed(dp);
+const m1=v=>(v<0?MN:'')+'A$'+(Math.abs(v)/1e6).toFixed(1)+'m', m2=v=>(v<0?MN:'')+'A$'+(Math.abs(v)/1e6).toFixed(2)+'m';
+const sm=(v,dp=1)=>(v>0?'+':v<0?MN:'')+'A$'+Math.abs(v).toFixed(dp)+'m';   /* v already in A$m */
+const pc=(f,dp=1)=>(f*100).toFixed(dp)+'%', spc=(f,dp=1)=>sg(f*100,dp)+'%';
+const n0=v=>Math.round(v).toLocaleString('en-AU');
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const ml=s=>{const [y,m]=s.split('-');return MON[+m-1]+'-'+y.slice(2)};
+const fyq=q=>'FY'+q.slice(2,4)+'-'+q.slice(4);   /* '2025Q3' -> 'FY25-Q3' */
+const table=(head,rows)=>`<details class="data"><summary>See data</summary><table class="t"><thead><tr>${head.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></details>`;
+const svgOpen=(w,h,label)=>`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">`;
+const tr=(a,b)=>`<div class='tr'><span>${a}</span><b>${b}</b></div>`;
+function yGrid(m,w,Y,ticks,fmt){return ticks.map(t=>`<line class="grid-l" x1="${m.l}" x2="${w-m.r}" y1="${Y(t)}" y2="${Y(t)}"/><text class="ax" x="${m.l-6}" y="${Y(t)+4}" text-anchor="end">${fmt(t)}</text>`).join('')}
+function wrap2(txt,x,y,maxw){const words=txt.split(' '),lines=[''];const cap=Math.max(6,Math.floor(maxw/6.6));words.forEach(w=>{const l=lines[lines.length-1];if((l+' '+w).trim().length>cap&&l)lines.push(w);else lines[lines.length-1]=(l+' '+w).trim()});
+ return `<text class="ax" x="${x}" y="${y}" text-anchor="middle">${lines.slice(0,3).map((l,i)=>`<tspan x="${x}" dy="${i?13:0}">${esc(l)}</tspan>`).join('')}</text>`}
+
+/* ---------- C. Tiles (In brief) ---------- */
+function spark(vals,tgt,vals2){const w=100,h=40,all=[...vals,...(vals2||[]),...(tgt==null?[]:[tgt])],mx=Math.max(...all),mn=Math.min(...all),Y=v=>h-3-(v-mn)/((mx-mn)||1)*(h-6);const P=vals.map((v,i)=>[i*w/(vals.length-1),Y(v)]),P2=vals2?vals2.map((v,i)=>[i*w/(vals2.length-1),Y(v)]):null;
+ const path=a=>'M'+a.map(p=>p.map(n=>n.toFixed(1)).join(',')).join('L'),end=P.at(-1)[1]/h*100;
+ return `<div class="spk"><svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path class="area" d="${path(P)}L${w},${h}L0,${h}Z"/>${tgt==null?'':`<line class="tgt-s" x1="0" x2="${w}" y1="${Y(tgt)}" y2="${Y(tgt)}"/>`}<path d="${path(P)}"/>${P2?`<path class="s2" d="${path(P2)}"/>`:''}</svg><span class="end" style="top:calc(${end.toFixed(1)}% - 4px)"></span>${P2?`<span class="end s2" style="top:calc(${(P2.at(-1)[1]/h*100).toFixed(1)}% - 4px)"></span>`:''}</div>`}
+const ICON={ok:'✓',warn:'!',bad:'×',none:'○'},WORD={ok:'On track',warn:'Behind',bad:'Off track'};
+const k1=D.k1,k3=D.k3,k4=D.k4,k2=D.k2,k5=D.k5,F5=k5.tile.finance_run_rate,S5=k5.tile.sales_crm;
+const TILES=[
+ {n:'Total revenue, last 12 months',v:m1(k1.cur),sp:D.spark.k1.map(v=>v/1e6),tgt:k1.path/1e6,t:'Target <b>A$115m</b> by 30-Jun-28',gap:`Gap <b>${m2(k1.gap)} (${spc(k1.gapPct)})</b> to path`,
+  need:`Needs +${m2(k1.pace)} a month`,trend:`Trend ${m2(k1.run)} a month`,s:'bad',note:`Path ${m1(k1.path)} at Sep-26. Peak ${m1(k1.peak)}`,
+  why:"The board's headline target. It shows early whether the gap is closing, so the board hears it from the CEO first.",spTip:'Last 24 months; dashed line: path at Sep-26'},
+ {n:'Software growth without one-off licences',v:spc(k3.growthEx),sp:D.spark.k3.map(v=>v*100),tgt:0,t:'Target <b>0% or more</b> by 30-Jun-27',gap:`Gap <b>${sg(k3.growthEx*100)} pts</b>`,
+  need:`Needs ${sg(k3.pace)} pts a month`,trend:`Trend ${sg(k3.run)} pts a month`,s:'bad',note:`${spc(k3.growth)} with the A$7.4m licence`,
+  why:'It decides whether to keep pushing software.',spTip:'Last 24 months; dashed line: 0%'},
+ {n:'Design wins that ship',v:pc(k4.rate),sp:k4.asof.map(r=>r[1]*100),tgt:35,t:'Target <b>35%</b> by 30-Jun-27',gap:`Gap <b>${sg(k4.rate*100-35)} pts</b>`,
+  need:`Needs ${sg(k4.pace,2)} pts a month`,trend:`Trend ${sg(k4.run,2)} pts a month`,s:'warn',note:'Working Hypothesis: 33% undated',
+  why:'Never measured before. Record design wins only matter if they ship.',spTip:'Last 4 quarter-ends; dashed line: 35%'},
+ {n:'New devices activated in the field',v:spc(k2.growth),sp:k2.spark,tgt:5,t:'Target <b>+5%</b> by 30-Jun-27',gap:`Gap <b>${sg(k2.growth*100-5)} pts</b>`,
+  need:`Needs ${sg(k2.pace,2)} pts a month`,trend:`Trend ${sg(k2.run,2)} pts a month`,s:'bad',note:`Last quarter alone ${spc(k2.latestQ)}`,
+  why:"If installs hold while hardware revenue falls, OEMs are running down stock; if installs fall too, it's demand.",spTip:'Last 4 months; dashed line: +5%'},
+ {n:'Forecast accuracy, latest quarter',two:[['Finance',spc(F5.err)],['Sales',spc(S5.err)]],sp:F5.spark,sp2:S5.spark,tgt:10,t:'Target <b>within 10%</b> by 30-Jun-27',
+  gap:`Gap <b>${(F5.abs*100-10).toFixed(1)} / ${(S5.abs*100-10).toFixed(1)} pts</b> too wide`,need:`Needs ${sg(F5.pace)} / ${sg(S5.pace)} pts a quarter`,trend:`Trend ${sg(F5.run)} / ${sg(S5.run)} pts a quarter`,
+  s:'warn',s2:'bad',note:'Finance, then Sales. The CFO chooses which counts',
+  why:"Forecasts aren't trusted and Sales and Finance argue. It stops the board being blindsided again.",spTip:'Miss each quarter, last 4 quarters, Finance and Sales as on page 5; dashed line: 10%'}];
+const E='<span aria-hidden="true"></span>';
+document.getElementById('tiles').innerHTML=TILES.map(t=>{const ln=x=>x?`<span class="ln">${x}</span>`:E;
+ const chip=x=>`<span class="st" data-s="${x}"><span class="ic" aria-hidden="true">${ICON[x]}</span>${WORD[x]}</span>`;
+ const top=`<div class="tile-top">${t.two?`<span class="v two">${t.two.map(a=>`<span><small>${a[0]}</small> ${a[1]}</span>`).join('')}</span>`:`<span class="v">${t.v}</span>`}${spark(t.sp,t.tgt,t.sp2)}</div>`;
+ const tag=E;
+ const st=t.s2?`<span class="sts">${chip(t.s)}${chip(t.s2)}</span>`:chip(t.s);
+ const said=t.two?t.two.map((a,i)=>`${a[0]} ${a[1]}, ${WORD[i?t.s2:t.s]}`).join('; '):`${t.v}, ${WORD[t.s]}`;
+ const tip=`<b>${esc(t.n)}</b>${t.spTip?tr('Sparkline',t.spTip):''}<div class='why'><b>Why it matters:</b> ${esc(t.why)}</div>`;
+ return `<div class="stat" role="listitem" tabindex="0" aria-label="${esc(t.n)}: ${esc(said)}. Why it matters: ${esc(t.why)}" data-tip="${esc(tip)}">
+ <span class="nm">${t.n}</span>${top}${tag}${ln(t.t)}${ln(t.gap)}${ln(t.need)}${t.trend?`<span class="ln trend" data-s="${t.s}">${t.trend}</span>`:E}${st}<span class="note">${t.note}</span></div>`}).join('');
+
+/* ---------- F. Actions in full ---------- */
+document.getElementById('acts-full').innerHTML=[
+ ['CEO, with the CFO',`The CFO takes the forecast apart OEM by OEM; the CEO changes the sales plan and effort and briefs the board early, so total revenue reaches <span class="tgt">A$115m by 30-Jun-28</span>.`,
+  `${m1(k1.cur)} now, path ${m1(k1.path)}. Needs +${m2(k1.pace)} a month; trend ${m2(k1.run)}. The CFO is to say whether the board measures against the path or the A$92.7m plan.`],
+ ['CEO, with the Head of Platform Engineering and VP Sales',`They check the product and the sales effort, so software growth without one-off licences is back to <span class="tgt">0% or more by 30-Jun-27</span>.`,
+  `${spc(k3.growthEx)} now (${spc(k3.growth)} with the licence). Needs ${sg(k3.pace)} pts a month; trend ${sg(k3.run)}. Target to agree with the VP Sales and CFO.`],
+ ['VP Sales, with the Head of Platform Engineering',`The VP Sales refocuses on design wins that will ship, not ones that earn a bonus, and Engineering checks its support, so <span class="tgt">35% ship by 30-Jun-27</span>.`,
+  `${pc(k4.rate)} now (${n0(k4.shipped)} of ${n0(k4.n)}). Needs ${sg(k4.pace,2)} pts a month; trend ${sg(k4.run,2)}. Working Hypothesis until the CRM dates are back-filled.`]
+].map((a,i)=>`<li><span class="own">${a[0]}</span><p>${a[1]}</p><small>${a[2]}</small><span class="ast-line">○ Status: no update yet. ${['The CEO','The CEO','The VP Sales'][i]} gives the first update at the next board meeting.</span></li>`).join('');
+
+/* ---------- Charts ---------- */
+const R={},T={};
+/* D. Revenue against the required path */
+let splitMode='total';
+R.path=el=>{const w=el.clientWidth,narrow=w<560,h=narrow?260:300,m={l:46,r:narrow?70:110,t:20,b:28};
+ const M=D.r12.months,N=M.length,end=N-1+21; /* Sep-26 + 21 months = Jun-28 */
+ const lo=splitMode==='total'?60:0,hi=130,X=i=>m.l+(w-m.l-m.r)*i/end,Y=v=>m.t+(h-m.t-m.b)*(1-(v-lo)/(hi-lo));
+ const iJun26=M.indexOf('2026-06'),iJun27=iJun26+12,iJun28=iJun26+24,pathV=i=>80.6+34.4*(i-iJun26)/24;
+ let s=svgOpen(w,h,`Total revenue, last 12 months, Jul-22 to Sep-26, against the path to A$115m. Now ${m1(k1.cur)}, path ${m1(k1.path)}.`)+yGrid(m,w,Y,splitMode==='total'?[60,80,100,120]:[0,40,80,120],v=>'A$'+v+'m');
+ [['2022-07','Jul-22'],['2023-07','Jul-23'],['2024-07','Jul-24'],['2025-07','Jul-25'],['2026-07','Jul-26']].forEach(([k,l])=>{const i=M.indexOf(k);if(!narrow||k!=='2023-07')s+=`<text class="ax" x="${X(i)}" y="${h-8}" text-anchor="middle">${l}</text>`});
+ s+=`<text class="ax" x="${X(iJun28)}" y="${h-8}" text-anchor="middle">Jun-28</text>`;
+ const line=(arr,col,cls='draw',extra='')=>`<path class="${cls}" pathLength="1" d="M${arr.map((v,i)=>`${X(i).toFixed(1)},${Y(v/1e6).toFixed(1)}`).join('L')}" style="fill:none;stroke:${col};stroke-width:2;stroke-linejoin:round;stroke-linecap:round;${extra}"/>`;
+ /* path to target */
+ s+=`<line x1="${X(iJun26)}" y1="${Y(80.6)}" x2="${X(iJun28)}" y2="${Y(115)}" style="stroke:var(--fg);stroke-width:2;stroke-dasharray:6 5;opacity:.85"/>`;
+ s+=`<circle cx="${X(iJun28)}" cy="${Y(115)}" r="4.5" class="dot" style="fill:var(--fg)"/><text class="lab" x="${X(iJun28)+8}" y="${Y(115)+4}"><tspan class="b">A$115m</tspan>${narrow?'':' by Jun-28'}</text>`;
+ /* FY27 board plan marker */
+ s+=`<g class="fade" style="--d:1.4s"><rect x="${X(iJun27)-5}" y="${Y(D.k1.plan/1e6)-5}" width="10" height="10" transform="rotate(45 ${X(iJun27)} ${Y(D.k1.plan/1e6)})" style="fill:var(--surface);stroke:var(--fg);stroke-width:2"/>
+  <text class="ax" x="${X(iJun27)+10}" y="${Y(D.k1.plan/1e6)+16}" style="fill:var(--fg)">Plan ${m1(D.k1.plan)}</text></g>`;
+ if(splitMode==='total'){
+  const v=D.r12.tot,last=v[N-1]/1e6;
+  s+=`<path class="fade" style="--d:1.2s;fill:var(--accent);fill-opacity:.1" d="M${v.map((x,i)=>`${X(i).toFixed(1)},${Y(x/1e6).toFixed(1)}`).join('L')}V${Y(lo)}H${X(0)}Z"/>`+line(v,'var(--accent)');
+  const ip=M.indexOf(D.k1.peakMonth);
+  s+=`<g class="fade" style="--d:1.3s"><circle class="dot" cx="${X(ip)}" cy="${Y(D.k1.peak/1e6)}" r="4.5" style="fill:var(--accent)"/><text class="lab" x="${X(ip)}" y="${Y(D.k1.peak/1e6)-10}" text-anchor="middle">Peak <tspan class="b">${m1(D.k1.peak)}</tspan></text>
+   <circle class="dot" cx="${X(N-1)}" cy="${Y(last)}" r="4.5" style="fill:var(--accent)"/>
+   <line x1="${X(N-1)+7}" x2="${X(N-1)+7}" y1="${Y(k1.path/1e6)}" y2="${Y(last)}" style="stroke:var(--fg)"/>
+   <text class="lab" x="${X(N-1)-8}" y="${Y(last)+20}" text-anchor="end">Now <tspan class="b">${m1(k1.cur)}</tspan></text>
+   <text class="lab" x="${X(N-1)+12}" y="${(Y(k1.path/1e6)+Y(last))/2+16}"><tspan class="b">${m2(k1.gap)}</tspan></text></g>`;
+ }else{
+  s+=line(D.r12.hw,'var(--accent)')+line(D.r12.sw,'var(--pos)');
+  s+=`<g class="fade" style="--d:1.3s"><text class="lab" x="${X(N-1)+8}" y="${Y(D.r12.hw[N-1]/1e6)-6}">Hardware <tspan class="b">${m1(k1.hw)}</tspan></text><text class="lab" x="${X(N-1)+8}" y="${Y(D.r12.sw[N-1]/1e6)+4}">Software <tspan class="b">${m1(k1.sw)}</tspan></text></g>`;
+ }
+ for(let i=0;i<=end;i++){const has=i<N,p=i>=iJun26?pathV(i):null;if(!has&&p==null)continue;
+  const lab=ml(D.allMonths[i]);
+  let tip=`<b>${lab}</b>`;if(has){tip+=splitMode==='total'?tr('Revenue, last 12 months',m1(D.r12.tot[i])):tr('Hardware',m1(D.r12.hw[i]))+tr('Software',m1(D.r12.sw[i]))}
+  if(p!=null)tip+=tr('Path to A$115m','A$'+p.toFixed(1)+'m');if(i===iJun27)tip+=tr('FY27 board plan',m1(D.k1.plan));
+  s+=`<rect class="hit" x="${X(i)-(w-m.l-m.r)/end/2}" y="${m.t}" width="${(w-m.l-m.r)/end}" height="${h-m.t-m.b}" data-tip="${tip}" data-x="${X(i)}"/>`}
+ s+=`<line class="cross" id="xh-path" x1="0" x2="0" y1="${m.t}" y2="${h-m.b}" style="opacity:0"/>`;
+ el.innerHTML=s+'</svg>';
+ document.getElementById('lg-path').innerHTML=(splitMode==='total'?'<span><i class="ln" style="--c:var(--accent)"></i>Revenue, last 12 months</span>':'<span><i class="ln" style="--c:var(--accent)"></i>Hardware</span><span><i class="ln" style="--c:var(--pos)"></i>Software</span>')+'<span><i class="dash" style="--c:var(--fg)"></i>Path to A$115m</span><span><i class="ring" style="--c:var(--fg);border-radius:2px;transform:rotate(45deg);width:9px;height:9px"></i>FY27 board plan</span>'};
+T.path=()=>table(['Month','Total','Hardware','Software','Path'],D.r12.months.map((mo,i)=>[ml(mo),m1(D.r12.tot[i]),m1(D.r12.hw[i]),m1(D.r12.sw[i]),mo>='2026-06'?'A$'+(80.6+34.4*(D.r12.months.indexOf(mo)-D.r12.months.indexOf('2026-06'))/24).toFixed(1)+'m':''])
+ .filter((r,i)=>i%3===2||i>=D.r12.months.length-4));
+document.getElementById('split').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;splitMode=b.dataset.s;document.querySelectorAll('#split button').forEach(x=>x.setAttribute('aria-pressed',x===b));const el=document.querySelector('[data-c="path"]');R.path(el);play(el)});
+
+/* Bridge (waterfall): effects add up exactly */
+function bridge(el,steps,{max,ticks,dp,label}){const w=el.clientWidth,narrow=(w-54)/steps.length<84,h=narrow?300:280,m={l:46,r:8,t:36,b:narrow?62:50},n=steps.length;
+ const band=(w-m.l-m.r)/n,bw=Math.min(40,band*0.62),X=i=>m.l+band*i+band/2,Y=v=>m.t+(h-m.t-m.b)*(1-v/max);
+ let s=svgOpen(w,h,label)+yGrid(m,w,Y,ticks,v=>'A$'+v+'m'),run=0;
+ steps.forEach(([nm,v,tot,short],i)=>{const y0=tot?0:run,y1=tot?v:run+v;run=y1;const top=Y(Math.max(y0,y1)),hh=Math.max(1.5,Math.abs(Y(y0)-Y(y1)));
+  const col=tot?'var(--fg)':v<0?'var(--neg)':'var(--pos)',lbl=tot?'A$'+v.toFixed(dp)+'m':sm(v,dp);
+  s+=`<g class="col" style="--d:${i*0.12}s"><rect x="${X(i)-bw/2}" y="${top}" width="${bw}" height="${hh}" rx="3" style="fill:${col}"/></g>`;
+  if(i<n-1)s+=`<line x1="${X(i)+bw/2}" x2="${X(i+1)-bw/2}" y1="${Y(run)}" y2="${Y(run)}" style="stroke:var(--muted);stroke-dasharray:3 3"/>`;
+  const ly=top-7-(narrow&&i%2===1&&!tot?13:0);
+  s+=`<text class="lab fade" style="--d:${0.5+i*0.12}s;font-size:${narrow?10.5:12}px" x="${X(i)}" y="${ly}" text-anchor="middle"><tspan class="b">${lbl}</tspan></text>`;
+  s+=wrap2(narrow&&short?short:nm,X(i),h-m.b+15,band);
+  s+=`<rect class="hit" x="${X(i)-band/2+1}" y="${m.t}" width="${band-2}" height="${h-m.t-m.b}" data-tip="<b>${esc(nm)}</b>${tr(tot?'Total':'Effect',lbl)}${tr('Running total','A$'+run.toFixed(dp)+'m')}"/>`});
+ el.innerHTML=s+'</svg>'}
+R.bridge=el=>bridge(el,D.bridge,{max:130,ticks:[0,40,80,120],dp:1,label:'Revenue bridge FY25 to FY26: '+D.bridge.map(b=>b[0]+' '+b[1].toFixed(1)).join(', ')});
+T.bridge=()=>{let r=0;return table(['Step','Effect','Running total'],[...D.bridge.map(b=>{r=b[2]?b[1]:r+b[1];return [b[0],b[2]?'A$'+b[1].toFixed(1)+'m':sm(b[1]),'A$'+r.toFixed(1)+'m']}),['Developer kits and freight (no change)','A$0.0m','']])};
+R.swbridge=el=>bridge(el,D.swbridge,{max:30,ticks:[0,10,20,30],dp:2,label:'Software revenue bridge: '+D.swbridge.map(b=>b[0]+' '+b[1].toFixed(2)).join(', ')});
+T.swbridge=()=>{let r=0;return table(['Step','Effect','Running total'],D.swbridge.map(b=>{r=b[2]?b[1]:r+b[1];return [b[0],b[2]?'A$'+b[1].toFixed(2)+'m':sm(b[1],2),'A$'+r.toFixed(2)+'m']}))};
+
+/* E1. Dumbbell: units ordered against devices installed, per month, by phase */
+R.phases=el=>{const w=el.clientWidth,narrow=w<520,rowH=narrow?88:62,m={l:narrow?8:170,r:20,t:8,b:26},h=m.t+m.b+rowH*D.phases.length,max=450000;
+ const X=v=>m.l+(w-m.l-m.r)*v/max;
+ let s=svgOpen(w,h,'Units ordered by OEMs against devices installed per month, by phase: '+D.phases.map(p=>`${p.name}: ${n0(p.orders)} ordered, ${n0(p.installs)} installed`).join('; '));
+ [0,100000,200000,300000,400000].forEach(t=>s+=`<line class="grid-l" x1="${X(t)}" x2="${X(t)}" y1="${m.t}" y2="${h-m.b}"/><text class="ax" x="${X(t)}" y="${h-8}" text-anchor="middle">${t/1000}k</text>`);
+ D.phases.forEach((p,i)=>{const y=m.t+rowH*i+(narrow?40:rowH/2),key=p.key,hi=key==='rebuy'||key==='reset';
+  const a=X(p.installs),b=X(p.orders),col=hi?'var(--accent)':'var(--grey)';
+  if(narrow)s+=`<text class="lab" x="${m.l}" y="${y-22}"><tspan class="b">${p.name}</tspan> <tspan class="ax">${p.when}</tspan></text>`;
+  else s+=`<text class="lab" x="${m.l-12}" y="${y-3}" text-anchor="end"><tspan class="${hi?'b':''}">${p.name}</tspan></text><text class="ax" x="${m.l-12}" y="${y+12}" text-anchor="end">${p.when}</text>`;
+  s+=`<g class="fade" style="--d:${0.15*i}s"><line x1="${a}" x2="${b}" y1="${y}" y2="${y}" style="stroke:${col};stroke-width:3;opacity:.55"/>
+   <circle cx="${a}" cy="${y}" r="5.5" style="fill:var(--surface);stroke:${hi?'var(--fg)':'var(--grey)'};stroke-width:2"/><circle class="dot" cx="${b}" cy="${y}" r="6" style="fill:${col}"/>
+   ${narrow?`<text class="lab" x="${m.l}" y="${y+21}"><tspan class="${hi?'b':''}">${p.ratio}</tspan></text><text class="ax" x="${m.l}" y="${y+35}">Lead time ${p.lead}</text>`
+    :`<text class="lab" x="${Math.min(a,b)}" y="${y+21}"><tspan class="${hi?'b':''}">${p.ratio}</tspan> <tspan class="ax">· lead time ${p.lead}</tspan></text>`}</g>`;
+  s+=`<rect class="hit" x="${m.l}" y="${y-rowH/2}" width="${w-m.l-m.r}" height="${rowH}" tabindex="0" data-tip="<b>${p.name}, ${p.when}</b>${tr('Ordered a month',n0(p.orders))}${tr('Installed a month',n0(p.installs))}${tr('Invoiced a month',n0(p.invoiced))}${tr('Lead time',p.lead)}"/>`});
+ el.innerHTML=s+'</svg>'};
+T.phases=()=>table(['Phase','Ordered a month','Installed a month','Invoiced a month','Lead time'],D.phases.map(p=>[`${p.name} (${p.when})`,n0(p.orders),n0(p.installs),n0(p.invoiced),p.lead]));
+
+/* E1 (Experimental A). Hexagonal dot swarm: one dot = 50,000 units */
+R.swarm=el=>{if(el.dataset.done)return;el.dataset.done=1;const U=50000,r=4,dx=9.2,dy=dx*Math.sqrt(3)/2;
+ const grid=[];for(let q=-10;q<=10;q++)for(let k=-10;k<=10;k++){const x=(q+k/2)*dx,y=k*dy;grid.push([x,y,Math.hypot(x,y)])}grid.sort((a,b)=>a[2]-b[2]);
+ el.innerHTML='<div class="hx">'+D.sellin.map(f=>{const tot=Math.round(f.invoiced/U),ins=Math.min(tot,Math.round(f.activated/U)),pts=grid.slice(0,tot),R0=Math.max(...pts.map(p=>p[2]))+r+2,sz=2*R0;
+  const dots=pts.map((p,i)=>`<circle class="fade" style="--d:${(i*0.008).toFixed(3)}s;fill:${i<ins?'var(--grey)':'var(--accent)'};opacity:${i<ins?.55:1}" cx="${(p[0]+R0).toFixed(1)}" cy="${(p[1]+R0).toFixed(1)}" r="${r}"/>`).join('');
+  return `<figure tabindex="0" data-tip="<b>${f.fy}</b>${tr('Units invoiced',n0(f.invoiced))}${tr('Devices installed',n0(f.activated))}${tr('Bought beyond installs',n0(f.invoiced-f.activated))}${tr('Units per device',f.ratio.toFixed(2))}"><svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" role="img" aria-label="${f.fy}: ${n0(f.invoiced)} units invoiced, ${n0(f.activated)} devices installed">${dots}</svg>
+   <figcaption><b>${f.fy}</b><br>${(f.invoiced/1e6).toFixed(2)}m bought · ${(f.activated/1e6).toFixed(2)}m installed</figcaption></figure>`}).join('')+'</div>'};
+T.swarm=()=>table(['Year','Units invoiced','Devices installed','Bought beyond installs','Units per device'],D.sellin.map(f=>[f.fy,n0(f.invoiced),n0(f.activated),n0(f.invoiced-f.activated),f.ratio.toFixed(2)]));
+
+/* E3. Share shipped by age, with target and belief lines */
+R.curve=el=>{const w=el.clientWidth,h=250,m={l:40,r:narrowR(w),t:16,b:30},C=D.k4.curve,X=v=>m.l+(w-m.l-m.r)*v/42,Y=v=>m.t+(h-m.t-m.b)*(1-v/100);
+ let s=svgOpen(w,h,'Share of Jan to Jun 2023 design wins shipped by months since design win: '+C.map(c=>c[0]+' months '+Math.round(c[1]*100)+'%').join(', '))+yGrid(m,w,Y,[0,25,50,75,100],v=>v+'%');
+ [0,6,12,18,24,30,36,42].forEach(t=>s+=`<text class="ax" x="${X(t)}" y="${h-8}" text-anchor="middle">${t}${t===42?' mo':''}</text>`);
+ s+=`<line x1="${m.l}" x2="${w-m.r}" y1="${Y(80)}" y2="${Y(80)}" style="stroke:var(--muted);stroke-dasharray:4 4"/><text class="ax" x="${w-m.r+6}" y="${Y(80)+4}">Belief 80%</text>`;
+ s+=`<line x1="${m.l}" x2="${w-m.r}" y1="${Y(35)}" y2="${Y(35)}" style="stroke:var(--fg);stroke-dasharray:4 4;opacity:.85"/><text class="ax" x="${w-m.r+6}" y="${Y(35)+4}" style="fill:var(--fg)">Target 35%</text>`;
+ const pts=[[0,0],...C],d='M'+pts.map(p=>`${X(p[0]).toFixed(1)},${Y(p[1]*100).toFixed(1)}`).join('L');
+ s+=`<path class="fade" style="--d:1.1s;fill:var(--accent);fill-opacity:.1" d="${d}V${Y(0)}H${X(0)}Z"/><path class="draw" pathLength="1" d="${d}" style="fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round"/>`;
+ C.forEach((c,i)=>{const lab=c[0]===18||c[0]===42;s+=`<g class="fade" style="--d:${1+i*0.08}s"><circle class="dot" cx="${X(c[0])}" cy="${Y(c[1]*100)}" r="${lab?5:3.5}" style="fill:var(--accent)"/>${lab?`<text class="lab" x="${X(c[0])+(c[0]===42?-6:0)}" y="${Y(c[1]*100)+(c[0]===42?20:-11)}" text-anchor="${c[0]===42?'end':'middle'}"><tspan class="b">${Math.round(c[1]*100)}%</tspan> at ${c[0]} mo</text>`:''}</g>
+  <circle class="hit" cx="${X(c[0])}" cy="${Y(c[1]*100)}" r="14" tabindex="0" data-tip="<b>${c[0]} months after design win</b>${tr('Shipped',pc(c[1]))}${tr('Design wins',n0(D.k4.curveN))}"/>`});
+ el.innerHTML=s+'</svg>'};
+function narrowR(w){return w<480?70:84}
+T.curve=()=>table(['Months since design win','Share shipped'],D.k4.curve.map(c=>[c[0],pc(c[1])]));
+
+/* Page 5. New devices activated: change on the same quarter a year before (diverging columns) */
+R.k2q=el=>{const w=el.clientWidth,h=230,m={l:40,r:8,t:22,b:30},Q=D.k2.q,n=Q.length,lo=-6,hi=8,band=(w-m.l-m.r)/n,bw=Math.min(24,band*.6),X=i=>m.l+band*i+band/2,Y=v=>m.t+(h-m.t-m.b)*(1-(v-lo)/(hi-lo));
+ let s=svgOpen(w,h,'New devices activated, change on a year before, by quarter: '+Q.map(q=>q[0]+' '+sg(q[1]*100)+'%').join(', '))+yGrid(m,w,Y,[-5,0,5],v=>v+'%');
+ s+=`<line x1="${m.l}" x2="${w-m.r}" y1="${Y(0)}" y2="${Y(0)}" style="stroke:var(--muted)"/>`;
+ Q.forEach(([q,v],i)=>{const p=v>=0,top=p?Y(v*100):Y(0),hh=Math.abs(Y(v*100)-Y(0)),col=p?'var(--pos)':'var(--neg)',last=i===n-1;
+  s+=`<g class="${p?'col':'coln'}" style="--d:${i*0.07}s"><rect x="${X(i)-bw/2}" y="${top}" width="${bw}" height="${hh}" rx="3" style="fill:${col}"/></g>`;
+  if(i===0||last||i===4||i===6)s+=`<text class="lab fade" style="--d:.8s" x="${X(i)}" y="${p?top-6:top+hh+14}" text-anchor="middle"><tspan class="${last?'b':''}">${sg(v*100)}%</tspan></text>`;
+  if(i%2===0||last)s+=`<text class="ax" x="${X(i)}" y="${h-8}" text-anchor="middle">${q.replace('FY','')}</text>`;
+  s+=`<rect class="hit" x="${X(i)-band/2+1}" y="${m.t}" width="${band-2}" height="${h-m.t-m.b}" data-tip="<b>${q}</b>${tr('Change on a year before',sg(v*100)+'%')}${D.k2.units[q]?tr('Devices activated',n0(D.k2.units[q])):''}"/>`});
+ el.innerHTML=s+'</svg>'};
+T.k2q=()=>table(['Quarter','Change on a year before','Devices activated'],D.k2.q.map(([q,v])=>[q,sg(v*100)+'%',D.k2.units[q]?n0(D.k2.units[q]):'']));
+
+/* Page 5. Months of stock cover */
+R.cover=el=>{const w=el.clientWidth,h=230,m={l:34,r:60,t:20,b:30},C=D.k21.cover,n=C.length,X=i=>m.l+(w-m.l-m.r)*i/(n-1),Y=v=>m.t+(h-m.t-m.b)*(1-v/18);
+ let s=svgOpen(w,h,'Months of stock cover at reporting OEMs by quarter, 2021-Q3 to 2026-Q3. Latest 10.9, peak 15.4 in 2025-Q3.')+yGrid(m,w,Y,[0,6,9,12,18],v=>v);
+ s+=`<line x1="${m.l}" x2="${w-m.r}" y1="${Y(6)}" y2="${Y(6)}" style="stroke:var(--fg);stroke-dasharray:4 4;opacity:.85"/><text class="ax" x="${w-m.r+6}" y="${Y(6)+4}" style="fill:var(--fg)">Target 6</text>`;
+ s+=`<line x1="${m.l}" x2="${w-m.r}" y1="${Y(9)}" y2="${Y(9)}" style="stroke:var(--muted);stroke-dasharray:4 4"/><text class="ax" x="${w-m.r+6}" y="${Y(9)+4}">Red 9</text>`;
+ C.forEach((c,i)=>{if(c[0].endsWith('Q3')&&(i%8===0||i===n-1||w>560))s+=`<text class="ax" x="${X(i)}" y="${h-8}" text-anchor="middle">${c[0]}</text>`});
+ const d='M'+C.map((c,i)=>`${X(i).toFixed(1)},${Y(c[1]).toFixed(1)}`).join('L');
+ s+=`<path class="draw" pathLength="1" d="${d}" style="fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round"/>`;
+ const ip=C.findIndex(c=>c[0]===D.k21.peakQ);
+ s+=`<g class="fade" style="--d:1.3s"><circle class="dot" cx="${X(ip)}" cy="${Y(C[ip][1])}" r="4.5" style="fill:var(--accent)"/><text class="lab" x="${X(ip)-8}" y="${Y(C[ip][1])+4}" text-anchor="end">Peak <tspan class="b">${C[ip][1].toFixed(1)}</tspan></text>
+  <circle class="dot" cx="${X(n-1)}" cy="${Y(C[n-1][1])}" r="4.5" style="fill:var(--accent)"/><text class="lab" x="${X(n-1)+8}" y="${Y(C[n-1][1])-8}"><tspan class="b">${C[n-1][1].toFixed(1)}</tspan></text></g>`;
+ C.forEach((c,i)=>s+=`<rect class="hit" x="${X(i)-(w-m.l-m.r)/(n-1)/2}" y="${m.t}" width="${(w-m.l-m.r)/(n-1)}" height="${h-m.t-m.b}" data-tip="<b>${c[0]}</b>${tr('Months of cover',c[1].toFixed(1))}${tr('Units on hand',n0(c[2]))}${tr('OEMs reporting',c[3])}"/>`);
+ el.innerHTML=s+'</svg>'};
+T.cover=()=>table(['Quarter','Months of cover','Units on hand','OEMs reporting'],D.k21.cover.map(c=>[c[0],c[1].toFixed(1),n0(c[2]),c[3]]));
+
+/* Page 5. Forecast accuracy: Finance and Sales signed error by quarter */
+R.k5=el=>{const w=el.clientWidth,narrow=w<560,h=250,m={l:40,r:narrow?60:96,t:16,b:30},Q=D.k5.order,n=Q.length,lo=-30,hi=60,X=i=>m.l+(w-m.l-m.r)*i/(n-1),Y=v=>m.t+(h-m.t-m.b)*(1-(v-lo)/(hi-lo));
+ let s=svgOpen(w,h,`Forecast error by quarter. FY27-Q1: Finance ${sg(D.k5.fin.at(-1)*100)}%, Sales ${sg(D.k5.sales.at(-1)*100)}%.`);
+ s+=`<rect x="${m.l}" y="${Y(10)}" width="${w-m.l-m.r}" height="${Y(-10)-Y(10)}" style="fill:var(--accent-soft)"/>`+yGrid(m,w,Y,[-30,0,30,60],v=>(v>0?'+':'')+v+'%');
+ s+=`<line x1="${m.l}" x2="${w-m.r}" y1="${Y(0)}" y2="${Y(0)}" style="stroke:var(--muted)"/>`;
+ Q.forEach((q,i)=>{if(q.endsWith('Q1'))s+=`<text class="ax" x="${X(i)}" y="${h-8}" text-anchor="middle">${q.slice(0,4)}</text>`});
+ const seg=(arr,col)=>{let d='',pen=false;arr.forEach((v,i)=>{if(v==null){pen=false;return}d+=(pen?'L':'M')+X(i).toFixed(1)+','+Y(v*100).toFixed(1);pen=true});return `<path class="draw" pathLength="1" d="${d}" style="fill:none;stroke:${col};stroke-width:2;stroke-linejoin:round"/>`};
+ s+=seg(D.k5.sales,'var(--pos)')+seg(D.k5.fin,'var(--accent)');
+ [[D.k5.fin,'var(--accent)','Finance'],[D.k5.sales,'var(--pos)','Sales']].forEach(([a,c,l])=>{const v=a.at(-1);s+=`<g class="fade" style="--d:1.4s"><circle class="dot" cx="${X(n-1)}" cy="${Y(v*100)}" r="4.5" style="fill:${c}"/><text class="lab" x="${X(n-1)+8}" y="${Y(v*100)+4}">${narrow?'':l+' '}<tspan class="b">${sg(v*100)}%</tspan></text></g>`});
+ const ib=Q.indexOf('FY26-Q1');s+=`<line x1="${X(ib)}" x2="${X(ib)}" y1="${m.t}" y2="${h-m.b}" style="stroke:var(--muted);stroke-dasharray:2 3"/><text class="ax" x="${X(ib)+4}" y="${m.t+10}">Hardware step, Jul-25</text>`;
+ Q.forEach((q,i)=>s+=`<rect class="hit" x="${X(i)-(w-m.l-m.r)/(n-1)/2}" y="${m.t}" width="${(w-m.l-m.r)/(n-1)}" height="${h-m.t-m.b}" data-tip="<b>${q}</b>${tr('Finance',sg(D.k5.fin[i]*100)+'%')}${tr('Sales',D.k5.sales[i]==null?'no forecast':sg(D.k5.sales[i]*100)+'%')}${tr('Actual revenue',m1(D.k5.actual[i]))}"/>`);
+ el.innerHTML=s+'</svg>'};
+T.k5=()=>table(['Quarter','Finance error','Sales error','Actual revenue'],D.k5.order.map((q,i)=>[q,sg(D.k5.fin[i]*100)+'%',D.k5.sales[i]==null?'No forecast':sg(D.k5.sales[i]*100)+'%',m1(D.k5.actual[i])]));
+
+/* Back page. Bullet chart for the software sub-KPIs, with and without the licence */
+let licMode='with';
+R.k3sub=el=>{const W=licMode==='with';
+ const rows=[{n:'Largest licence, share of new contract value',v:W?D.k31.with:D.k31.without,t:10,max:40,lowGood:true,bands:[[0,10,60],[10,20,40],[20,40,22]],
+   s:(v=>v<10?'ok':v<=20?'warn':'bad'),sub:`Top 5: ${(W?D.k31.top5:D.k31.top5ex).toFixed(1)}%`,why:'Shows how much of software comes from one big licence.'},
+  {n:'Gross margin %, last 12 months',v:W?D.k32.with:D.k32.without,t:76,max:100,bands:[[0,74,22],[74,76,40],[76,100,60]],s:(v=>v>=76?'ok':v>=74?'warn':'bad'),sub:'Board target 76% for FY27',why:"Shows whether margin is holding up as the mix moves to software."}];
+ el.innerHTML='<div class="bnd">'+rows.map((b,i)=>{const p=v=>(v/b.max*100).toFixed(1)+'%',st=b.s(b.v);
+  const z=b.bands.map(([a,c,pcn])=>`<span class="z" style="left:${p(a)};width:calc(${p(c)} - ${p(a)});background:color-mix(in oklab,var(--grey) ${pcn}%,var(--surface))"></span>`).join('');
+  return `<div class="bnd-r" data-why="${esc(b.why)}"><div class="bnd-n">${b.n}<small>${b.sub}</small></div>
+   <div class="bnd-t" tabindex="0" role="img" aria-label="${b.n}: ${b.v.toFixed(1)}% against a target of ${b.lowGood?'under ':''}${b.t}%" data-tip="<b>${b.n}</b>${tr(W?'With the licence':'Without it',b.v.toFixed(1)+'%')}${tr('Target',(b.lowGood?'under ':'')+b.t+'%')}">${z}<span class="bnd-a" style="width:${p(b.v)};--d:${i*0.1}s"></span><span class="bnd-k" style="left:${p(b.t)}"></span></div>
+   <div class="bnd-v"><b>${b.v.toFixed(1)}%</b><span class="st" data-s="${st}"><span class="ic" aria-hidden="true">${ICON[st]}</span>${WORD[st]}</span></div></div>`}).join('')+'</div>'};
+T.k3sub=()=>table(['Measure','With the licence','Without it','Target'],[['Largest licence share',D.k31.with.toFixed(1)+'%',D.k31.without.toFixed(1)+'%','Under 10%'],['Largest 5 licences share',D.k31.top5.toFixed(1)+'%',D.k31.top5ex.toFixed(1)+'%','Shown alongside'],['Gross margin %',D.k32.with.toFixed(1)+'%',D.k32.without.toFixed(1)+'%','76% or more']]);
+document.getElementById('lic').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;licMode=b.dataset.l;document.querySelectorAll('#lic button').forEach(x=>x.setAttribute('aria-pressed',x===b));const el=document.querySelector('[data-c="k3sub"]');R.k3sub(el);play(el)});
+
+/* Back page. Design wins per quarter (columns) */
+R.k42=el=>{const w=el.clientWidth,h=224,m={l:36,r:8,t:36,b:30},Q=D.k42,n=Q.length,band=(w-m.l-m.r)/n,bw=Math.min(24,band*.62),X=i=>m.l+band*i+band/2,Y=v=>m.t+(h-m.t-m.b)*(1-v/350);
+ let s=svgOpen(w,h,'Design wins per quarter: '+Q.map(q=>fyq(q[0])+' '+q[1]).join(', '))+yGrid(m,w,Y,[0,100,200,300],v=>v);
+ const ib=Q.findIndex(q=>q[0]==='2025Q1');
+ Q.forEach(([q,v],i)=>{const post=i>=ib,lab=i===0||i===n-1||v===Math.max(...Q.map(x=>x[1]));
+  s+=`<g class="col" style="--d:${i*0.05}s"><rect x="${X(i)-bw/2}" y="${Y(v)}" width="${bw}" height="${Y(0)-Y(v)}" rx="3" style="fill:${post?'var(--accent)':'var(--grey)'}"/></g>`;
+  if(lab)s+=`<text class="lab fade" style="--d:.9s" x="${X(i)}" y="${Y(v)-6}" text-anchor="middle"><tspan class="b">${v}</tspan></text>`;
+  if(q.endsWith('Q1'))s+=`<text class="ax" x="${X(i)}" y="${h-8}" text-anchor="middle">FY${q.slice(2,4)}</text>`;
+  s+=`<rect class="hit" x="${X(i)-band/2+1}" y="${m.t}" width="${band-2}" height="${h-m.t-m.b}" data-tip="<b>${fyq(q)}</b>${tr('Design wins',v)}${tr('Bonus',post?'A$400 a win':'not yet')}"/>`});
+ s+=`<line x1="${X(ib)-band/2}" x2="${X(ib)-band/2}" y1="${m.t-20}" y2="${h-m.b}" style="stroke:var(--muted);stroke-dasharray:2 3"/><text class="ax" x="${X(ib)-band/2+4}" y="${m.t-24}">Bonus from Jul-24</text>`;
+ el.innerHTML=s+'</svg>'};
+T.k42=()=>table(['Quarter','Design wins'],D.k42.map(([q,v])=>[fyq(q),v]).concat([['FY24 total',D.k4.fy.FY24],['FY25 total',D.k4.fy.FY25],['FY26 total',D.k4.fy.FY26]]));
+/* Back page. Median months from design win to first shipment, by design-win quarter */
+R.k41=el=>{const w=el.clientWidth,h=150,m={l:36,r:84,t:20,b:30},C=D.k41.cohorts,n=C.length,X=i=>m.l+(w-m.l-m.r)*i/(n-1),Y=v=>m.t+(h-m.t-m.b)*(1-(v-10)/10);
+ let s=svgOpen(w,h,`Median months from design win to first shipment by design-win quarter; overall ${D.k41.median.toFixed(1)} months.`)+yGrid(m,w,Y,[10,15,20],v=>v+' mo');
+ s+=`<line x1="${m.l}" x2="${w-m.r}" y1="${Y(D.k41.median)}" y2="${Y(D.k41.median)}" style="stroke:var(--fg);stroke-dasharray:4 4;opacity:.8"/><text class="ax" x="${w-m.r+6}" y="${Y(D.k41.median)+4}" style="fill:var(--fg)">Median ${D.k41.median.toFixed(1)}</text>`;
+ C.forEach((c,i)=>{s+=`<circle class="dot fade" style="--d:${i*0.06}s;fill:var(--accent)" cx="${X(i)}" cy="${Y(c[1])}" r="4.5"/>`;if(i%(w<480?4:2)===0)s+=`<text class="ax" x="${X(i)}" y="${h-8}" text-anchor="middle">${fyq(c[0])}</text>`;
+  s+=`<circle class="hit" cx="${X(i)}" cy="${Y(c[1])}" r="14" data-tip="<b>Design wins in ${fyq(c[0])}</b>${tr('Median months to ship',c[1].toFixed(1))}${tr('Shipped',c[2])}"/>`});
+ el.innerHTML=s+'</svg>'};
+T.k41=()=>table(['Design-win quarter','Median months to ship','Shipped'],D.k41.cohorts.map(c=>[fyq(c[0]),c[1].toFixed(1),c[2]]).concat([['All, at least 18 months old',`${D.k41.median.toFixed(1)} (middle half ${D.k41.p25.toFixed(1)} to ${D.k41.p75.toFixed(1)})`,D.k41.n]]));
+
+/* ---------- Pages: turns, hash, keys, swipe ---------- */
+const pages=[...document.querySelectorAll('.page')],broad=VARIANT==='B';
+document.getElementById('tabs').innerHTML=pages.map((p,i)=>`<a href="#${p.id}">${i+1}. ${p.dataset.title}</a>`).join('');
+let cur=0;
+const zeroW=el=>{const g=el.querySelector('svg');return !g||Math.abs((+g.getAttribute('width')||0)-el.clientWidth)>2};
+const canDraw=el=>el.offsetParent!==null&&el.clientWidth>0;
+function drawPage(p){p.querySelectorAll('.chart').forEach(el=>{if(canDraw(el)&&(!el.dataset.drawn||zeroW(el))){delete el.dataset.done;R[el.dataset.c](el);el.dataset.drawn=1;play(el)}})}
+function show(i,push=true){cur=Math.max(0,Math.min(pages.length-1,i));
+ if(!broad)pages.forEach((p,j)=>p.hidden=j!==cur);
+ document.getElementById('ctr').textContent=`${cur+1} of ${pages.length}`;
+ document.getElementById('prev').disabled=cur===0;document.getElementById('next').disabled=cur===pages.length-1;
+ document.querySelectorAll('#tabs a').forEach((a,j)=>j===cur?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
+ if(push&&location.hash!=='#'+pages[cur].id)history.replaceState(null,'','#'+pages[cur].id);
+ if(broad){if(push&&cur>0)pages[cur].scrollIntoView({behavior:reduce?'auto':'smooth'})}else{scrollTo(0,0);drawPage(pages[cur])}}
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function play(el){if(reduce)return;el.classList.remove('play');void el.offsetWidth;el.classList.add('play')}
+document.getElementById('prev').onclick=()=>show(cur-1);document.getElementById('next').onclick=()=>show(cur+1);
+addEventListener('hashchange',()=>{const i=pages.findIndex(p=>'#'+p.id===location.hash);if(i>=0&&i!==cur)show(i,false)});
+document.getElementById('tabs').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();show(pages.findIndex(p=>'#'+p.id===a.getAttribute('href')))});
+addEventListener('keydown',e=>{if(broad||e.altKey||e.ctrlKey||e.metaKey)return;const t=e.target.tagName;if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT')return;if(e.key==='ArrowRight')show(cur+1);else if(e.key==='ArrowLeft')show(cur-1)});
+let tx=null,ty=null;addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{if(broad||tx==null)return;const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)>60&&Math.abs(dy)<40)show(cur+(dx<0?1:-1));tx=null},{passive:true});
+
+/* ---------- Render, replay and tooltips ---------- */
+document.querySelectorAll('[data-t]').forEach(n=>{if(T[n.dataset.t])n.innerHTML=T[n.dataset.t]()});
+document.querySelectorAll('.fig > .cap').forEach(c=>{const d=c.parentElement.querySelector('details.data');if(d){c.style.margin='6px 0';d.querySelector('summary').after(c)}});
+const charts=[...document.querySelectorAll('.chart')];
+document.querySelectorAll('details.sec').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)requestAnimationFrame(()=>d.querySelectorAll('.chart').forEach(el=>{if(canDraw(el)){delete el.dataset.done;R[el.dataset.c](el);el.dataset.drawn=1;play(el)}}))}));
+let rw=null,lastW=innerWidth;addEventListener('resize',()=>{clearTimeout(rw);rw=setTimeout(()=>{if(innerWidth===lastW)return;lastW=innerWidth;charts.forEach(el=>{if(canDraw(el)){delete el.dataset.done;R[el.dataset.c](el)}})},150)});
+charts.forEach(el=>el.addEventListener('click',e=>{if(el.classList.contains('replay')&&!e.target.closest('details'))play(el)}));
+if(broad&&'IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const el=e.target;if(!el.dataset.drawn&&el.offsetParent!==null){R[el.dataset.c](el);el.dataset.drawn=1}play(el);io.unobserve(el)}}),{threshold:.2});charts.forEach(el=>io.observe(el))}
+const tip=document.getElementById('tip');
+const whyOf=el=>{const w=el&&el.closest&&el.closest('[data-why]');return w&&!(el.closest('.stat'))?w.dataset.why:''};
+function showTip(html,x,y,src){const why=whyOf(src);tip.innerHTML=html+(why?`<div class='why'><b>Why it matters:</b> ${esc(why)}</div>`:'');tip.classList.add('on');const r=tip.getBoundingClientRect();let l=x+14,t=y+14;if(l+r.width>innerWidth-8)l=x-r.width-14;if(t+r.height>innerHeight-8)t=y-r.height-14;tip.style.left=Math.max(8,l)+'px';tip.style.top=Math.max(8,t)+'px'}
+function hideTip(){tip.classList.remove('on');const x=document.getElementById('xh-path');if(x)x.style.opacity=0}
+document.addEventListener('pointermove',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');
+ const x=document.getElementById('xh-path');if(x){if(t&&t.dataset.x){x.setAttribute('x1',t.dataset.x);x.setAttribute('x2',t.dataset.x);x.style.opacity=1}else x.style.opacity=0}
+ if(t)showTip(t.dataset.tip,e.clientX,e.clientY,t);else if(whyOf(e.target))showTip('',e.clientX,e.clientY,e.target);else hideTip()});
+document.addEventListener('focusin',e=>{const t=e.target.closest('[data-tip]');if(t){const b=t.getBoundingClientRect();showTip(t.dataset.tip,b.right,b.top,t)}});
+document.addEventListener('focusout',hideTip);
+applyMode();
+{const i=pages.findIndex(p=>'#'+p.id===location.hash);show(i>=0?i:0,false);if(broad)charts.forEach(el=>{if(el.offsetParent!==null){R[el.dataset.c](el);el.dataset.drawn=1}})}
+</script>
+</body>
+</html>

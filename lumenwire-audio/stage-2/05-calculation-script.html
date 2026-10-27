@@ -1,0 +1,1024 @@
+<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Lumenwire Audio: Kewpie&#x27;s calculation script</title><style>
+:root{--bg:#0f1621;--panel:#16202e;--line:#26354a;--ink:#e6edf6;--muted:#9fb0c6;--accent:#5b9cf2;--before:#3a1d1d;--after:#173a28;--quote:#1b2a40}
+@media (prefers-color-scheme: light){:root{--bg:#f6f8fb;--panel:#fff;--line:#d9e1ec;--ink:#1a2433;--muted:#566377;--accent:#2f6fd0;--before:#fbeaea;--after:#e6f6ec;--quote:#eef4fd}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 64px}
+nav{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px}
+nav label{color:var(--accent);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.9rem;user-select:none}
+nav label:hover{border-color:var(--accent)}
+input.tab{position:absolute;opacity:0;pointer-events:none}
+section{display:none}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 20px 20px;margin:20px 0}
+.src{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+h1{font-size:1.6rem;margin:12px 0 6px}h2{font-size:1.25rem;margin:28px 0 10px}h3{font-size:1.08rem;margin:20px 0 8px}h4{font-size:1rem;margin:16px 0 6px}
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line);overflow-wrap:break-word;hyphens:manual}
+th{color:var(--muted);font-weight:600;font-size:.9rem}
+tr.before td{background:var(--before)}tr.after td{background:var(--after)}
+tr.before td:first-child,tr.after td:first-child{white-space:nowrap;width:1%;font-weight:700;overflow-wrap:normal}
+blockquote{margin:12px 0;padding:12px 16px;background:var(--quote);border-left:4px solid var(--accent);border-radius:8px}
+code{font-family:Consolas,monospace;font-size:.9em;background:var(--quote);padding:1px 5px;border-radius:4px}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0}
+ul,ol{padding-left:22px;margin:6px 0}
+.gantt{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.g-row{display:grid;grid-template-columns:minmax(120px,36%) 1fr;gap:10px;align-items:center;min-height:34px}
+.g-lab{font-size:.9rem;line-height:1.3}.g-lab small{display:block;color:var(--muted);font-size:.78rem}
+.g-track{position:relative;height:26px}
+.g-axis .g-track{height:20px;border-bottom:1px solid var(--line)}
+.g-tick{position:absolute;top:0;font-size:.72rem;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.g-grid{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-bar{position:absolute;top:5px;height:16px;min-width:6px;background:var(--accent);border-radius:4px}
+.g-ms{position:absolute;top:6px;width:14px;height:14px;background:var(--ink);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.g-today{position:absolute;top:-4px;bottom:-4px;border-left:2px dashed var(--muted)}
+.g-key{color:var(--muted);font-size:.78rem;margin-top:8px}
+.g-lane .g-track{height:92px;background:var(--quote);border-radius:6px}
+.g-lane .g-ms{top:39px}
+.g-ml{position:absolute;font-size:.72rem;line-height:1.15;white-space:nowrap}
+.g-ml.t0{top:4px}.g-ml.t1{bottom:4px}.g-ml.t2{top:20px}.g-ml.t3{bottom:20px}.g-ml.end{transform:translateX(-100%)}
+@media (max-width:640px){.g-ml{display:none}}
+.proc{display:flex;align-items:stretch;gap:6px;margin:10px 0 18px;flex-wrap:nowrap}
+.proc .st{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 10px 12px;background:var(--panel);position:relative}
+.proc .ar{flex:0 0 auto;align-self:center;color:var(--muted);font-size:1.1rem}
+.proc .num{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.proc .nm{font-weight:700;line-height:1.25;margin:2px 0}
+.proc .ow{font-size:.8rem;color:var(--muted)}
+.proc .nt{font-size:.78rem;margin-top:6px}
+.proc .st.done{background:var(--quote)}
+.proc .st.done .num::after{content:" · Done ✓"}
+.proc .st.current{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.proc .st.current .num{color:var(--accent)}
+.proc .here{display:inline-block;margin-top:6px;font-size:.72rem;font-weight:700;background:var(--accent);color:var(--bg);border-radius:999px;padding:2px 9px}
+.proc .st.next{opacity:.75}
+@media (max-width:640px){.proc{flex-direction:column}.proc .ar{transform:rotate(90deg);align-self:center}}
+.toc{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0 14px;background:var(--quote);font-size:.8rem;line-height:1.45}
+.toc b{display:block;margin-bottom:4px;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+h1[id],h2[id]{scroll-margin-top:110px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+@media (max-width:640px){.toc ol{columns:1}}
+.toc a,.btt{color:var(--accent);text-decoration:none}.toc a:hover,.btt:hover{text-decoration:underline}
+.btt{display:block;text-align:right;font-size:.75rem;margin:8px 0 0}
+pre.code{background:var(--quote);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font:13px/1.45 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 18px}
+@media (max-width:640px){.quad{grid-template-columns:1fr}}
+.quad>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--quote)}
+.quad h4{margin:0 0 8px;font-size:1rem}.quad h4 small{color:var(--muted);font-weight:400}
+.quad ul{list-style:none;padding:0;margin:0}.quad li{margin:0 0 10px;line-height:1.4}
+.chip{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.chip.high{color:var(--ink);border-color:var(--ink)}
+#t0:checked~main #s0{display:block}#t0:checked~main #l0{background:var(--accent);color:var(--bg)}</style></head><body><input class="tab" type="radio" name="tab" id="t0" checked><main><nav><label for="t0" id="l0">Lumenwire Audio: Kewpie&#x27;s calculation script</label></nav><section id="s0"><p class="src">File: 05-calculation-script.md</p><h1>Lumenwire Audio: Kewpie's calculation script</h1>
+<p>Every KPI calculated on the sample data in one saved, re-runnable script. Every number in the Calculation Pack comes from its results.</p>
+<pre class="code"><code>&quot;&quot;&quot;Lumenwire Audio, Stage 2 (Kewpie): KPI calculations and root cause tests.
+Sample data. Re-run:  python &quot;02_calculations.py&quot;   (from anywhere)
+Reads ./data/*.csv, writes 02_results.json next to this script and prints a log.
+Every number in the Calculation Pack comes from 02_results.json (see 02_build_pack.py).
+&quot;&quot;&quot;
+import json
+import re
+import warnings
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+warnings.filterwarnings(&quot;ignore&quot;)
+HERE = Path(__file__).resolve().parent
+D = HERE / &quot;data&quot;
+R = {}  # results
+
+AS_OF = pd.Period(&quot;2026-09&quot;, &quot;M&quot;)          # latest complete month (data ends 30 Sep 2026)
+AS_OF_DATE = pd.Timestamp(&quot;2026-09-30&quot;)
+TARGET = 115_000_000
+FY26_REV = 80_600_000
+TARGET_MONTH = pd.Period(&quot;2028-06&quot;, &quot;M&quot;)
+
+
+def fy_of(p):  # period -&gt; financial year (July to June)
+    return p.year + (1 if p.month &gt;= 7 else 0)
+
+
+# ---------------------------------------------------------------- GL
+gl = pd.read_csv(D / &quot;gl_monthly.csv&quot;)
+acc = pd.read_csv(D / &quot;gl_accounts.csv&quot;)
+gl[&quot;p&quot;] = pd.PeriodIndex(gl.period, freq=&quot;M&quot;)
+gl = gl.merge(acc[[&quot;account_code&quot;, &quot;pl_group&quot;]], on=&quot;account_code&quot;, how=&quot;left&quot;)
+R[&quot;dq_gl_unmapped_rows&quot;] = int(gl.pl_group.isna().sum())
+R[&quot;dq_gl_dup_rows&quot;] = int(gl.duplicated([&quot;period&quot;, &quot;account_code&quot;, &quot;cost_centre&quot;]).sum())
+
+HW = [4000, 4050]
+SW = [4100, 4110]
+OTH = [4200, 4210]
+REVACC = HW + SW + OTH
+
+
+def monthly(codes):
+    s = gl[gl.account_code.isin(codes)].groupby(&quot;p&quot;).amount_aud.sum() * -1
+    return s.reindex(pd.period_range(gl.p.min(), AS_OF, freq=&quot;M&quot;)).fillna(0.0)
+
+
+m_hw, m_sw, m_oth = monthly(HW), monthly(SW), monthly(OTH)
+m_tot = m_hw + m_sw + m_oth
+m_cos = gl[gl.pl_group == &quot;cost_of_sales&quot;].groupby(&quot;p&quot;).amount_aud.sum().reindex(m_tot.index).fillna(0.0)
+r12 = lambda s: s.rolling(12).sum()
+
+fy_rev = {}
+for fy in range(2020, 2027):
+    idx = [p for p in m_tot.index if fy_of(p) == fy]
+    fy_rev[fy] = dict(total=m_tot[idx].sum(), hw=m_hw[idx].sum(), sw=m_sw[idx].sum(), oth=m_oth[idx].sum(),
+                      cos=m_cos[idx].sum())
+R[&quot;fy_rev&quot;] = {str(k): v for k, v in fy_rev.items()}
+R[&quot;recon_FY25_total&quot;] = fy_rev[2025][&quot;total&quot;]
+R[&quot;recon_FY26_total&quot;] = fy_rev[2026][&quot;total&quot;]
+R[&quot;recon_FY26_sw&quot;] = fy_rev[2026][&quot;sw&quot;]
+R[&quot;recon_FY26_sw_growth&quot;] = fy_rev[2026][&quot;sw&quot;] / fy_rev[2025][&quot;sw&quot;] - 1
+R[&quot;recon_gm_FY25&quot;] = 1 - fy_rev[2025][&quot;cos&quot;] / fy_rev[2025][&quot;total&quot;]
+R[&quot;recon_gm_FY26&quot;] = 1 - fy_rev[2026][&quot;cos&quot;] / fy_rev[2026][&quot;total&quot;]
+
+# ---------------------------------------------------------------- K1
+r12_tot, r12_hw, r12_sw = r12(m_tot), r12(m_hw), r12(m_sw)
+
+
+def path(p):
+    k = (p - pd.Period(&quot;2026-06&quot;, &quot;M&quot;)).n
+    return FY26_REV + (TARGET - FY26_REV) * k / 24
+
+
+k1_rows = []
+for p in pd.period_range(&quot;2026-06&quot;, AS_OF, freq=&quot;M&quot;):
+    k1_rows.append(dict(month=str(p), r12=r12_tot[p], hw=r12_hw[p], sw=r12_sw[p], path=path(p),
+                        gap=r12_tot[p] - path(p), gap_pct=r12_tot[p] / path(p) - 1))
+R[&quot;k1_series&quot;] = k1_rows
+k1 = k1_rows[-1]
+R[&quot;k1&quot;] = dict(
+    current=k1[&quot;r12&quot;], hw=k1[&quot;hw&quot;], sw=k1[&quot;sw&quot;], path=k1[&quot;path&quot;], gap=k1[&quot;gap&quot;], gap_pct=k1[&quot;gap_pct&quot;],
+    months_remaining=(TARGET_MONTH - AS_OF).n,
+)
+R[&quot;k1&quot;][&quot;pace_needed_per_month&quot;] = (TARGET - k1[&quot;r12&quot;]) / R[&quot;k1&quot;][&quot;months_remaining&quot;]
+R[&quot;k1&quot;][&quot;run_rate_3m&quot;] = (r12_tot[AS_OF] - r12_tot[AS_OF - 3]) / 3
+R[&quot;k1&quot;][&quot;path_pace_per_month&quot;] = (TARGET - FY26_REV) / 24
+R[&quot;k1&quot;][&quot;peak_r12&quot;] = float(r12_tot.max())
+R[&quot;k1&quot;][&quot;peak_r12_month&quot;] = str(r12_tot.idxmax())
+# quarterly revenue by family (financial quarters)
+qs = {}
+for p in m_tot.index:
+    if p &lt; pd.Period(&quot;2024-07&quot;, &quot;M&quot;):
+        continue
+    q = f&quot;FY{str(fy_of(p))[2:]}-Q{((p.month - 7) % 12) // 3 + 1}&quot;
+    d = qs.setdefault(q, dict(hw=0.0, sw=0.0, oth=0.0))
+    d[&quot;hw&quot;] += m_hw[p]; d[&quot;sw&quot;] += m_sw[p]; d[&quot;oth&quot;] += m_oth[p]
+R[&quot;quarterly_rev&quot;] = qs
+
+# FY27 plan vs path / actual
+plan = pd.read_csv(D / &quot;board_plan_fy27.csv&quot;)
+plan[&quot;p&quot;] = pd.PeriodIndex(plan.month, freq=&quot;M&quot;)
+R[&quot;plan_fy27_total&quot;] = float(plan.plan_revenue_aud.sum())
+R[&quot;path_at_jun27&quot;] = path(pd.Period(&quot;2027-06&quot;, &quot;M&quot;))
+act_q1 = m_tot[pd.period_range(&quot;2026-07&quot;, &quot;2026-09&quot;, freq=&quot;M&quot;)].sum()
+plan_q1 = plan[plan.p &lt;= pd.Period(&quot;2026-09&quot;, &quot;M&quot;)].plan_revenue_aud.sum()
+R[&quot;fy27_q1_actual&quot;] = float(act_q1)
+R[&quot;fy27_q1_plan&quot;] = float(plan_q1)
+# plan = FY26 month x 1.15 ?  (test)
+chk = []
+for _, r in plan.iterrows():
+    prev = r.p - 12
+    fam = dict(hardware=m_hw, software=m_sw, other=m_oth)[r.product_family]
+    chk.append(r.plan_revenue_aud / fam[prev])
+R[&quot;plan_vs_prior_year_ratio_min_max&quot;] = [float(min(chk)), float(max(chk))]
+R[&quot;plan_sw_mar27&quot;] = float(plan[(plan.month == &quot;2027-03&quot;) &amp; (plan.product_family == &quot;software&quot;)].plan_revenue_aud.iloc[0])
+
+# ---------------------------------------------------------------- licences (K3, K3.1)
+lic = pd.read_csv(D / &quot;software_licences.csv&quot;, parse_dates=[&quot;start_date&quot;, &quot;end_date&quot;])
+lic[&quot;p&quot;] = lic.start_date.dt.to_period(&quot;M&quot;)
+lic[&quot;fy&quot;] = lic.start_date.apply(lambda d: d.year + (1 if d.month &gt;= 7 else 0))
+cur = pd.period_range(AS_OF - 11, AS_OF, freq=&quot;M&quot;)
+pri = pd.period_range(AS_OF - 23, AS_OF - 12, freq=&quot;M&quot;)
+sw_cur, sw_pri = m_sw[cur].sum(), m_sw[pri].sum()
+lic_cur = lic[lic.p.isin(cur)]
+lic_pri = lic[lic.p.isin(pri)]
+R[&quot;dq_lic_vs_gl_diff_FY26&quot;] = float(lic[lic.fy == 2026].contract_value_aud.sum() - fy_rev[2026][&quot;sw&quot;])
+R[&quot;dq_lic_vs_gl_diff_R12M&quot;] = float(lic_cur.contract_value_aud.sum() - sw_cur)
+big = lic.sort_values(&quot;contract_value_aud&quot;, ascending=False).iloc[0]
+R[&quot;big_licence&quot;] = dict(id=big.licence_id, customer=big.customer_name, oem=big.oem_id, value=float(big.contract_value_aud),
+                        start=str(big.start_date.date()), type=big.licence_type, seats=int(big.seats_or_devices))
+ex = big.contract_value_aud
+R[&quot;k3&quot;] = dict(cur=sw_cur, prior=sw_pri, growth=sw_cur / sw_pri - 1,
+               cur_ex=sw_cur - ex, growth_ex=(sw_cur - ex) / sw_pri - 1,
+               fy26=fy_rev[2026][&quot;sw&quot;], fy25=fy_rev[2025][&quot;sw&quot;], fy24=fy_rev[2024][&quot;sw&quot;],
+               fy26_growth=fy_rev[2026][&quot;sw&quot;] / fy_rev[2025][&quot;sw&quot;] - 1,
+               fy26_growth_ex=(fy_rev[2026][&quot;sw&quot;] - ex) / fy_rev[2025][&quot;sw&quot;] - 1,
+               fy25_growth=fy_rev[2025][&quot;sw&quot;] / fy_rev[2024][&quot;sw&quot;] - 1,
+               big_share_of_fy26=ex / fy_rev[2026][&quot;sw&quot;], big_share_of_r12=ex / sw_cur)
+# months remaining to target date 2027-06 and pace
+mrem = (pd.Period(&quot;2027-06&quot;, &quot;M&quot;) - AS_OF).n
+R[&quot;k3&quot;][&quot;months_remaining&quot;] = mrem
+# growth series for last 4 months (run rate of the growth %)
+g_series = {}
+for p in [AS_OF - 3, AS_OF - 2, AS_OF - 1, AS_OF]:
+    g_series[str(p)] = float(r12(m_sw)[p] / r12(m_sw)[p - 12] - 1)
+R[&quot;k3&quot;][&quot;growth_series&quot;] = g_series
+R[&quot;k3&quot;][&quot;run_rate_pts_per_month&quot;] = (g_series[str(AS_OF)] - g_series[str(AS_OF - 3)]) / 3 * 100
+R[&quot;k3&quot;][&quot;pace_needed_pts_per_month&quot;] = (0.20 - g_series[str(AS_OF)]) / mrem * 100
+# software split by type (perpetual vs subscription) and other licences
+sw_perp = monthly([4100]); sw_sub = monthly([4110])
+R[&quot;k3&quot;][&quot;perp_cur&quot;], R[&quot;k3&quot;][&quot;perp_prior&quot;] = sw_perp[cur].sum(), sw_perp[pri].sum()
+R[&quot;k3&quot;][&quot;sub_cur&quot;], R[&quot;k3&quot;][&quot;sub_prior&quot;] = sw_sub[cur].sum(), sw_sub[pri].sum()
+# ex-big: perpetual ex
+R[&quot;k3&quot;][&quot;perp_cur_ex&quot;] = R[&quot;k3&quot;][&quot;perp_cur&quot;] - ex
+# licence count / mean size
+R[&quot;k3&quot;][&quot;lic_count_cur&quot;], R[&quot;k3&quot;][&quot;lic_count_prior&quot;] = int(len(lic_cur)), int(len(lic_pri))
+R[&quot;k3&quot;][&quot;new_cust_median_value_cur&quot;] = float(lic_cur[lic_cur.contract_value_aud &lt; 1e6].contract_value_aud.median())
+R[&quot;k3&quot;][&quot;new_cust_median_value_prior&quot;] = float(lic_pri.contract_value_aud.median())
+# bridge of software change (cur vs prior)
+oth_cur = lic_cur[lic_cur.licence_id != big.licence_id]
+R[&quot;k3&quot;][&quot;bridge&quot;] = dict(
+    prior=sw_pri,
+    big_licence=ex,
+    perpetual_other=float(oth_cur[oth_cur.licence_type == &quot;perpetual&quot;].contract_value_aud.sum() - lic_pri[lic_pri.licence_type == &quot;perpetual&quot;].contract_value_aud.sum()),
+    sub_annual=float(oth_cur[oth_cur.licence_type == &quot;subscription_annual&quot;].contract_value_aud.sum() - lic_pri[lic_pri.licence_type == &quot;subscription_annual&quot;].contract_value_aud.sum()),
+    sub_monthly=float(oth_cur[oth_cur.licence_type == &quot;subscription_monthly&quot;].contract_value_aud.sum() - lic_pri[lic_pri.licence_type == &quot;subscription_monthly&quot;].contract_value_aud.sum()),
+    current=sw_cur)
+R[&quot;k3&quot;][&quot;bridge_sum_check&quot;] = sum(v for k, v in R[&quot;k3&quot;][&quot;bridge&quot;].items() if k not in (&quot;current&quot;,)) - sw_cur
+# renewal quality of annual subscriptions ended in last 12 months (counter-metric)
+sub = lic[lic.licence_type == &quot;subscription_annual&quot;].copy()
+due = sub[(sub.end_date &gt;= (AS_OF_DATE - pd.DateOffset(months=12))) &amp; (sub.end_date &lt;= AS_OF_DATE)]
+R[&quot;k3&quot;][&quot;renewal_due_n&quot;] = int(len(due))
+R[&quot;k3&quot;][&quot;renewal_status_missing&quot;] = int(due.renewal_status.isna().sum())
+dd = due.dropna(subset=[&quot;renewal_status&quot;])
+R[&quot;k3&quot;][&quot;renewal_rate_value&quot;] = float(dd[dd.renewal_status == &quot;renewed&quot;].contract_value_aud.sum() / dd.contract_value_aud.sum())
+R[&quot;k3&quot;][&quot;renewal_rate_count&quot;] = float((dd.renewal_status == &quot;renewed&quot;).mean())
+due_prior = sub[(sub.end_date &gt;= (AS_OF_DATE - pd.DateOffset(months=24))) &amp; (sub.end_date &lt; (AS_OF_DATE - pd.DateOffset(months=12)))].dropna(subset=[&quot;renewal_status&quot;])
+R[&quot;k3&quot;][&quot;renewal_rate_count_prior&quot;] = float((due_prior.renewal_status == &quot;renewed&quot;).mean())
+R[&quot;k3&quot;][&quot;pending_in_due&quot;] = int((dd.renewal_status == &quot;pending&quot;).sum())
+R[&quot;dq_lic_enddate_missing_subs&quot;] = int(sub.end_date.isna().sum())
+R[&quot;dq_lic_oem_missing&quot;] = int(lic.oem_id.isna().sum())
+R[&quot;dq_lic_total&quot;] = int(len(lic))
+
+# K3.1 concentration (licences started in last 12 months)
+c = lic_cur.contract_value_aud.sort_values(ascending=False)
+R[&quot;k3_1&quot;] = dict(total=float(c.sum()), largest=float(c.iloc[0]), largest_share=float(c.iloc[0] / c.sum()),
+                 top5=float(c.head(5).sum()), top5_share=float(c.head(5).sum() / c.sum()),
+                 largest_share_ex=0.0, n=int(len(c)))
+c2 = c.iloc[1:]
+R[&quot;k3_1&quot;][&quot;largest_share_ex&quot;] = float(c2.iloc[0] / c2.sum())
+R[&quot;k3_1&quot;][&quot;top5_share_ex&quot;] = float(c2.head(5).sum() / c2.sum())
+R[&quot;k3_1&quot;][&quot;largest_customer_is_oem&quot;] = bool(pd.notna(big.oem_id))
+# prior-year comparator
+cp = lic_pri.contract_value_aud.sort_values(ascending=False)
+R[&quot;k3_1&quot;][&quot;prior_largest_share&quot;] = float(cp.iloc[0] / cp.sum())
+R[&quot;k3_1&quot;][&quot;prior_top5_share&quot;] = float(cp.head(5).sum() / cp.sum())
+# same licence set by calendar of FY for trend
+R[&quot;k3_1&quot;][&quot;by_fy_largest_share&quot;] = {str(fy): float(g.contract_value_aud.max() / g.contract_value_aud.sum())
+                                    for fy, g in lic.groupby(&quot;fy&quot;) if fy &lt; 2027}
+# Gary&#x27;s 10% threshold test on the second largest
+R[&quot;k3_1&quot;][&quot;second_largest&quot;] = float(c.iloc[1])
+# total of licences with zero seats
+R[&quot;dq_lic_zero_seats&quot;] = int((lic.seats_or_devices == 0).sum())
+
+# ---------------------------------------------------------------- K3.2 gross margin
+gm_cur = 1 - m_cos[cur].sum() / m_tot[cur].sum()
+gm_pri = 1 - m_cos[pri].sum() / m_tot[pri].sum()
+R[&quot;k3_2&quot;] = dict(cur=float(gm_cur), prior=float(gm_pri), fy25=R[&quot;recon_gm_FY25&quot;], fy26=R[&quot;recon_gm_FY26&quot;],
+                 cur_rev=float(m_tot[cur].sum()), cur_cos=float(m_cos[cur].sum()))
+ex_rev = m_tot[cur].sum() - ex
+R[&quot;k3_2&quot;][&quot;cur_ex_big&quot;] = float(1 - m_cos[cur].sum() / ex_rev)  # big licence assumed ~zero cost of sales
+R[&quot;k3_2&quot;][&quot;fy26_ex_big&quot;] = float(1 - fy_rev[2026][&quot;cos&quot;] / (fy_rev[2026][&quot;total&quot;] - ex))
+# hardware-only gross margin (cost of sales split: 5000-5030 hardware, 5100 software)
+cos_hw_codes = [5000, 5010, 5020, 5030]
+cos_hw = gl[gl.account_code.isin(cos_hw_codes)].groupby(&quot;p&quot;).amount_aud.sum().reindex(m_tot.index).fillna(0)
+cos_sw = gl[gl.account_code == 5100].groupby(&quot;p&quot;).amount_aud.sum().reindex(m_tot.index).fillna(0)
+R[&quot;k3_2&quot;][&quot;hw_gm_cur&quot;] = float(1 - cos_hw[cur].sum() / (m_hw[cur].sum() + m_oth[cur].sum()))
+R[&quot;k3_2&quot;][&quot;hw_gm_prior&quot;] = float(1 - cos_hw[pri].sum() / (m_hw[pri].sum() + m_oth[pri].sum()))
+R[&quot;k3_2&quot;][&quot;sw_gm_cur&quot;] = float(1 - cos_sw[cur].sum() / m_sw[cur].sum())
+R[&quot;k3_2&quot;][&quot;sw_share_cur&quot;] = float(m_sw[cur].sum() / m_tot[cur].sum())
+R[&quot;k3_2&quot;][&quot;sw_share_prior&quot;] = float(m_sw[pri].sum() / m_tot[pri].sum())
+# 5010 variance release (FY26 credit)
+v5010 = gl[gl.account_code == 5010].groupby(&quot;p&quot;).amount_aud.sum().reindex(m_tot.index).fillna(0)
+R[&quot;k3_2&quot;][&quot;var5010_cur&quot;] = float(v5010[cur].sum())
+R[&quot;k3_2&quot;][&quot;var5010_prior&quot;] = float(v5010[pri].sum())
+R[&quot;k3_2&quot;][&quot;target_fy27_board&quot;] = 76.0
+R[&quot;k3_2&quot;][&quot;r12_series&quot;] = {str(p): float(1 - m_cos[p - 11:p].sum() / m_tot[p - 11:p].sum()) for p in [AS_OF - 3, AS_OF - 2, AS_OF - 1, AS_OF]}
+R[&quot;k3_2&quot;][&quot;run_rate_pts_per_month&quot;] = (R[&quot;k3_2&quot;][&quot;r12_series&quot;][str(AS_OF)] - R[&quot;k3_2&quot;][&quot;r12_series&quot;][str(AS_OF - 3)]) / 3 * 100
+
+# ---------------------------------------------------------------- invoices (K1 RCA)
+inv = pd.read_csv(D / &quot;erp_invoice_lines.csv&quot;, parse_dates=[&quot;invoice_date&quot;])
+inv[&quot;p&quot;] = inv.invoice_date.dt.to_period(&quot;M&quot;)
+inv[&quot;fy&quot;] = inv.invoice_date.apply(lambda d: d.year + (1 if d.month &gt;= 7 else 0))
+R[&quot;dq_inv_oem_missing&quot;] = int(inv.oem_id.isna().sum())
+R[&quot;dq_inv_rows&quot;] = int(len(inv))
+R[&quot;dq_inv_order_missing&quot;] = int(inv.order_id.isna().sum())
+R[&quot;dq_inv_order_missing_hw&quot;] = int((inv.order_id.isna() &amp; inv.product_family.isin([&quot;chip&quot;, &quot;module&quot;, &quot;card&quot;])).sum())
+R[&quot;dq_inv_oem_missing_families&quot;] = inv[inv.oem_id.isna()].product_family.value_counts().to_dict()
+R[&quot;dq_inv_fx_missing_nonaud&quot;] = int(((inv.fx_rate_used.isna()) &amp; (inv.currency != &quot;AUD&quot;)).sum())
+R[&quot;dq_inv_fx_missing_nonaud_last24m&quot;] = int(((inv.fx_rate_used.isna()) &amp; (inv.currency != &quot;AUD&quot;) &amp; (inv.invoice_date &gt;= &quot;2024-10-01&quot;)).sum())
+# reconcile invoices to GL by FY and family
+inv_fam = inv.groupby([&quot;fy&quot;, &quot;product_family&quot;]).net_amount_aud.sum().unstack().fillna(0)
+rec = {}
+for fy in range(2020, 2027):
+    hw_i = inv_fam.loc[fy, [&quot;chip&quot;, &quot;module&quot;, &quot;card&quot;, &quot;rebate&quot;]].sum()
+    sw_i = inv_fam.loc[fy, [&quot;software_perpetual&quot;, &quot;software_subscription&quot;]].sum()
+    oth_i = inv_fam.loc[fy, [&quot;dev_kit&quot;, &quot;freight&quot;]].sum()
+    rec[str(fy)] = dict(hw_diff=float(hw_i - fy_rev[fy][&quot;hw&quot;]), sw_diff=float(sw_i - fy_rev[fy][&quot;sw&quot;]), oth_diff=float(oth_i - fy_rev[fy][&quot;oth&quot;]))
+R[&quot;recon_invoice_vs_gl&quot;] = rec
+R[&quot;recon_max_abs_diff&quot;] = max(abs(v) for r_ in rec.values() for v in r_.values())
+
+hwi = inv[inv.product_family.isin([&quot;chip&quot;, &quot;module&quot;, &quot;card&quot;])]
+# volume / price-mix bridge FY25 -&gt; FY26 by SKU
+sku = hwi.groupby([&quot;fy&quot;, &quot;sku&quot;]).agg(q=(&quot;qty&quot;, &quot;sum&quot;), a=(&quot;net_amount_aud&quot;, &quot;sum&quot;)).reset_index()
+b = {}
+for s_, g in sku.groupby(&quot;sku&quot;):
+    g = g.set_index(&quot;fy&quot;)
+    q0, q1, a0, a1 = g.loc[2025, &quot;q&quot;], g.loc[2026, &quot;q&quot;], g.loc[2025, &quot;a&quot;], g.loc[2026, &quot;a&quot;]
+    p0, p1 = a0 / q0, a1 / q1
+    b[s_] = dict(vol=(q1 - q0) * p0, price=q1 * (p1 - p0), q0=int(q0), q1=int(q1))
+vol = sum(v[&quot;vol&quot;] for v in b.values()); prc = sum(v[&quot;price&quot;] for v in b.values())
+reb25 = inv_fam.loc[2025, &quot;rebate&quot;]; reb26 = inv_fam.loc[2026, &quot;rebate&quot;]
+sw25, sw26 = fy_rev[2025][&quot;sw&quot;], fy_rev[2026][&quot;sw&quot;]
+oth25, oth26 = fy_rev[2025][&quot;oth&quot;], fy_rev[2026][&quot;oth&quot;]
+R[&quot;bridge_fy25_fy26&quot;] = dict(
+    fy25=fy_rev[2025][&quot;total&quot;], hw_volume=float(vol), hw_price_mix=float(prc), rebates=float(reb26 - reb25),
+    sw_big_licence=-0.0 + float(ex), sw_other=float(sw26 - sw25 - ex), other=float(oth26 - oth25), fy26=fy_rev[2026][&quot;total&quot;])
+bb = R[&quot;bridge_fy25_fy26&quot;]
+bb[&quot;check_unexplained&quot;] = float(bb[&quot;fy26&quot;] - (bb[&quot;fy25&quot;] + bb[&quot;hw_volume&quot;] + bb[&quot;hw_price_mix&quot;] + bb[&quot;rebates&quot;] + bb[&quot;sw_big_licence&quot;] + bb[&quot;sw_other&quot;] + bb[&quot;other&quot;]))
+bb[&quot;hw_units_fy25&quot;] = int(sum(v[&quot;q0&quot;] for v in b.values())); bb[&quot;hw_units_fy26&quot;] = int(sum(v[&quot;q1&quot;] for v in b.values()))
+bb[&quot;hw_units_change_pct&quot;] = bb[&quot;hw_units_fy26&quot;] / bb[&quot;hw_units_fy25&quot;] - 1
+bb[&quot;hw_avg_price_change_pct&quot;] = (hwi[hwi.fy == 2026].net_amount_aud.sum() / hwi[hwi.fy == 2026].qty.sum()) / (hwi[hwi.fy == 2025].net_amount_aud.sum() / hwi[hwi.fy == 2025].qty.sum()) - 1
+# like-for-like list prices: mean unit price per SKU FY25 vs FY26 (price held?)
+pr = hwi.groupby([&quot;fy&quot;, &quot;sku&quot;]).apply(lambda g: g.net_amount_aud.sum() / g.qty.sum()).unstack()
+R[&quot;sku_price_change_pct&quot;] = {s_: float(pr.loc[2026, s_] / pr.loc[2025, s_] - 1) for s_ in pr.columns}
+# FX test: re-price FY26 non-AUD lines at FY25 average rate
+fx = inv[inv.currency != &quot;AUD&quot;].dropna(subset=[&quot;fx_rate_used&quot;])
+fx25 = fx[fx.fy == 2025].groupby(&quot;currency&quot;).fx_rate_used.mean()
+l26 = hwi[(hwi.fy == 2026) &amp; (hwi.currency != &quot;AUD&quot;)].dropna(subset=[&quot;fx_rate_used&quot;])
+at_old = (l26.net_amount_aud / l26.fx_rate_used * l26.currency.map(fx25)).sum()
+R[&quot;fx_effect_fy26_hw&quot;] = float(l26.net_amount_aud.sum() - at_old)
+R[&quot;fx_rates&quot;] = {f&quot;{c_}_{fy}&quot;: float(fx[(fx.currency == c_) &amp; (fx.fy == fy)].fx_rate_used.mean()) for c_ in [&quot;EUR&quot;, &quot;USD&quot;] for fy in (2025, 2026)}
+# breadth: OEM, tier, region
+oem = pd.read_csv(D / &quot;oem_master.csv&quot;)
+po = hwi.pivot_table(index=&quot;oem_id&quot;, columns=&quot;fy&quot;, values=&quot;net_amount_aud&quot;, aggfunc=&quot;sum&quot;).fillna(0)
+R[&quot;oem_breadth&quot;] = dict(
+    oems_buying_fy25=int((po[2025] &gt; 0).sum()), oems_buying_fy26=int((po[2026] &gt; 0).sum()),
+    lost_oems=int(((po[2025] &gt; 0) &amp; (po[2026] == 0)).sum()),
+    oems_down=int((po[2026] &lt; po[2025]).sum()), oems_total=int(((po[2025] &gt; 0) | (po[2026] &gt; 0)).sum()),
+    median_oem_change_pct=float(((po[2026] / po[2025]).replace([np.inf], np.nan).dropna()).median() - 1),
+    top10_share_fy25=float(po[2025].nlargest(10).sum() / po[2025].sum()),
+    top10_share_fy26=float(po[2026].nlargest(10).sum() / po[2026].sum()),
+    top1_oem=str(po[2026].idxmax()), top1_fy25=float(po.loc[po[2025].idxmax(), 2025]), top1_fy26=float(po.loc[po[2025].idxmax(), 2026]),
+)
+byt = po.join(oem.set_index(&quot;oem_id&quot;).tier).groupby(&quot;tier&quot;)[[2025, 2026]].sum()
+R[&quot;by_tier&quot;] = {t: float(r_[2026] / r_[2025] - 1) for t, r_ in byt.iterrows()}
+byr = hwi.pivot_table(index=&quot;sales_region&quot;, columns=&quot;fy&quot;, values=&quot;net_amount_aud&quot;, aggfunc=&quot;sum&quot;)
+R[&quot;by_region&quot;] = {t: float(r_[2026] / r_[2025] - 1) for t, r_ in byr.iterrows()}
+bys = {s_: float(v[&quot;q1&quot;] / v[&quot;q0&quot;] - 1) for s_, v in b.items()}
+R[&quot;by_sku_units&quot;] = bys
+
+# quarter-end loading
+gm_ = hwi.groupby(&quot;p&quot;).net_amount_aud.sum()
+def qe_split(fy):
+    ms = [p for p in gm_.index if p.year + (1 if p.month &gt;= 7 else 0) == fy]
+    qe = sum(gm_[p] for p in ms if p.month in (3, 6, 9, 12)); ot = sum(gm_[p] for p in ms if p.month not in (3, 6, 9, 12))
+    return qe, ot
+qe25, ot25 = qe_split(2025); qe26, ot26 = qe_split(2026)
+R[&quot;quarter_end&quot;] = dict(qe25=float(qe25), ot25=float(ot25), qe26=float(qe26), ot26=float(ot26),
+                        qe_share25=float(qe25 / (qe25 + ot25)), qe_share26=float(qe26 / (qe26 + ot26)),
+                        qe_avg_month25=float(qe25 / 4), ot_avg_month25=float(ot25 / 8), qe_avg_month26=float(qe26 / 4), ot_avg_month26=float(ot26 / 8),
+                        rebate_rate25=float(-reb25 / hwi[hwi.fy == 2025].net_amount_aud.sum()), rebate_rate26=float(-reb26 / hwi[hwi.fy == 2026].net_amount_aud.sum()))
+# months with rebates
+rb = inv[inv.product_family == &quot;rebate&quot;]
+R[&quot;quarter_end&quot;][&quot;rebate_only_in_quarter_end_months&quot;] = bool(rb.invoice_date.dt.month.isin([3, 6, 9, 12]).all())
+
+# ---------------------------------------------------------------- orders / lead times
+so = pd.read_csv(D / &quot;sales_orders.csv&quot;, parse_dates=[&quot;order_date&quot;], low_memory=False)
+so[&quot;p&quot;] = so.order_date.dt.to_period(&quot;M&quot;)
+R[&quot;dq_orders_leadtime_missing&quot;] = int(so.quoted_lead_time_weeks.isna().sum())
+R[&quot;dq_orders_rows&quot;] = int(len(so))
+ordq = so.groupby(&quot;p&quot;).qty_ordered.sum()
+lt = so.groupby(&quot;p&quot;).quoted_lead_time_weeks.mean()
+# --------------------------------------------------------------- device activations (K2)
+act = pd.read_csv(D / &quot;device_activations.csv&quot;)
+R[&quot;dq_act_rows&quot;] = int(len(act))
+act[&quot;ts&quot;] = pd.to_datetime(act.first_seen_ts.str[:19])
+act = act.sort_values(&quot;ts&quot;)
+R[&quot;dq_act_dup_serials&quot;] = int(act.device_serial.duplicated().sum())
+R[&quot;dq_act_dup_serials_last24m&quot;] = int(act[(act.ts &gt;= &quot;2024-10-01&quot;)].device_serial.duplicated().sum())
+R[&quot;dq_act_oem_missing&quot;] = int(act.oem_id.isna().sum())
+code2oem = act.dropna(subset=[&quot;oem_id&quot;]).drop_duplicates(&quot;manufacturer_code&quot;).set_index(&quot;manufacturer_code&quot;).oem_id
+act[&quot;oem_fixed&quot;] = act.oem_id.fillna(act.manufacturer_code.map(code2oem))
+R[&quot;dq_act_oem_missing_after_backfill&quot;] = int(act.oem_fixed.isna().sum())
+R[&quot;dq_act_beta_rows&quot;] = int((act.firmware_version.str.contains(&quot;beta&quot;)).sum())
+R[&quot;dq_act_beta_in_last24m&quot;] = int(((act.firmware_version.str.contains(&quot;beta&quot;)) &amp; (act.ts &gt;= &quot;2024-10-01&quot;)).sum())
+R[&quot;dq_act_model_string_free_text&quot;] = True
+a1 = act.drop_duplicates(&quot;device_serial&quot;, keep=&quot;first&quot;).copy()
+a1[&quot;p&quot;] = a1.ts.dt.to_period(&quot;M&quot;)
+SC = 10
+am = a1.groupby(&quot;p&quot;).size().reindex(pd.period_range(&quot;2021-01&quot;, AS_OF, freq=&quot;M&quot;)).fillna(0) * SC
+raw = act.assign(p=act.ts.dt.to_period(&quot;M&quot;)).groupby(&quot;p&quot;).size().reindex(am.index).fillna(0) * SC
+a_cur, a_pri = am[cur].sum(), am[pri].sum()
+a_pri2 = am[pd.period_range(AS_OF - 35, AS_OF - 24, freq=&quot;M&quot;)].sum()
+R[&quot;k2&quot;] = dict(cur=float(a_cur), prior=float(a_pri), growth=float(a_cur / a_pri - 1), prior2=float(a_pri2),
+               prior_growth=float(a_pri / a_pri2 - 1), raw_cur=float(raw[cur].sum()), raw_growth=float(raw[cur].sum() / raw[pri].sum() - 1),
+               months_remaining=(pd.Period(&quot;2027-06&quot;, &quot;M&quot;) - AS_OF).n)
+gs = {str(p): float(r12(am)[p] / r12(am)[p - 12] - 1) for p in [AS_OF - 3, AS_OF - 2, AS_OF - 1, AS_OF]}
+R[&quot;k2&quot;][&quot;growth_series&quot;] = gs
+R[&quot;k2&quot;][&quot;run_rate_pts_per_month&quot;] = (gs[str(AS_OF)] - gs[str(AS_OF - 3)]) / 3 * 100
+R[&quot;k2&quot;][&quot;pace_needed_pts_per_month&quot;] = (0.05 - gs[str(AS_OF)]) / R[&quot;k2&quot;][&quot;months_remaining&quot;] * 100
+R[&quot;k2&quot;][&quot;fy_activations&quot;] = {str(fy): float(am[[p for p in am.index if fy_of(p) == fy]].sum()) for fy in range(2022, 2027)}
+R[&quot;k2&quot;][&quot;dup_rate_cur&quot;] = float(1 - a1[a1.p.isin(cur)].shape[0] / act[act.ts.dt.to_period(&quot;M&quot;).isin(cur)].shape[0])
+# by SKU group and country top changes
+a1[&quot;grp&quot;] = a1.module_sku.map(lambda s_: &quot;chip&quot; if s_.startswith(&quot;LW-C&quot;) else (&quot;module&quot; if s_.startswith(&quot;LW-M&quot;) else &quot;card&quot;))
+sg = a1.groupby([&quot;grp&quot;, &quot;p&quot;]).size().unstack(0).fillna(0) * SC
+R[&quot;k2&quot;][&quot;by_group_growth&quot;] = {g_: float(sg.loc[cur, g_].sum() / sg.loc[pri, g_].sum() - 1) for g_ in sg.columns}
+cg = a1.groupby([&quot;country_from_ip&quot;, &quot;p&quot;]).size().unstack(0).fillna(0) * SC
+cgrow = (cg.loc[cur].sum() / cg.loc[pri].sum() - 1).dropna()
+R[&quot;k2&quot;][&quot;country_growth_range&quot;] = [float(cgrow.min()), float(cgrow.max())]
+R[&quot;k2&quot;][&quot;countries_growing&quot;] = int((cgrow &gt; 0).sum()); R[&quot;k2&quot;][&quot;countries_total&quot;] = int(len(cgrow))
+top_c = cg.loc[pri].sum().nlargest(8).index
+R[&quot;k2&quot;][&quot;top_country_growth&quot;] = {c_: float(cg.loc[cur, c_].sum() / cg.loc[pri, c_].sum() - 1) for c_ in top_c}
+og = a1.dropna(subset=[&quot;oem_fixed&quot;]).groupby([&quot;oem_fixed&quot;, &quot;p&quot;]).size().unstack(0).fillna(0) * SC
+ogr = (og.loc[cur].sum() / og.loc[pri].sum()).replace([np.inf, -np.inf], np.nan).dropna() - 1
+R[&quot;k2&quot;][&quot;oems_growing&quot;] = int((ogr &gt; 0).sum()); R[&quot;k2&quot;][&quot;oems_total&quot;] = int(len(ogr)); R[&quot;k2&quot;][&quot;oem_growth_median&quot;] = float(ogr.median())
+# the same by quarter in the FY (seasonality): last 8 quarters of activations
+R[&quot;k2&quot;][&quot;quarterly&quot;] = {f&quot;FY{str(fy_of(p))[2:]}-Q{((p.month - 7) % 12) // 3 + 1}&quot;: 0 for p in am.index[-24:]}
+for p in am.index[-24:]:
+    R[&quot;k2&quot;][&quot;quarterly&quot;][f&quot;FY{str(fy_of(p))[2:]}-Q{((p.month - 7) % 12) // 3 + 1}&quot;] += float(am[p])
+# counter-metric: duplicate serial share
+R[&quot;k2&quot;][&quot;dup_serial_share_all&quot;] = float(R[&quot;dq_act_dup_serials&quot;] / len(act))
+
+# sell-in vs install
+units_inv = hwi.groupby(&quot;p&quot;).qty.sum().reindex(am.index).fillna(0)
+def fysum(s, fy): return float(s[[p for p in s.index if fy_of(p) == fy]].sum())
+R[&quot;sellin_vs_installs&quot;] = {str(fy): dict(invoiced=fysum(units_inv, fy), activated=fysum(am, fy), ratio=fysum(units_inv, fy) / fysum(am, fy)) for fy in (2023, 2024, 2025, 2026)}
+R[&quot;sellin_vs_installs&quot;][&quot;R12M&quot;] = dict(invoiced=float(units_inv[cur].sum()), activated=float(am[cur].sum()), ratio=float(units_inv[cur].sum() / am[cur].sum()))
+R[&quot;sellin_vs_installs&quot;][&quot;R12M_prior&quot;] = dict(invoiced=float(units_inv[pri].sum()), activated=float(am[pri].sum()), ratio=float(units_inv[pri].sum() / am[pri].sum()))
+mr = (units_inv / am)
+R[&quot;sellin_vs_installs&quot;][&quot;ratio_jan25_jun25_avg&quot;] = float(units_inv[pd.period_range(&quot;2025-01&quot;, &quot;2025-06&quot;, freq=&quot;M&quot;)].sum() / am[pd.period_range(&quot;2025-01&quot;, &quot;2025-06&quot;, freq=&quot;M&quot;)].sum())
+R[&quot;sellin_vs_installs&quot;][&quot;ratio_jul25_sep26_avg&quot;] = float(units_inv[pd.period_range(&quot;2025-07&quot;, &quot;2026-09&quot;, freq=&quot;M&quot;)].sum() / am[pd.period_range(&quot;2025-07&quot;, &quot;2026-09&quot;, freq=&quot;M&quot;)].sum())
+R[&quot;sellin_vs_installs&quot;][&quot;cum_excess_jul22_jun25&quot;] = float(units_inv[pd.period_range(&quot;2022-07&quot;, &quot;2025-06&quot;, freq=&quot;M&quot;)].sum() - am[pd.period_range(&quot;2022-07&quot;, &quot;2025-06&quot;, freq=&quot;M&quot;)].sum())
+R[&quot;sellin_vs_installs&quot;][&quot;ratio_fy22&quot;] = fysum(units_inv, 2022) / fysum(am, 2022)
+# timeline for the story: orders and lead time at key points
+tl = {}
+for lab, per in {&quot;2022-06&quot;: &quot;2022-06&quot;, &quot;2023-03&quot;: &quot;2023-03&quot;, &quot;2023-09&quot;: &quot;2023-09&quot;, &quot;2023-12&quot;: &quot;2023-12&quot;, &quot;2024-03&quot;: &quot;2024-03&quot;, &quot;2024-09&quot;: &quot;2024-09&quot;, &quot;2025-06&quot;: &quot;2025-06&quot;, &quot;2025-09&quot;: &quot;2025-09&quot;, &quot;2026-09&quot;: &quot;2026-09&quot;}.items():
+    pp = pd.Period(per, &quot;M&quot;)
+    tl[lab] = dict(ord_qty=float(ordq.get(pp, np.nan)), lead_wk=float(lt.get(pp, np.nan)), inv_qty=float(units_inv.get(pp, np.nan)), act=float(am.get(pp, np.nan)))
+R[&quot;timeline&quot;] = tl
+R[&quot;orders_drought&quot;] = dict(
+    ord_qty_oct23_jun24=float(ordq[pd.period_range(&quot;2023-10&quot;, &quot;2024-06&quot;, freq=&quot;M&quot;)].sum()),
+    ord_qty_prev9m=float(ordq[pd.period_range(&quot;2023-01&quot;, &quot;2023-09&quot;, freq=&quot;M&quot;)].sum()),
+    lead_before=float(lt[pd.Period(&quot;2023-03&quot;, &quot;M&quot;)]), lead_after=float(lt[pd.Period(&quot;2024-06&quot;, &quot;M&quot;)]))
+R[&quot;orders_drought&quot;][&quot;backlog_invoiced_jul24_jun25_vs_orders&quot;] = float(units_inv[pd.period_range(&quot;2024-07&quot;, &quot;2025-06&quot;, freq=&quot;M&quot;)].sum())
+
+# ---------------------------------------------------------------- inventory (K2.1)
+inb = pd.read_csv(D / &quot;oem_inventory_reports.csv&quot;)
+def norm(s):
+    s = re.sub(r&quot;[-\s]+&quot;, &quot; &quot;, s.strip().lower()).replace(&quot;.&quot;, &quot;&quot;).replace(&quot;,&quot;, &quot;&quot;)
+    return re.sub(r&quot;( co ltd| gmbh| inc| ltd| pty ltd)$&quot;, &quot;&quot;, s)
+inb[&quot;k&quot;] = inb.oem_name.map(norm)
+oem[&quot;k&quot;] = oem.oem_name.map(norm)
+mm = oem.drop_duplicates(&quot;k&quot;).set_index(&quot;k&quot;).oem_id
+inb[&quot;oem_id&quot;] = inb.k.map(mm)
+R[&quot;dq_inv_reports_rows&quot;] = int(len(inb))
+R[&quot;dq_inv_reports_unmatched&quot;] = int(inb.oem_id.isna().sum())
+R[&quot;dq_inv_reports_raw_names&quot;] = int(inb.oem_name.nunique())
+R[&quot;dq_inv_reports_clean_names&quot;] = int(inb.k.nunique())
+R[&quot;dq_inv_reports_kinds&quot;] = dict(reel=int(inb.sku_or_description.str.contains(&quot;reel&quot;).sum()), finished=int(inb.sku_or_description.str.contains(&quot;finished&quot;).sum()))
+inb[&quot;units&quot;] = np.where(inb.sku_or_description.str.contains(&quot;reel&quot;), inb.units_on_hand * 500, inb.units_on_hand)
+inb[&quot;kind&quot;] = np.where(inb.sku_or_description.str.contains(&quot;finished&quot;), &quot;finished&quot;, &quot;parts&quot;)
+dupk = inb.duplicated([&quot;k&quot;, &quot;quarter&quot;, &quot;sku_or_description&quot;]).sum()
+R[&quot;dq_inv_reports_dups&quot;] = int(dupk)
+qtot = inb.groupby(&quot;quarter&quot;).agg(units=(&quot;units&quot;, &quot;sum&quot;), oems=(&quot;k&quot;, &quot;nunique&quot;))
+qparts = inb[inb.kind == &quot;parts&quot;].groupby(&quot;quarter&quot;).units.sum()
+R[&quot;inv_by_quarter&quot;] = {q: dict(units=float(r_.units), oems=int(r_.oems), parts=float(qparts.get(q, 0))) for q, r_ in qtot.iterrows()}
+# like for like: OEMs reporting in both quarters
+oq = {q: set(g.k) for q, g in inb.groupby(&quot;quarter&quot;)}
+qs_ = sorted(oq)
+lfl = {}
+for a_, b_ in zip(qs_[:-1], qs_[1:]):
+    both = oq[a_] &amp; oq[b_]
+    ua = inb[(inb.quarter == a_) &amp; inb.k.isin(both)].units.sum(); ub = inb[(inb.quarter == b_) &amp; inb.k.isin(both)].units.sum()
+    lfl[b_] = dict(prev=a_, both=len(both), prev_units=float(ua), units=float(ub), change=float(ub / ua - 1))
+R[&quot;inv_lfl&quot;] = lfl
+pk = max(R[&quot;inv_by_quarter&quot;].items(), key=lambda kv: kv[1][&quot;units&quot;])
+R[&quot;inv_peak&quot;] = dict(quarter=pk[0], units=pk[1][&quot;units&quot;], oems=pk[1][&quot;oems&quot;])
+# like-for-like peak to latest for OEMs reporting in both 2025-Q2 and 2026-Q3
+both = oq[&quot;2025-Q2&quot;] &amp; oq[&quot;2026-Q3&quot;]
+u0 = inb[(inb.quarter == &quot;2025-Q2&quot;) &amp; inb.k.isin(both)].units.sum(); u1 = inb[(inb.quarter == &quot;2026-Q3&quot;) &amp; inb.k.isin(both)].units.sum()
+R[&quot;inv_lfl_peak_to_latest&quot;] = dict(oems=len(both), peak=float(u0), latest=float(u1), change=float(u1 / u0 - 1))
+# months of cover: latest stock / monthly installs of those OEMs? (approx: all-OEM installs not matched) -&gt; use total
+R[&quot;inv_share_of_oems&quot;] = dict(reporting_latest=int(R[&quot;inv_by_quarter&quot;][&quot;2026-Q3&quot;][&quot;oems&quot;]), total_active=int(oem[oem.status == &quot;active&quot;].shape[0]))
+# top-40 coverage: share of FY26 hardware invoices from the reporting OEMs
+rep_ids = set(inb.oem_id.dropna())
+R[&quot;inv_coverage_fy26_hw_share&quot;] = float(po.loc[po.index.isin(rep_ids), 2026].sum() / po[2026].sum())
+# stock vs units shipped to those OEMs (months of cover at latest quarter)
+shipped_rep_q = hwi[hwi.oem_id.isin(rep_ids) &amp; (hwi.p &gt;= pd.Period(&quot;2026-07&quot;, &quot;M&quot;))].qty.sum()
+R[&quot;inv_months_cover_latest&quot;] = float(R[&quot;inv_by_quarter&quot;][&quot;2026-Q3&quot;][&quot;units&quot;] / (shipped_rep_q / 3))
+shipped_rep_pk = hwi[hwi.oem_id.isin(rep_ids) &amp; (hwi.p &gt;= pd.Period(&quot;2025-04&quot;, &quot;M&quot;)) &amp; (hwi.p &lt;= pd.Period(&quot;2025-06&quot;, &quot;M&quot;))].qty.sum()
+R[&quot;inv_months_cover_peak&quot;] = float(R[&quot;inv_by_quarter&quot;][&quot;2025-Q2&quot;][&quot;units&quot;] / (shipped_rep_pk / 3))
+# are stock reports tied to the OEM drop-offs? names unmatched count
+R[&quot;inv_notes_counts&quot;] = inb.notes.fillna(&quot;none&quot;).value_counts().to_dict()
+
+# ---------------------------------------------------------------- CRM (K4, K4.1, K4.2)
+crm = pd.read_csv(D / &quot;crm_opportunities.csv&quot;)
+st = [c_ for c_ in crm.columns if c_.startswith(&quot;stage_entered&quot;)]
+for s_ in st:
+    crm[s_] = pd.to_datetime(crm[s_])
+dwd, shd = crm.stage_entered_design_win, crm.stage_entered_shipping
+R[&quot;dq_crm_rows&quot;] = int(len(crm))
+R[&quot;dq_crm_no_dates_at_all&quot;] = int(crm[st].isna().all(axis=1).sum())
+undated = crm[crm[st].isna().all(axis=1)]
+R[&quot;dq_crm_undated_last_modified_max&quot;] = str(undated.last_modified.max())
+R[&quot;dq_crm_undated_by_stage&quot;] = undated.stage.value_counts().to_dict()
+passed_dw_stage = [&quot;design_win&quot;, &quot;pre_production&quot;, &quot;shipping&quot;]
+R[&quot;dq_crm_undated_past_dw_stage&quot;] = int(undated.stage.isin(passed_dw_stage).sum())
+R[&quot;dq_crm_dated_dw&quot;] = int(dwd.notna().sum())
+R[&quot;dq_crm_ship_without_dw_date&quot;] = int((shd.notna() &amp; dwd.isna()).sum())
+R[&quot;dq_crm_dw_without_design_in&quot;] = int((dwd.notna() &amp; crm.stage_entered_design_in.isna()).sum())
+R[&quot;dq_crm_dw_without_design_in_after_2023q2&quot;] = int((dwd.notna() &amp; crm.stage_entered_design_in.isna() &amp; (dwd &gt;= &quot;2023-07-01&quot;)).sum())
+R[&quot;dq_crm_stage_dates_start&quot;] = str(min(crm[st].min()).date())
+R[&quot;dq_crm_missing_share_k4&quot;] = float(R[&quot;dq_crm_undated_past_dw_stage&quot;] / (R[&quot;dq_crm_undated_past_dw_stage&quot;] + R[&quot;dq_crm_dated_dw&quot;]))
+
+cut = AS_OF_DATE - pd.DateOffset(months=18)
+R[&quot;k4_cutoff&quot;] = str(cut.date())
+dw = crm[dwd.notna()].copy()
+dw[&quot;q&quot;] = dw.stage_entered_design_win.dt.to_period(&quot;Q&quot;)
+dw[&quot;fq&quot;] = dw.stage_entered_design_win.dt.to_period(&quot;Q-JUN&quot;)
+dw[&quot;shipped&quot;] = dw.stage_entered_shipping.notna()
+dw[&quot;lost_after&quot;] = dw.stage_entered_lost.notna()
+dw[&quot;days&quot;] = (dw.stage_entered_shipping - dw.stage_entered_design_win).dt.days
+mature = dw[dw.stage_entered_design_win &lt;= cut]
+R[&quot;k4&quot;] = dict(n=int(len(mature)), shipped=int(mature.shipped.sum()), rate=float(mature.shipped.mean()),
+               lost=int(mature.lost_after.sum()), lost_rate=float(mature.lost_after.mean()),
+               still_open=int((~mature.shipped &amp; ~mature.lost_after).sum()),
+               cohort_from=str(mature.stage_entered_design_win.min().date()), cohort_to=str(mature.stage_entered_design_win.max().date()))
+# shipped within 18m of DW for same mature cohort
+R[&quot;k4&quot;][&quot;shipped_within_18m&quot;] = int((mature.days &lt;= 548).sum()); R[&quot;k4&quot;][&quot;rate_within_18m&quot;] = float((mature.days &lt;= 548).sum() / len(mature))
+R[&quot;k4&quot;][&quot;rate_within_24m_cohort&quot;] = None
+m24 = dw[dw.stage_entered_design_win &lt;= (AS_OF_DATE - pd.DateOffset(months=24))]
+R[&quot;k4&quot;][&quot;rate_within_24m_cohort&quot;] = float((m24.days &lt;= 730).sum() / len(m24))
+R[&quot;k4&quot;][&quot;n24&quot;] = int(len(m24))
+# stricter reading: gary&#x27;s draft counts shipped without a DW date? separate. Also sensitivity: undated count in
+R[&quot;k4&quot;][&quot;sens_include_undated_stage_based&quot;] = float(
+    (mature.shipped.sum() + (undated.stage == &quot;shipping&quot;).sum()) /
+    (len(mature) + undated.stage.isin(passed_dw_stage).sum()))
+R[&quot;k4&quot;][&quot;months_remaining&quot;] = (pd.Period(&quot;2027-06&quot;, &quot;M&quot;) - AS_OF).n
+# cohort table by FY quarter
+rows = []
+for q, g in dw.groupby(&quot;fq&quot;):
+    row = dict(q=str(q), n=int(len(g)), shipped=int(g.shipped.sum()), lost=int(g.lost_after.sum()),
+               age_months=float(((AS_OF_DATE - g.stage_entered_design_win.mean()).days) / 30.44))
+    for lab, d_ in ((&quot;s12&quot;, 365), (&quot;s18&quot;, 548)):
+        eligible = g[g.stage_entered_design_win &lt;= AS_OF_DATE - pd.Timedelta(days=d_)]
+        row[lab] = float((eligible.days &lt;= d_).sum() / len(eligible)) if len(eligible) == len(g) else None
+    row[&quot;pp12&quot;] = None
+    ge = g[g.stage_entered_design_win &lt;= AS_OF_DATE - pd.Timedelta(days=365)]
+    if len(ge) == len(g):
+        row[&quot;pp12&quot;] = float(((ge.stage_entered_pre_production - ge.stage_entered_design_win).dt.days &lt;= 365).sum() / len(ge))
+        row[&quot;lost12&quot;] = float(((ge.stage_entered_lost - ge.stage_entered_design_win).dt.days &lt;= 365).sum() / len(ge))
+    else:
+        row[&quot;lost12&quot;] = None
+    row[&quot;rev_median&quot;] = float(g.est_annual_revenue_aud.median())
+    row[&quot;last_week_share&quot;] = float((g.stage_entered_design_win &gt;= (g.stage_entered_design_win.dt.to_period(&quot;Q&quot;).dt.end_time.dt.normalize() - pd.Timedelta(days=6))).mean())
+    row[&quot;no_design_in&quot;] = float(g.stage_entered_design_in.isna().mean())
+    rows.append(row)
+R[&quot;k4_cohorts&quot;] = rows
+R[&quot;k4_fy_dw&quot;] = {}
+for fy in (2023, 2024, 2025, 2026):
+    R[&quot;k4_fy_dw&quot;][str(fy)] = int(((dwd &gt;= f&quot;{fy-1}-07-01&quot;) &amp; (dwd &lt; f&quot;{fy}-07-01&quot;)).sum())
+R[&quot;k4_fy_dw&quot;][&quot;FY27_Q1&quot;] = int(((dwd &gt;= &quot;2026-07-01&quot;) &amp; (dwd &lt;= &quot;2026-09-30&quot;)).sum())
+# bonus test: cohorts before vs after bonus start (FY25 = 1 Jul 2024), equal age (12 months) so no censoring
+bonus = pd.Timestamp(&quot;2024-07-01&quot;)
+elig12 = dw[dw.stage_entered_design_win &lt;= AS_OF_DATE - pd.Timedelta(days=365)]
+elig18 = dw[dw.stage_entered_design_win &lt;= AS_OF_DATE - pd.Timedelta(days=548)]
+def split(df, days):
+    pre = df[df.stage_entered_design_win &lt; bonus]; post = df[df.stage_entered_design_win &gt;= bonus]
+    f = lambda g: float((g.days &lt;= days).sum() / len(g)) if len(g) else None
+    return dict(pre_n=int(len(pre)), post_n=int(len(post)), pre=f(pre), post=f(post))
+R[&quot;k4_bonus_test&quot;] = dict(ship12=split(elig12, 365), ship18=split(elig18, 548))
+# first-half-of-year only to keep pre/post fair seasonally: pre = Jan23-Jun24 (18m) vs post = Jul24-Sep25
+# lost and pre-production progression within 12m, pre vs post
+def prog(df, col, days):
+    pre = df[df.stage_entered_design_win &lt; bonus]; post = df[df.stage_entered_design_win &gt;= bonus]
+    f = lambda g: float(((g[col] - g.stage_entered_design_win).dt.days &lt;= days).sum() / len(g))
+    return dict(pre=f(pre), post=f(post))
+R[&quot;k4_bonus_test&quot;][&quot;preprod12&quot;] = prog(elig12, &quot;stage_entered_pre_production&quot;, 365)
+R[&quot;k4_bonus_test&quot;][&quot;lost12&quot;] = prog(elig12, &quot;stage_entered_lost&quot;, 365)
+R[&quot;k4_bonus_test&quot;][&quot;dw_per_quarter_pre&quot;] = float(len(dw[(dw.stage_entered_design_win &lt; bonus) &amp; (dw.stage_entered_design_win &gt;= &quot;2023-01-01&quot;)]) / 6)
+R[&quot;k4_bonus_test&quot;][&quot;dw_per_quarter_post&quot;] = float(len(dw[(dw.stage_entered_design_win &gt;= bonus)]) / (len(pd.period_range(&quot;2024Q3&quot;, &quot;2026Q3&quot;, freq=&quot;Q&quot;))))
+R[&quot;k4_bonus_test&quot;][&quot;est_rev_median_pre&quot;] = float(dw[dw.stage_entered_design_win &lt; bonus].est_annual_revenue_aud.median())
+R[&quot;k4_bonus_test&quot;][&quot;est_rev_median_post&quot;] = float(dw[dw.stage_entered_design_win &gt;= bonus].est_annual_revenue_aud.median())
+R[&quot;k4_bonus_test&quot;][&quot;last_week_share_pre&quot;] = float((dw[dw.stage_entered_design_win &lt; bonus].stage_entered_design_win &gt;= (dw[dw.stage_entered_design_win &lt; bonus].stage_entered_design_win.dt.to_period(&quot;Q&quot;).dt.end_time.dt.normalize() - pd.Timedelta(days=6))).mean())
+post_ = dw[dw.stage_entered_design_win &gt;= bonus]
+R[&quot;k4_bonus_test&quot;][&quot;last_week_share_post&quot;] = float((post_.stage_entered_design_win &gt;= (post_.stage_entered_design_win.dt.to_period(&quot;Q&quot;).dt.end_time.dt.normalize() - pd.Timedelta(days=6))).mean())
+R[&quot;k4_bonus_test&quot;][&quot;last_week_expected&quot;] = 7 / 91
+R[&quot;k4_bonus_payout_estimate_fy26&quot;] = float(R[&quot;k4_fy_dw&quot;][&quot;2026&quot;] * 400)
+R[&quot;k4_bonus_payout_lost_after_dw_fy26_cohort&quot;] = int(dw[(dw.stage_entered_design_win &gt;= &quot;2025-07-01&quot;) &amp; (dw.stage_entered_design_win &lt; &quot;2026-07-01&quot;)].lost_after.sum()) * 400
+R[&quot;k4_bonus_dw_fy26_not_shipped&quot;] = int(((dw.stage_entered_design_win &gt;= &quot;2025-07-01&quot;) &amp; (dw.stage_entered_design_win &lt; &quot;2026-07-01&quot;) &amp; ~dw.shipped).sum())
+# spread: owners / region / tier  (mature cohort)
+oemt = oem.set_index(&quot;oem_id&quot;).tier
+mature = mature.assign(tier=mature.oem_id.map(oemt))
+R[&quot;k4_spread&quot;] = dict(
+    owner_min=float(mature.groupby(&quot;owner&quot;).shipped.mean().min()), owner_max=float(mature.groupby(&quot;owner&quot;).shipped.mean().max()),
+    owners=int(mature.owner.nunique()),
+    region={k: float(v) for k, v in mature.groupby(&quot;region&quot;).shipped.mean().items()},
+    tier={k: float(v) for k, v in mature.groupby(&quot;tier&quot;).shipped.mean().items()})
+og_ = mature.groupby(&quot;owner&quot;).agg(n=(&quot;shipped&quot;, &quot;size&quot;), r=(&quot;shipped&quot;, &quot;mean&quot;))
+og_ = og_[og_.n &gt;= 50]
+R[&quot;k4_spread&quot;][&quot;owner_min&quot;] = float(og_.r.min()); R[&quot;k4_spread&quot;][&quot;owner_max&quot;] = float(og_.r.max()); R[&quot;k4_spread&quot;][&quot;owner_n_min&quot;] = int(og_.n.min())
+# OEM health: do design-win OEMs still order? OEM level cross-check of shipped opps (invoices after ship date)
+last_inv = hwi.groupby(&quot;oem_id&quot;).invoice_date.max()
+sh = mature[mature.shipped]
+R[&quot;k4_invoice_crosscheck&quot;] = dict(
+    shipped_opps=int(len(sh)),
+    oem_invoiced_after_ship=int((sh.apply(lambda r_: last_inv.get(r_.oem_id, pd.NaT) &gt;= r_.stage_entered_shipping, axis=1)).sum()))
+# K4.1: months to ship by DW cohort, only cohorts with &gt;=18 months age; also show censoring
+dw[&quot;months&quot;] = dw.days / 30.44
+mm_ = dw[dw.shipped &amp; (dw.stage_entered_design_win &lt;= cut)]
+R[&quot;k4_1&quot;] = dict(median=float(mm_.months.median()), p25=float(mm_.months.quantile(.25)), p75=float(mm_.months.quantile(.75)), n=int(len(mm_)),
+                 all_shipped_median=float(dw[dw.shipped].months.median()), all_n=int(dw.shipped.sum()))
+byc = []
+for q, g in dw[dw.stage_entered_design_win &lt;= cut].groupby(&quot;fq&quot;):
+    s_ = g[g.shipped]
+    byc.append(dict(q=str(q), n_ship=int(len(s_)), median=float(s_.months.median()) if len(s_) else None))
+R[&quot;k4_1&quot;][&quot;by_cohort&quot;] = byc
+cohort_series = [b_[&quot;median&quot;] for b_ in byc if b_[&quot;median&quot;] is not None]
+R[&quot;k4_1&quot;][&quot;run_rate_months_per_cohort&quot;] = float((cohort_series[-1] - cohort_series[-4]) / 3)
+# K4.2 design wins per FY quarter
+dwq = dw.groupby(&quot;fq&quot;).size()
+R[&quot;k4_2&quot;] = {str(k): int(v) for k, v in dwq.items()}
+R[&quot;k4_2_fy26&quot;] = R[&quot;k4_fy_dw&quot;][&quot;2026&quot;]; R[&quot;k4_2_fy25&quot;] = R[&quot;k4_fy_dw&quot;][&quot;2025&quot;]
+R[&quot;k4_2_run_rate_per_quarter&quot;] = float((dwq.iloc[-2] - dwq.iloc[-5]) / 3)
+
+# ---------------------------------------------------------------- forecasts (K5)
+fc = pd.read_csv(D / &quot;forecast_snapshots.csv&quot;, parse_dates=[&quot;snapshot_date&quot;])
+fc[&quot;aud&quot;] = np.where(fc.amount_unit.str.contains(&quot;thousand&quot;), fc.forecast_amount * 1000, fc.forecast_amount)
+R[&quot;dq_fc_rows&quot;] = int(len(fc))
+R[&quot;dq_fc_thousands_rows&quot;] = int(fc.amount_unit.str.contains(&quot;thousand&quot;).sum())
+R[&quot;dq_fc_thousands_quarters&quot;] = sorted(fc[fc.amount_unit.str.contains(&quot;thousand&quot;)].forecast_quarter.unique().tolist())
+def qstart(q):
+    fy = 2000 + int(q[2:4]); n = int(q[-1])
+    return pd.Timestamp(year=fy - 1 if n &lt;= 2 else fy, month={1: 7, 2: 10, 3: 1, 4: 4}[n], day=1)
+def qmonths(q):
+    s_ = qstart(q); return pd.period_range(s_.to_period(&quot;M&quot;), periods=3, freq=&quot;M&quot;)
+fc[&quot;qstart&quot;] = fc.forecast_quarter.map(qstart)
+fam_series = dict(hardware=m_hw, software=m_sw, other=m_oth)
+rows = []
+for (src, q, fam), g in fc.groupby([&quot;source&quot;, &quot;forecast_quarter&quot;, &quot;product_family&quot;]):
+    qs_start = qstart(q)
+    g2 = g[g.snapshot_date &lt;= qs_start]
+    if g2.empty:
+        continue
+    snap = g2.sort_values(&quot;snapshot_date&quot;).iloc[-1]
+    ms = qmonths(q)
+    if ms[-1] &gt; AS_OF:
+        continue
+    actual = fam_series[fam][ms].sum()
+    rows.append(dict(source=src, q=q, fam=fam, snap=str(snap.snapshot_date.date()), forecast=float(snap.aud), actual=float(actual),
+                     days_before=int((qs_start - snap.snapshot_date).days)))
+f = pd.DataFrame(rows)
+tot = f.groupby([&quot;source&quot;, &quot;q&quot;]).agg(forecast=(&quot;forecast&quot;, &quot;sum&quot;), actual=(&quot;actual&quot;, &quot;sum&quot;), n=(&quot;fam&quot;, &quot;size&quot;)).reset_index()
+tot = tot[tot.n == 3]
+tot[&quot;err&quot;] = (tot.forecast - tot.actual) / tot.actual
+tot[&quot;abs_err&quot;] = tot.err.abs()
+qorder = sorted(tot.q.unique(), key=lambda s_: (s_[2:4], s_[-1]))
+R[&quot;k5_quarters&quot;] = {s_: {r_.q: dict(forecast=float(r_.forecast), actual=float(r_.actual), err=float(r_.err)) for r_ in tot[tot.source == s_].itertuples()} for s_ in [&quot;finance_run_rate&quot;, &quot;sales_crm&quot;]}
+R[&quot;k5_order&quot;] = qorder
+# missing snapshots
+exp_ = {(s_, q) for s_ in [&quot;finance_run_rate&quot;, &quot;sales_crm&quot;] for q in qorder}
+have = {(r_.source, r_.q) for r_ in tot.itertuples()}
+R[&quot;k5_missing_source_quarters&quot;] = sorted([f&quot;{s_} {q}&quot; for s_, q in exp_ - have])
+# also fc quarters with a complete set missing family
+R[&quot;dq_fc_late_snapshots&quot;] = fc[(fc.snapshot_date &gt; fc.qstart)].groupby([&quot;source&quot;, &quot;forecast_quarter&quot;]).size().reset_index().to_dict(&quot;records&quot;)
+R[&quot;dq_fc_late_snapshots&quot;] = [dict(source=a_[&quot;source&quot;], q=a_[&quot;forecast_quarter&quot;]) for a_ in R[&quot;dq_fc_late_snapshots&quot;]]
+R[&quot;dq_fc_snapshot_days_before_start&quot;] = [int(f.days_before.min()), int(f.days_before.max())]
+last4 = qorder[-4:]
+R[&quot;k5_last4&quot;] = last4
+R[&quot;k5&quot;] = {}
+for s_ in [&quot;finance_run_rate&quot;, &quot;sales_crm&quot;]:
+    t = tot[tot.source == s_].set_index(&quot;q&quot;)
+    R[&quot;k5&quot;][s_] = dict(latest_q=qorder[-1], latest_err=float(t.loc[qorder[-1], &quot;err&quot;]) if qorder[-1] in t.index else None,
+                       latest_abs=float(t.loc[qorder[-1], &quot;abs_err&quot;]) if qorder[-1] in t.index else None,
+                       mape_last4=float(t.loc[[q for q in last4 if q in t.index], &quot;abs_err&quot;].mean()),
+                       mape_all=float(t.abs_err.mean()), n_all=int(len(t)),
+                       within5=int((t.abs_err &lt;= 0.05).sum()), within10=int((t.abs_err &lt;= 0.10).sum()),
+                       bias_all=float(t.err.mean()), bias_last4=float(t.loc[[q for q in last4 if q in t.index], &quot;err&quot;].mean()),
+                       worst_q=str(t.abs_err.idxmax()), worst_err=float(t.loc[t.abs_err.idxmax(), &quot;err&quot;]))
+# the unit trap
+nofix = fc.copy(); nofix[&quot;raw&quot;] = nofix.forecast_amount
+raw_tot = nofix[nofix.source == &quot;finance_run_rate&quot;].groupby(&quot;forecast_quarter&quot;).raw.sum()
+R[&quot;k5_unit_trap&quot;] = dict(fy24q1_raw=float(raw_tot[&quot;FY24-Q1&quot;]), fy24q1_fixed=float(tot[(tot.source == &quot;finance_run_rate&quot;) &amp; (tot.q == &quot;FY24-Q1&quot;)].forecast.iloc[0]))
+# error by family, finance &amp; sales, mean abs (all quarters)
+fam_err = f.assign(abs_err=lambda d: ((d.forecast - d.actual) / d.actual).abs(), err=lambda d: (d.forecast - d.actual) / d.actual)
+R[&quot;k5_family&quot;] = {s_: {fam: dict(mape=float(g.abs_err.mean()), bias=float(g.err.mean())) for fam, g in d.groupby(&quot;fam&quot;)} for s_, d in fam_err.groupby(&quot;source&quot;)}
+# last 4 quarters by family
+fl = fam_err[fam_err.q.isin(last4)]
+R[&quot;k5_family_last4&quot;] = {s_: {fam: dict(mape=float(g.abs_err.mean()), bias=float(g.err.mean())) for fam, g in d.groupby(&quot;fam&quot;)} for s_, d in fl.groupby(&quot;source&quot;)}
+# naive tests: is Finance = last quarter&#x27;s actual (run rate)? compare error of forecast vs prior-quarter actual
+def prev_q_actual(q, fam):
+    n = int(q[-1]); fy = int(q[2:4])
+    pq = f&quot;FY{fy}-Q{n-1}&quot; if n &gt; 1 else f&quot;FY{fy-1}-Q4&quot;
+    ms = qmonths(pq); return fam_series[fam][ms].sum()
+fin = f[f.source == &quot;finance_run_rate&quot;].copy()
+fin[&quot;prev_actual&quot;] = [prev_q_actual(r_.q, r_.fam) for r_ in fin.itertuples()]
+fin[&quot;f_vs_prev&quot;] = (fin.forecast - fin.prev_actual) / fin.prev_actual
+fin[&quot;naive_err&quot;] = (fin.prev_actual - fin.actual) / fin.actual
+fin[&quot;err&quot;] = (fin.forecast - fin.actual) / fin.actual
+# totals by quarter
+ft = fin.groupby(&quot;q&quot;).agg(forecast=(&quot;forecast&quot;, &quot;sum&quot;), prev=(&quot;prev_actual&quot;, &quot;sum&quot;), actual=(&quot;actual&quot;, &quot;sum&quot;))
+ft[&quot;f_vs_prev&quot;] = ft.forecast / ft.prev - 1
+ft[&quot;naive_err&quot;] = ft.prev / ft.actual - 1
+ft[&quot;err&quot;] = ft.forecast / ft.actual - 1
+R[&quot;k5_finance_vs_naive&quot;] = {q: dict(f_vs_prev=float(r_.f_vs_prev), naive_err=float(r_.naive_err), err=float(r_.err)) for q, r_ in ft.iterrows()}
+R[&quot;k5_naive&quot;] = dict(finance_mape_all=float(ft.err.abs().mean()), naive_mape_all=float(ft.naive_err.abs().mean()),
+                     median_abs_gap_to_prev=float(ft.f_vs_prev.abs().median()),
+                     corr=float(np.corrcoef(ft.forecast, ft.prev)[0, 1]),
+                     finance_mape_ex_break=float(ft.drop(index=[q for q in [&quot;FY26-Q1&quot;, &quot;FY27-Q1&quot;] if q in ft.index]).err.abs().mean()),
+                     naive_mape_ex_break=float(ft.drop(index=[q for q in [&quot;FY26-Q1&quot;, &quot;FY27-Q1&quot;] if q in ft.index]).naive_err.abs().mean()))
+# Software lumpiness: finance and sales software error vs size of top licence in quarter
+swq = f[f.fam == &quot;software&quot;].copy(); swq[&quot;err&quot;] = (swq.forecast - swq.actual) / swq.actual
+R[&quot;k5_software_miss_q&quot;] = {f&quot;{r_.source} {r_.q}&quot;: float(r_.err) for r_ in swq.itertuples() if abs(r_.err) &gt; 0.4}
+# the Mar-26 quarter (FY26-Q3 Jan-Mar 26 includes Corvane). Actual FY26-Q3 software:
+R[&quot;k5_fy26q3_software_actual&quot;] = float(m_sw[qmonths(&quot;FY26-Q3&quot;)].sum())
+R[&quot;k5_fy26q3_software_actual_ex&quot;] = float(m_sw[qmonths(&quot;FY26-Q3&quot;)].sum() - ex)
+for src in (&quot;finance_run_rate&quot;, &quot;sales_crm&quot;):
+    r_ = f[(f.source == src) &amp; (f.q == &quot;FY26-Q3&quot;) &amp; (f.fam == &quot;software&quot;)].iloc[0]
+    R.setdefault(&quot;k5_fy26q3_software&quot;, {})[src] = dict(forecast=float(r_.forecast), err=float((r_.forecast - r_.actual) / r_.actual), err_ex=float((r_.forecast - (r_.actual - ex)) / (r_.actual - ex)))
+# Structural break: Jul 2025 hardware halved
+R[&quot;k5_break&quot;] = {src: dict(forecast=float(f[(f.source == src) &amp; (f.q == &quot;FY26-Q1&quot;) &amp; (f.fam == &quot;hardware&quot;)].forecast.iloc[0]),
+                           actual=float(f[(f.source == src) &amp; (f.q == &quot;FY26-Q1&quot;) &amp; (f.fam == &quot;hardware&quot;)].actual.iloc[0])) for src in (&quot;finance_run_rate&quot;, &quot;sales_crm&quot;)}
+R[&quot;k5_fy27q1_hw&quot;] = {src: dict(forecast=float(f[(f.source == src) &amp; (f.q == &quot;FY27-Q1&quot;) &amp; (f.fam == &quot;hardware&quot;)].forecast.iloc[0]),
+                               actual=float(f[(f.source == src) &amp; (f.q == &quot;FY27-Q1&quot;) &amp; (f.fam == &quot;hardware&quot;)].actual.iloc[0])) for src in (&quot;finance_run_rate&quot;, &quot;sales_crm&quot;)}
+# rolling-year forecast-vs-actual scale for Finance FY27-Q1 hardware relative to prior-year same quarter
+R[&quot;k5_fin_fy27q1_hw_vs_actual_prev_q&quot;] = float(m_hw[qmonths(&quot;FY26-Q4&quot;)].sum())
+# Sales vs Finance disagreement per quarter (difference as % of actual)
+sf = f.pivot_table(index=[&quot;q&quot;, &quot;fam&quot;], columns=&quot;source&quot;, values=&quot;forecast&quot;).dropna()
+sfq = sf.groupby(&quot;q&quot;).sum()
+act_q = f.drop_duplicates([&quot;q&quot;, &quot;fam&quot;]).groupby(&quot;q&quot;).actual.sum()
+R[&quot;k5_disagreement&quot;] = {q: float((sfq.loc[q, &quot;sales_crm&quot;] - sfq.loc[q, &quot;finance_run_rate&quot;]) / act_q[q]) for q in sfq.index}
+R[&quot;k5_disagreement_median_abs&quot;] = float(np.median([abs(v) for v in R[&quot;k5_disagreement&quot;].values()]))
+R[&quot;k5_target_checks&quot;] = dict(latest_q=qorder[-1], months_remaining=(pd.Period(&quot;2027-06&quot;, &quot;M&quot;) - AS_OF).n)
+# best of the two (blended) as an option
+bl = tot.pivot(index=&quot;q&quot;, columns=&quot;source&quot;, values=&quot;forecast&quot;)
+bl = bl.dropna()
+ac = tot.drop_duplicates(&quot;q&quot;).set_index(&quot;q&quot;).actual
+R[&quot;k5_blend_mape&quot;] = float((((bl.mean(axis=1) - ac.loc[bl.index]) / ac.loc[bl.index]).abs()).mean())
+R[&quot;k5_blend_quarters&quot;] = int(len(bl))
+R[&quot;k5_sales_mape_same_quarters&quot;] = float((((bl.sales_crm - ac.loc[bl.index]) / ac.loc[bl.index]).abs()).mean())
+R[&quot;k5_finance_mape_same_quarters&quot;] = float((((bl.finance_run_rate - ac.loc[bl.index]) / ac.loc[bl.index]).abs()).mean())
+
+# ---------------------------------------------------------------- headcount / incentive context (reference)
+inc = pd.read_csv(D / &quot;sales_incentive_plans.csv&quot;)
+R[&quot;incentive&quot;] = inc[inc.component == &quot;Design wins&quot;].iloc[0].to_dict()
+
+# ---------------------------------------------------------------- targets sanity (K1 and board targets)
+R[&quot;board_targets&quot;] = pd.read_csv(D / &quot;board_targets.csv&quot;).to_dict(&quot;records&quot;)
+
+# --------------------------------------------------------------- heartbeat: not used (coverage check only)
+hb = pd.read_csv(D / &quot;device_heartbeat_monthly.csv&quot;, usecols=[&quot;device_serial&quot;, &quot;month&quot;])
+R[&quot;dq_heartbeat_rows&quot;] = int(len(hb))
+R[&quot;dq_heartbeat_devices&quot;] = int(hb.device_serial.nunique())
+R[&quot;dq_heartbeat_first_month&quot;] = str(hb.month.min())
+
+# ================================================================ ADDITIONAL TESTS (second pass)
+# --- K1: &quot;nothing changes&quot; illustration and plan checks
+jun27 = pd.period_range(&quot;2026-10&quot;, &quot;2027-06&quot;, freq=&quot;M&quot;)
+same_as_last_year = sum(m_tot[p - 12] for p in jun27)
+flat_ex_big = m_tot[pd.period_range(&quot;2026-07&quot;, &quot;2026-09&quot;, freq=&quot;M&quot;)].sum() + same_as_last_year - ex
+R[&quot;k1_flat_jun27&quot;] = dict(value=float(flat_ex_big), with_big=float(flat_ex_big + ex), path=float(R[&quot;path_at_jun27&quot;]),
+                          gap_to_path=float(flat_ex_big - R[&quot;path_at_jun27&quot;]))
+R[&quot;plan_corvane_repeat&quot;] = float(ex * 1.15)
+R[&quot;plan_ex_corvane_repeat&quot;] = float(R[&quot;plan_fy27_total&quot;] - ex * 1.15)
+R[&quot;k1_hw_q_vs_prior_year&quot;] = {&quot;FY27-Q1&quot;: float(qs[&quot;FY27-Q1&quot;][&quot;hw&quot;] / qs[&quot;FY26-Q1&quot;][&quot;hw&quot;] - 1),
+                              &quot;FY26-Q4&quot;: float(qs[&quot;FY26-Q4&quot;][&quot;hw&quot;] / qs[&quot;FY25-Q4&quot;][&quot;hw&quot;] - 1)}
+R[&quot;k1_hw_q_vs_prev_q&quot;] = {&quot;FY26-Q1&quot;: float(qs[&quot;FY26-Q1&quot;][&quot;hw&quot;] / qs[&quot;FY25-Q4&quot;][&quot;hw&quot;] - 1),
+                          &quot;FY27-Q1&quot;: float(qs[&quot;FY27-Q1&quot;][&quot;hw&quot;] / qs[&quot;FY26-Q4&quot;][&quot;hw&quot;] - 1)}
+R[&quot;hw_q_series&quot;] = {q: float(v[&quot;hw&quot;]) for q, v in qs.items()}
+
+# --- K1 RCA: split of hardware volume change into installs (end demand) and the sell-in gap
+av25 = hwi[hwi.fy == 2025].net_amount_aud.sum() / hwi[hwi.fy == 2025].qty.sum()
+d_units = R[&quot;bridge_fy25_fy26&quot;][&quot;hw_units_fy26&quot;] - R[&quot;bridge_fy25_fy26&quot;][&quot;hw_units_fy25&quot;]
+d_inst = R[&quot;k2&quot;][&quot;fy_activations&quot;][&quot;2026&quot;] - R[&quot;k2&quot;][&quot;fy_activations&quot;][&quot;2025&quot;]
+R[&quot;hw_volume_split&quot;] = dict(units_change=float(d_units), installs_change=float(d_inst), gap_change=float(d_units - d_inst),
+                            avg_price_fy25=float(av25), installs_effect=float(d_inst * av25), gap_effect=float((d_units - d_inst) * av25),
+                            total_effect_at_avg_price=float(d_units * av25), sku_level_volume_effect=R[&quot;bridge_fy25_fy26&quot;][&quot;hw_volume&quot;])
+R[&quot;hw_volume_split&quot;][&quot;installs_share_of_units_fall&quot;] = float(d_inst / d_units)
+
+# --- K2: year-on-year by quarter and month (the turn)
+qa = a1.assign(q=a1.p.dt.asfreq(&quot;Q-JUN&quot;)).groupby(&quot;q&quot;).size()
+qy = (qa / qa.shift(4) - 1).dropna()
+R[&quot;k2_quarter_yoy&quot;] = {f&quot;FY{str(q.qyear)[2:]}-Q{q.quarter}&quot;: float(v) for q, v in qy.items() if q &gt;= pd.Period(&quot;2025Q1&quot;, &quot;Q-JUN&quot;)}
+ma = a1.groupby(&quot;p&quot;).size()
+my = (ma / ma.shift(12) - 1).dropna()
+R[&quot;k2_month_yoy_2025_07_to_2026_06_mean&quot;] = float(my[pd.period_range(&quot;2025-07&quot;, &quot;2026-06&quot;, freq=&quot;M&quot;)].mean())
+R[&quot;k2_month_yoy_2024_07_to_2025_06_mean&quot;] = float(my[pd.period_range(&quot;2024-07&quot;, &quot;2025-06&quot;, freq=&quot;M&quot;)].mean())
+R[&quot;k2_latest_q_units&quot;] = float(am[pd.period_range(&quot;2026-07&quot;, &quot;2026-09&quot;, freq=&quot;M&quot;)].sum())
+R[&quot;k2_latest_q_prior_units&quot;] = float(am[pd.period_range(&quot;2025-07&quot;, &quot;2025-09&quot;, freq=&quot;M&quot;)].sum())
+R[&quot;k2_latest_q_yoy_exact&quot;] = R[&quot;k2_latest_q_units&quot;] / R[&quot;k2_latest_q_prior_units&quot;] - 1
+dip_cur = pd.period_range(&quot;2025-07&quot;, &quot;2026-06&quot;, freq=&quot;M&quot;); dip_pri = pd.period_range(&quot;2024-07&quot;, &quot;2025-06&quot;, freq=&quot;M&quot;)
+cgd = (cg.loc[dip_cur].sum() / cg.loc[dip_pri].sum() - 1)
+R[&quot;k2_dip_breadth&quot;] = dict(countries_down=int((cgd &lt; 0).sum()), countries=int(len(cgd)), min=float(cgd.min()), max=float(cgd.max()),
+                           groups={g_: float(sg.loc[dip_cur, g_].sum() / sg.loc[dip_pri, g_].sum() - 1) for g_ in sg.columns})
+latest_q = pd.period_range(&quot;2026-07&quot;, &quot;2026-09&quot;, freq=&quot;M&quot;); prior_q = pd.period_range(&quot;2025-07&quot;, &quot;2025-09&quot;, freq=&quot;M&quot;)
+cgl = (cg.loc[latest_q].sum() / cg.loc[prior_q].sum() - 1)
+R[&quot;k2_latest_q_breadth&quot;] = dict(countries_up=int((cgl &gt; 0).sum()), countries=int(len(cgl)))
+fwm = a1.groupby([&quot;p&quot;, &quot;firmware_version&quot;]).size().unstack().fillna(0)
+R[&quot;k2_firmware_first_month&quot;] = {v: str(fwm.index[(fwm[v] &gt; 0).argmax()]) for v in fwm.columns}
+R[&quot;k2_dup_share_by_period&quot;] = dict(
+    dip=float(1 - a1[a1.p.isin(dip_cur)].shape[0] / act[act.ts.dt.to_period(&quot;M&quot;).isin(dip_cur)].shape[0]),
+    before=float(1 - a1[a1.p.isin(dip_pri)].shape[0] / act[act.ts.dt.to_period(&quot;M&quot;).isin(dip_pri)].shape[0]))
+yq = a1.assign(fy=a1.p.apply(fy_of), qn=a1.p.apply(lambda p: ((p.month - 7) % 12) // 3 + 1)).groupby([&quot;fy&quot;, &quot;qn&quot;]).size().unstack()
+R[&quot;k2_quarter_share_of_year&quot;] = {str(fy): [float(x) for x in (r_ / r_.sum()).round(4)] for fy, r_ in yq.loc[2023:2025].iterrows()}
+hbm = pd.read_csv(D / &quot;device_heartbeat_monthly.csv&quot;, usecols=[&quot;device_serial&quot;, &quot;month&quot;])
+hbc = hbm.groupby(&quot;month&quot;).device_serial.nunique()
+R[&quot;k2_heartbeat_devices_seen&quot;] = {m_: int(hbc[m_]) for m_ in [&quot;2025-06-01&quot;, &quot;2025-07-01&quot;, &quot;2026-06-01&quot;, &quot;2026-07-01&quot;, &quot;2026-09-01&quot;] if m_ in hbc.index}
+
+# --- K3: perpetual licences ex the big one
+pc = lic_cur[(lic_cur.licence_type == &quot;perpetual&quot;) &amp; (lic_cur.licence_id != big.licence_id)]
+pp = lic_pri[lic_pri.licence_type == &quot;perpetual&quot;]
+R[&quot;k3_perp&quot;] = dict(cur_n=int(len(pc)), prior_n=int(len(pp)), cur_value=float(pc.contract_value_aud.sum()), prior_value=float(pp.contract_value_aud.sum()),
+                    cur_median=float(pc.contract_value_aud.median()), prior_median=float(pp.contract_value_aud.median()),
+                    cur_over_500k=int((pc.contract_value_aud &gt; 500_000).sum()), prior_over_500k=int((pp.contract_value_aud &gt; 500_000).sum()),
+                    cur_over_500k_value=float(pc[pc.contract_value_aud &gt; 500_000].contract_value_aud.sum()),
+                    prior_over_500k_value=float(pp[pp.contract_value_aud &gt; 500_000].contract_value_aud.sum()),
+                    small_cur=float(pc[pc.contract_value_aud &lt;= 500_000].contract_value_aud.sum()),
+                    small_prior=float(pp[pp.contract_value_aud &lt;= 500_000].contract_value_aud.sum()))
+dec = dd[dd.renewal_status.isin([&quot;renewed&quot;, &quot;lapsed&quot;])]
+R[&quot;k3&quot;][&quot;renewal_decided_n&quot;] = int(len(dec))
+R[&quot;k3&quot;][&quot;renewal_rate_decided&quot;] = float((dec.renewal_status == &quot;renewed&quot;).mean())
+decp = due_prior[due_prior.renewal_status.isin([&quot;renewed&quot;, &quot;lapsed&quot;])]
+R[&quot;k3&quot;][&quot;renewal_rate_decided_prior&quot;] = float((decp.renewal_status == &quot;renewed&quot;).mean())
+R[&quot;k3&quot;][&quot;renewal_decided_prior_n&quot;] = int(len(decp))
+R[&quot;big_oem_hw&quot;] = dict(fy25=float(po.loc[big.oem_id, 2025]), fy26=float(po.loc[big.oem_id, 2026]),
+                       change=float(po.loc[big.oem_id, 2026] / po.loc[big.oem_id, 2025] - 1),
+                       rank_fy25=int(po[2025].rank(ascending=False)[big.oem_id]))
+R[&quot;k3&quot;][&quot;lic_vs_gl_r12m_diff&quot;] = float(lic_cur.contract_value_aud.sum() - sw_cur)
+
+# --- K4: how many old design wins are neither shipped nor lost
+old36 = dw[dw.stage_entered_design_win &lt;= AS_OF_DATE - pd.DateOffset(months=36)]
+R[&quot;k4_old36&quot;] = dict(n=int(len(old36)), shipped=float(old36.shipped.mean()), lost=float(old36.lost_after.mean()),
+                     open=float((~old36.shipped &amp; ~old36.lost_after).mean()))
+c23 = dw[(dw.stage_entered_design_win &lt; &quot;2023-07-01&quot;)]
+R[&quot;k4_ship_curve_2023h1&quot;] = {str(m_): float((c23.days &lt;= m_ * 30.44).sum() / len(c23)) for m_ in (6, 12, 18, 24, 30, 36, 42)}
+R[&quot;k4_ship_curve_2023h1_n&quot;] = int(len(c23))
+
+# --- K5: year-ago test and the A$ error by family
+def year_ago_actual(q, fam):
+    fy = int(q[2:4]); n = int(q[-1]); yq_ = f&quot;FY{fy-1}-Q{n}&quot;
+    return fam_series[fam][qmonths(yq_)].sum()
+fin[&quot;yago&quot;] = [year_ago_actual(r_.q, r_.fam) for r_ in fin.itertuples()]
+ftt = fin.groupby(&quot;q&quot;).agg(forecast=(&quot;forecast&quot;, &quot;sum&quot;), yago=(&quot;yago&quot;, &quot;sum&quot;), actual=(&quot;actual&quot;, &quot;sum&quot;))
+ftt[&quot;f_vs_yago&quot;] = ftt.forecast / ftt.yago - 1
+ftt[&quot;yago_err&quot;] = ftt.yago / ftt.actual - 1
+R[&quot;k5_finance_vs_yearago&quot;] = {q: dict(f_vs_yago=float(r_.f_vs_yago), yago_err=float(r_.yago_err)) for q, r_ in ftt.iterrows()}
+R[&quot;k5_yearago&quot;] = dict(corr=float(np.corrcoef(ftt.forecast, ftt.yago)[0, 1]), yago_mape=float(ftt.yago_err.abs().mean()),
+                       finance_mape=float((ftt.forecast / ftt.actual - 1).abs().mean()),
+                       median_gap_to_yago=float(ftt.f_vs_yago.abs().median()))
+f[&quot;err_aud&quot;] = f.forecast - f.actual
+bysrc = f[f.q.isin(last4)].groupby([&quot;source&quot;, &quot;fam&quot;]).err_aud.sum().unstack().fillna(0)
+R[&quot;k5_aud_error_last4&quot;] = {s_: {fam: float(v) for fam, v in r_.items()} for s_, r_ in bysrc.iterrows()}
+R[&quot;k5_aud_actual_last4&quot;] = float(f[(f.source == &quot;finance_run_rate&quot;) &amp; f.q.isin(last4)].actual.sum())
+for src in (&quot;finance_run_rate&quot;, &quot;sales_crm&quot;):
+    t = tot[tot.source == src].set_index(&quot;q&quot;)
+    pre = [q for q in t.index if q &lt; &quot;FY26-Q1&quot;]; post = [q for q in t.index if q &gt;= &quot;FY26-Q1&quot;]
+    R[&quot;k5&quot;][src][&quot;mape_before_break&quot;] = float(t.loc[pre, &quot;abs_err&quot;].mean()); R[&quot;k5&quot;][src][&quot;mape_after_break&quot;] = float(t.loc[post, &quot;abs_err&quot;].mean())
+    R[&quot;k5&quot;][src][&quot;bias_before_break&quot;] = float(t.loc[pre, &quot;err&quot;].mean()); R[&quot;k5&quot;][src][&quot;bias_after_break&quot;] = float(t.loc[post, &quot;err&quot;].mean())
+    R[&quot;k5&quot;][src][&quot;n_over&quot;] = int((t.err &gt; 0).sum()); R[&quot;k5&quot;][src][&quot;n_quarters&quot;] = int(len(t))
+
+
+# ================================================================ THIRD PASS: pace-needed inputs
+# --- K4 as of each of the last 4 quarter-ends (same 18-month rule, shipping known by that date)
+def k4_asof(d):
+    d = pd.Timestamp(d)
+    coh = dw[dw.stage_entered_design_win &lt;= d - pd.DateOffset(months=18)]
+    shipped = (coh.stage_entered_shipping &lt;= d).sum()
+    return float(shipped / len(coh)), int(len(coh))
+R[&quot;k4_asof&quot;] = {d: dict(zip((&quot;rate&quot;, &quot;n&quot;), k4_asof(d))) for d in [&quot;2025-12-31&quot;, &quot;2026-03-31&quot;, &quot;2026-06-30&quot;, &quot;2026-09-30&quot;]}
+R[&quot;k4_run_rate_pts_per_month&quot;] = (R[&quot;k4_asof&quot;][&quot;2026-09-30&quot;][&quot;rate&quot;] - R[&quot;k4_asof&quot;][&quot;2025-12-31&quot;][&quot;rate&quot;]) / 9 * 100
+R[&quot;k4_pace_needed_pts_per_month&quot;] = (0.80 - R[&quot;k4_asof&quot;][&quot;2026-09-30&quot;][&quot;rate&quot;]) / R[&quot;k4&quot;][&quot;months_remaining&quot;] * 100
+
+# --- K3: what FY27 software needs for +20%, in dollars
+need = fy_rev[2026][&quot;sw&quot;] * 1.20
+q1_sw = float(m_sw[pd.period_range(&quot;2026-07&quot;, &quot;2026-09&quot;, freq=&quot;M&quot;)].sum())
+rest = (need - q1_sw) / 9
+exbig_fy26_monthly = (fy_rev[2026][&quot;sw&quot;] - ex) / 12
+R[&quot;k3_fy27_need&quot;] = dict(need_fy27=float(need), q1_actual=q1_sw, rest_per_month=float(rest), fy26_ex_big_per_month=float(exbig_fy26_monthly),
+                         ex_big_trailing_per_month=float((sw_cur - ex) / 12))
+sw_flat = q1_sw + sum(m_sw[p - 12] for p in pd.period_range(&quot;2026-10&quot;, &quot;2027-06&quot;, freq=&quot;M&quot;)) - ex
+R[&quot;k3_flat_jun27&quot;] = dict(value=float(sw_flat), growth=float(sw_flat / fy_rev[2026][&quot;sw&quot;] - 1))
+
+# --- K2: pace in customers
+R[&quot;k2_pace_note&quot;] = dict(target_units_jun27=float(a_pri * 0 + R[&quot;k2&quot;][&quot;prior&quot;] * 1.05))
+
+# --- K5: absolute error run rate and plan cross-check
+for src in (&quot;finance_run_rate&quot;, &quot;sales_crm&quot;):
+    t = tot[tot.source == src].set_index(&quot;q&quot;).abs_err
+    last = t.iloc[-1]; three_back = t.iloc[-4] if len(t) &gt;= 4 else np.nan
+    R[&quot;k5&quot;][src][&quot;abs_err_latest&quot;] = float(last)
+    R[&quot;k5&quot;][src][&quot;run_rate_pts_per_quarter&quot;] = float((last - three_back) / 3 * 100)
+    R[&quot;k5&quot;][src][&quot;pace_needed_pts_per_quarter&quot;] = float((0.05 - last) / 3 * 100)
+    R[&quot;k5&quot;][src][&quot;abs_err_series_last4&quot;] = {q: float(v) for q, v in t.iloc[-4:].items()}
+plan_q1_hw = float(plan[(plan.month &lt;= &quot;2026-09&quot;) &amp; (plan.product_family == &quot;hardware&quot;)].plan_revenue_aud.sum())
+R[&quot;k5_plan_vs_forecast_q1&quot;] = dict(plan_hw=plan_q1_hw, finance_forecast_hw=R[&quot;k5_fy27q1_hw&quot;][&quot;finance_run_rate&quot;][&quot;forecast&quot;],
+                                   sales_forecast_hw=R[&quot;k5_fy27q1_hw&quot;][&quot;sales_crm&quot;][&quot;forecast&quot;], actual_hw=R[&quot;k5_fy27q1_hw&quot;][&quot;finance_run_rate&quot;][&quot;actual&quot;],
+                                   plan_set=&quot;2026-06-15&quot;, forecast_dated=&quot;2026-06-26&quot;)
+plan_q1_all = float(plan[plan.month &lt;= &quot;2026-09&quot;].plan_revenue_aud.sum())
+R[&quot;k5_plan_q1_all&quot;] = plan_q1_all
+R[&quot;k5_plan_q1_err&quot;] = float(plan_q1_all / act_q1 - 1)
+
+# --- challenge-note facts
+R[&quot;gary_hw_codes_check&quot;] = dict(
+    plan_other_codes_match=bool(abs(plan[plan.product_family == &quot;other&quot;].plan_revenue_aud.sum() / fy_rev[2026][&quot;oth&quot;] - 1.15) &lt; 0.001),
+    other_fy26=float(fy_rev[2026][&quot;oth&quot;]), dev_kits_fy26=float(-gl[(gl.account_code == 4200) &amp; (gl.p.map(fy_of) == 2026)].amount_aud.sum()),
+    freight_fy26=float(-gl[(gl.account_code == 4210) &amp; (gl.p.map(fy_of) == 2026)].amount_aud.sum()))
+R[&quot;fy27_plan_vs_path_gap&quot;] = float(R[&quot;plan_fy27_total&quot;] - R[&quot;path_at_jun27&quot;])
+R[&quot;fy27_plan_vs_path_gap_pct&quot;] = float(R[&quot;plan_fy27_total&quot;] / R[&quot;path_at_jun27&quot;] - 1)
+R[&quot;board_target_fy27_gm&quot;] = 76.0
+
+# ================================================================ FOURTH PASS: loose ends
+# orders against installs, by phase
+def avg_m(s, a_, b_):
+    return float(s[pd.period_range(a_, b_, freq=&quot;M&quot;)].mean())
+R[&quot;orders_vs_installs&quot;] = dict(
+    shortage_2022_07_to_2023_09=dict(orders=avg_m(ordq, &quot;2022-07&quot;, &quot;2023-09&quot;), installs=avg_m(am, &quot;2022-07&quot;, &quot;2023-09&quot;), invoiced=avg_m(units_inv, &quot;2022-07&quot;, &quot;2023-09&quot;)),
+    drought_2023_10_to_2024_06=dict(orders=avg_m(ordq, &quot;2023-10&quot;, &quot;2024-06&quot;), installs=avg_m(am, &quot;2023-10&quot;, &quot;2024-06&quot;), invoiced=avg_m(units_inv, &quot;2023-10&quot;, &quot;2024-06&quot;)),
+    rebuy_2024_07_to_2025_04=dict(orders=avg_m(ordq, &quot;2024-07&quot;, &quot;2025-04&quot;), installs=avg_m(am, &quot;2024-07&quot;, &quot;2025-04&quot;), invoiced=avg_m(units_inv, &quot;2024-07&quot;, &quot;2025-04&quot;)),
+    reset_2025_05_to_2026_09=dict(orders=avg_m(ordq, &quot;2025-05&quot;, &quot;2026-09&quot;), installs=avg_m(am, &quot;2025-05&quot;, &quot;2026-09&quot;), invoiced=avg_m(units_inv, &quot;2025-05&quot;, &quot;2026-09&quot;)),
+)
+# ledger software revenue vs licence table, month by month
+lic_m = lic.groupby(&quot;p&quot;).contract_value_aud.sum().reindex(m_sw.index).fillna(0)
+dm = (lic_m - m_sw).abs()
+R[&quot;lic_vs_gl_monthly&quot;] = dict(max_abs_diff=float(dm.max()), months_over_1pct=int(((dm / m_sw) &gt; 0.01).sum()), months=int(len(dm)))
+# K2.1 headline numbers
+iq = R[&quot;inv_by_quarter&quot;]
+R[&quot;k2_1&quot;] = dict(latest_q=&quot;2026-Q3&quot;, latest_units=iq[&quot;2026-Q3&quot;][&quot;units&quot;], latest_oems=iq[&quot;2026-Q3&quot;][&quot;oems&quot;],
+                 latest_parts=iq[&quot;2026-Q3&quot;][&quot;parts&quot;], peak_q=R[&quot;inv_peak&quot;][&quot;quarter&quot;], peak_units=R[&quot;inv_peak&quot;][&quot;units&quot;], peak_oems=R[&quot;inv_peak&quot;][&quot;oems&quot;],
+                 lfl_latest=R[&quot;inv_lfl&quot;][&quot;2026-Q3&quot;], lfl_prev=R[&quot;inv_lfl&quot;][&quot;2026-Q2&quot;], lfl_prev2=R[&quot;inv_lfl&quot;][&quot;2026-Q1&quot;],
+                 raw_sum_no_reel_fix_latest=float(inb[inb.quarter == &quot;2026-Q3&quot;].units_on_hand.sum()))
+R[&quot;k2_1&quot;][&quot;run_rate_lfl_per_quarter&quot;] = float(np.mean([R[&quot;inv_lfl&quot;][q][&quot;change&quot;] for q in (&quot;2026-Q1&quot;, &quot;2026-Q2&quot;, &quot;2026-Q3&quot;)]))
+# counter-metric baselines
+R[&quot;counter&quot;] = dict(
+    k1_gm=R[&quot;k3_2&quot;][&quot;cur&quot;], k1_rebate_rate_fy26=R[&quot;quarter_end&quot;][&quot;rebate_rate26&quot;],
+    k2_dup=R[&quot;k2&quot;][&quot;dup_rate_cur&quot;], k3_renewal=R[&quot;k3&quot;][&quot;renewal_rate_decided&quot;],
+    k4_lost=R[&quot;k4&quot;][&quot;lost_rate&quot;], k5_bias_fin=R[&quot;k5&quot;][&quot;finance_run_rate&quot;][&quot;bias_last4&quot;], k5_bias_sales=R[&quot;k5&quot;][&quot;sales_crm&quot;][&quot;bias_last4&quot;])
+
+# ================================================================ v1.1 PASS (Business Requirements v1.1)
+# --- K3 v1.1: growth leaving out any single licence worth more than A$1m (threshold to agree with the CFO)
+LIM = 1_000_000
+def k3_ex(end):
+    cw = pd.period_range(end - 11, end, freq=&quot;M&quot;); pw = pd.period_range(end - 23, end - 12, freq=&quot;M&quot;)
+    exc = lic[(lic.contract_value_aud &gt; LIM) &amp; lic.p.isin(cw)].contract_value_aud.sum()
+    exp_ = lic[(lic.contract_value_aud &gt; LIM) &amp; lic.p.isin(pw)].contract_value_aud.sum()
+    c_, p_ = m_sw[cw].sum() - exc, m_sw[pw].sum() - exp_
+    return float(c_ / p_ - 1), float(exc), float(exp_), float(c_), float(p_)
+ser = {str(p): k3_ex(p) for p in [AS_OF - 3, AS_OF - 2, AS_OF - 1, AS_OF]}
+g_, exc_, exp_, c_, p_ = ser[str(AS_OF)]
+R[&quot;k3_v11&quot;] = dict(growth_ex=g_, excluded_cur=exc_, excluded_prior=exp_, cur=c_, prior=p_, limit=LIM,
+                   n_over_limit_cur=int(((lic.contract_value_aud &gt; LIM) &amp; lic.p.isin(cur)).sum()),
+                   n_over_limit_prior=int(((lic.contract_value_aud &gt; LIM) &amp; lic.p.isin(pri)).sum()),
+                   series={k: v[0] for k, v in ser.items()}, months_remaining=mrem)
+R[&quot;k3_v11&quot;][&quot;run_rate_pts_per_month&quot;] = (ser[str(AS_OF)][0] - ser[str(AS_OF - 3)][0]) / 3 * 100
+R[&quot;k3_v11&quot;][&quot;pace_needed_pts_per_month&quot;] = (0 - g_) / mrem * 100
+R[&quot;k3_v11&quot;][&quot;fy26_ex&quot;] = float((fy_rev[2026][&quot;sw&quot;] - lic[(lic.contract_value_aud &gt; LIM) &amp; (lic.fy == 2026)].contract_value_aud.sum()) /
+                               (fy_rev[2025][&quot;sw&quot;] - lic[(lic.contract_value_aud &gt; LIM) &amp; (lic.fy == 2025)].contract_value_aud.sum()) - 1)
+
+# --- K2.1 v1.1: months of stock cover at the reporting OEMs, divisor = units invoiced to the same OEMs
+inb_ids = inb.dropna(subset=[&quot;oem_id&quot;])
+def q_months(qs):
+    y, n = int(qs[:4]), int(qs[-1]); return pd.period_range(f&quot;{y}-{(n-1)*3+1:02d}&quot;, periods=3, freq=&quot;M&quot;)
+hw_oem_m = hwi.groupby([&quot;oem_id&quot;, &quot;p&quot;]).qty.sum()
+cover = {}
+for q, g in inb_ids.groupby(&quot;quarter&quot;):
+    ids = set(g.oem_id); ms = q_months(q)
+    if ms[-1] &gt; AS_OF: continue
+    stock = float(g.units.sum())
+    inv_u = float(hwi[hwi.oem_id.isin(ids) &amp; hwi.p.isin(ms)].qty.sum()) / 3
+    a_u = float(a1[a1.oem_fixed.isin(ids) &amp; a1.p.isin(ms)].shape[0] * SC) / 3
+    cover[q] = dict(stock=stock, oems=len(ids), invoiced_per_month=inv_u, activated_per_month=a_u,
+                    months_invoiced=stock / inv_u if inv_u else None, months_activated=stock / a_u if a_u else None)
+R[&quot;k2_1_cover&quot;] = cover
+last3 = [&quot;2026-Q1&quot;, &quot;2026-Q2&quot;, &quot;2026-Q3&quot;]
+R[&quot;k2_1_cover_summary&quot;] = dict(
+    latest=cover[&quot;2026-Q3&quot;], peak_q=max(cover, key=lambda q: cover[q][&quot;months_invoiced&quot;] or 0),
+    run_rate_per_quarter=float((cover[&quot;2026-Q3&quot;][&quot;months_invoiced&quot;] - cover[&quot;2025-Q4&quot;][&quot;months_invoiced&quot;]) / 3),
+    pace_needed_per_quarter=float((6 - cover[&quot;2026-Q3&quot;][&quot;months_invoiced&quot;]) / 3),
+    quarters_remaining=3,
+    activation_share_oem_known=float(1 - R[&quot;dq_act_oem_missing_after_backfill&quot;] / R[&quot;dq_act_rows&quot;]),
+    activated_vs_invoiced_ratio_latest=float(cover[&quot;2026-Q3&quot;][&quot;months_activated&quot;] / cover[&quot;2026-Q3&quot;][&quot;months_invoiced&quot;]))
+R[&quot;k2_1_cover_summary&quot;][&quot;peak&quot;] = cover[R[&quot;k2_1_cover_summary&quot;][&quot;peak_q&quot;]]
+# --- K4 v1.1 pace to 35%
+R[&quot;k4_pace_needed_pts_per_month_v11&quot;] = (0.35 - R[&quot;k4&quot;][&quot;rate&quot;]) / R[&quot;k4&quot;][&quot;months_remaining&quot;] * 100
+# --- K5 v1.1 pace to 10%
+for src in (&quot;finance_run_rate&quot;, &quot;sales_crm&quot;):
+    R[&quot;k5&quot;][src][&quot;pace_needed_pts_per_quarter_v11&quot;] = (0.10 - R[&quot;k5&quot;][src][&quot;abs_err_latest&quot;]) / 3 * 100
+# --- K3.2 v1.1 pace to 76%
+R[&quot;k3_2&quot;][&quot;pace_needed_pts_per_month_v11&quot;] = (0.76 - R[&quot;k3_2&quot;][&quot;cur&quot;]) * 100 / 9
+
+
+def conv(o):
+    if isinstance(o, (np.integer,)): return int(o)
+    if isinstance(o, (np.floating,)): return float(o)
+    if isinstance(o, (np.bool_,)): return bool(o)
+    if isinstance(o, (pd.Period, pd.Timestamp)): return str(o)
+    raise TypeError(type(o))
+
+
+(HERE / &quot;02_results.json&quot;).write_text(json.dumps(R, indent=1, default=conv), encoding=&quot;utf-8&quot;)
+print(json.dumps(R, indent=1, default=conv))
+</code></pre></section></main><script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-jump]');if(!a)return;var t=document.getElementById(a.dataset.jump);if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});}});</script></body></html>
