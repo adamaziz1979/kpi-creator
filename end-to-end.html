@@ -204,6 +204,8 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-si
 /* Whole-page pollen: one canvas fixed behind the content, sized to the screen (not the full page height) */
 body>canvas.anim-bg.page{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;pointer-events:none;
  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 12%,#000 85%,transparent);mask-image:linear-gradient(to bottom,transparent,#000 12%,#000 85%,transparent)}
+/* Light mode: fainter pollen, so it never competes with the text (dark mode unchanged) */
+:root[data-theme="light"] body>canvas.anim-bg.page{opacity:.35}
 body>main{position:relative;z-index:1}
 /* Project selector */
 html:not([data-case="clearcompare"]) [data-case="clearcompare"]{display:none!important}
