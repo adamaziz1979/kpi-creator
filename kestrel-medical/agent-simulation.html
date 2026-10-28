@@ -87,7 +87,7 @@ body.playing .track .tick.now i{animation:tickpulse 1.4s ease-in-out infinite}
 .agent .cnt{position:absolute;top:8px;right:8px;font-size:12px;font-weight:700;background:var(--card2);border:1px solid var(--line);border-radius:999px;min-width:24px;padding:0 6px;color:var(--muted)}
 .agent.working{border-color:var(--c);box-shadow:0 0 0 1px var(--c),var(--shadow);transform:translateY(-3px)}
 .agent.working img,.agent.working .av{border-color:var(--c)}
-.agent.working .st{background:var(--c);color:#0c121a}
+.agent.working .st{background:var(--c);color:var(--ink,#0c121a)}
 .agent.done .st{color:var(--good)}
 .agent.done img{border-color:var(--good)}
 .tree{list-style:none;margin:10px 0 0;padding:0 0 0 8px;text-align:left;font-size:11px;line-height:1.35;color:var(--muted)}
@@ -133,7 +133,7 @@ body.playing .track .tick.now i{animation:tickpulse 1.4s ease-in-out infinite}
 .node .st{margin-top:4px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;background:var(--card2);color:var(--muted)}
 .node .cnt{position:absolute;top:-4px;left:calc(50% + 18px);font-size:11px;font-weight:700;background:var(--card2);border:1px solid var(--line);border-radius:999px;min-width:22px;padding:0 5px;color:var(--muted)}
 .node.working .ph{border-color:var(--c);animation:pulse 1.6s ease-in-out infinite}
-.node.working .st{background:var(--c);color:#0c121a}
+.node.working .st{background:var(--c);color:var(--ink,#0c121a)}
 .node.done .ph{border-color:var(--good)}
 .node.done .st{color:var(--good)}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 45%,transparent)}50%{box-shadow:0 0 0 10px color-mix(in srgb,var(--c) 0%,transparent)}}
@@ -246,6 +246,23 @@ svg .tx{fill:var(--text)}
 .ver.pick{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
 .ver b{display:block;font-size:14px;margin-bottom:2px}
 .actions3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+/* screenshots of the real outputs (a SHOT placeholder in a step body), in the page colour mode */
+.shots{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 0;align-items:start}
+.shots .wide{grid-column:1/-1}
+.shots.dp{grid-template-columns:3fr 1fr}
+.shot{margin:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card2);animation:rise .4s ease both}
+.shot img{display:block;width:100%;height:auto}
+.shot figcaption{font-size:11.5px;line-height:1.3;color:var(--muted);padding:4px 8px}
+.shot figcaption b{color:var(--text)}
+.shot .sh-light{display:none}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .shot .sh-light{display:block}:root:not([data-theme="dark"]) .shot .sh-dark{display:none}}
+:root[data-theme="light"] .shot .sh-light{display:block}:root[data-theme="light"] .shot .sh-dark{display:none}
+.bridge{width:100%;height:auto;display:block;margin:6px 0 0}
+.bridge .neg{fill:var(--bad)}.bridge .pos{fill:var(--good)}.bridge .net{fill:var(--c,var(--accent))}.bridge .zero{stroke:var(--line)}
+.cov{display:flex;height:12px;border-radius:6px;overflow:hidden;margin:8px 0 4px;background:var(--card2)}
+.cov i{display:block;height:100%;transform-origin:left;animation:grow .9s ease both}
+@keyframes grow{from{transform:scaleX(0)}to{transform:none}}
+.cov .g{background:var(--good)}.cov .w{background:var(--warn)}.cov .b{background:var(--bad)}
 .act{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--card2);font-size:13px;animation:rise .4s ease both}
 .act b{display:block;font-size:13px;color:var(--accent)}
 .meter{height:10px;border-radius:999px;background:var(--card2);border:1px solid var(--line);overflow:hidden;margin:6px 0 4px}
@@ -351,7 +368,7 @@ body.notk .tk,body.notk .tkv,body.notk .rtkey,body.notk #tkcard{display:none}
 <body>
 <div class="wrap">
   <h1>Kestrel Medical: KPI Creator at work</h1>
-  <p class="sub">Five AI agents at work with a human in the loop, taking Kestrel Medical, a generated test company, from business problem to KPI dashboard. Each output appears in the middle as it's made, and a line traces every move of the work between agents. Gold lines are handovers after the Human gives Keep, Change and Decision feedback and approves a stage.</p>
+  <p class="sub">Five AI agents at work with a human in the loop, taking Kestrel Medical, a generated test company, from business problem to KPI dashboard. Each output appears in the middle as it's made, and a line traces every move of the work between agents. Gold lines are handovers after the Human approves a stage.</p>
 
   <div class="bar">
     <div class="clock" aria-live="off">
@@ -468,8 +485,8 @@ const OUTF=E.map(e=>e.f);
 /* Stage 5: the stakeholder named in simulation.json; runs that replay Stage 5 have steps on the 'adam' seat and a gate 5 */
 const WHO=DATA.stakeholder||'the stakeholder',HAS5=E.some(x=>x.gate===5);
 const gateText=(g,long)=>g===5?'Human gives the go-live approval':g===4&&!HAS5?'Human gives the final approval'
-  :g===4?(long?'Human: Keep, Change, Decision. Stage 4 approved and the dashboard goes to the stakeholder review':'Human: Keep, Change, Decision. Stage 4 approved')
-  :(long?`Human: Keep, Change, Decision. Stage ${g} approved and the work moves on`:`Human: Keep, Change, Decision. Stage ${g} approved`);
+  :g===4?(long?'Human approves Stage 4 and the dashboard goes to the stakeholder review':'Human approves Stage 4')
+  :(long?`Human approves Stage ${g} and the work moves on`:`Human approves Stage ${g}`);
 document.getElementById('n-next').textContent=HAS5?'':`Next: Stage 5, Stakeholder Review and Handover. The walk-through with ${WHO}, sign-off and the Human's go-live approval. In test mode, Ovy then runs the sealed check and scores the run. Not in this replay.`;
 const olink=(f,t)=>f?`<a href="${f}" target="_blank" rel="noopener" title="Open in a new window">${t}</a>`:t;
 const T0=E[0].d;
@@ -593,6 +610,7 @@ function render(i,animate){
     else html=`<span class="lbl">Waiting</span>`;
     st.innerHTML=html;
   });
+  refreshInk();
   updateNums(i,animate);
   document.body.classList.toggle('ended',i===E.length-1);
   // track
@@ -669,7 +687,8 @@ document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closePops();});
 // light and dark mode button: starts from the device setting, remembers the viewer's choice
 const isDark=()=>(document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'))==='dark';
 function themeBtn(){const d=isDark(),t=d?'Switch to light mode':'Switch to dark mode';$('theme').innerHTML=d?'&#9788;':'&#9790;';$('theme').setAttribute('aria-label',t);$('theme').title=t;}
-$('theme').onclick=()=>{const t=isDark()?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('sim-theme',t)}catch(e){}themeBtn();};
+$('theme').onclick=()=>{const t=isDark()?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('sim-theme',t)}catch(e){}themeBtn();refreshInk();};
+matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>refreshInk());
 themeBtn();
 /* fit the circle to the screen: the scene is drawn at 800px and scaled */
 const small=matchMedia('(max-width:700px)');
@@ -681,10 +700,19 @@ function fitScene(){
 }
 fitScene();
 /* centre: no scrolling. The old step fades out, the new one fades in, scaled down if it would overflow */
+/* status text on an agent's own colour: dark or white, whichever reads better on that colour in this colour mode */
+function inkFor(el){
+  const m=getComputedStyle(el).getPropertyValue('--c').trim().match(/^#([0-9a-f]{6})$/i);if(!m)return '#0c121a';
+  const L=[0,2,4].map(k=>{const v=parseInt(m[1].substr(k,2),16)/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);})
+    .reduce((s,v,k)=>s+v*[.2126,.7152,.0722][k],0);
+  return (L+.05)/.0566>=1.05/(L+.05)?'#0c121a':'#ffffff';
+}
+function refreshInk(){document.querySelectorAll('.node,.agent').forEach(el=>el.style.setProperty('--ink',inkFor(el)));}
 let swapT=null;
 function swapCenter(html,animate){
   const out=$('out'),old=out.querySelector('.fit');clearTimeout(swapT);
-  const put=()=>{out.innerHTML=`<div class="fit">${html}</div>`;fitCenter();runBodyAnims();};
+  const put=()=>{out.innerHTML=`<div class="fit">${html}</div>`;fitCenter();runBodyAnims();
+    out.querySelectorAll('img').forEach(im=>{if(!im.complete)im.addEventListener('load',fitCenter,{once:true});});};
   if(animate&&old&&!reduce){old.classList.add('fade');swapT=setTimeout(put,300/speed);}else put();
 }
 function fitCenter(){
