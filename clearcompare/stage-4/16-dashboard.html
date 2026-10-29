@@ -354,7 +354,7 @@ footer{color:var(--muted);font-size:.74rem;border-top:1px solid var(--line);padd
 </section>
 
 <footer>
- <span>Built by Visalli from the Business Requirements v1.1 and the KPI Calculation Pack (Stage 2, approved 21-Oct-26). Every number matches the Calculation Pack.</span>
+ <span>Built by Viktor from the Business Requirements v1.1 and the KPI Calculation Pack (Stage 2, approved 21-Oct-26). Every number matches the Calculation Pack.</span>
  <span>ClearCompare is a made-up organisation. Sample data (synthetic), data to 30-Sep-26.</span>
 </footer>
 </main>
@@ -482,7 +482,7 @@ function hbars(rows,{max,fmt,hi,target,tName,extra}){return '<div class="hb">'+r
 R.perlead=el=>{if(el.dataset.done)return;el.dataset.done=1;el.innerHTML=hbars(D.perLead,{max:Math.max(...D.perLead.map(r=>r[1])),fmt:money,hi:r=>r[0]==='Energy',extra:r=>`${money(r[2])} a sale`})};
 T.perlead=()=>table(['Product area','Net revenue per lead','Commission per sale'],D.perLead.map(r=>[r[0],money(r[1]),money(r[2])]));
 
-/* Lead mix as a barbell on two vertical axes, one per quarter on the same scale (Visalli's chart portfolio: two-period comparison) */
+/* Lead mix as a barbell on two vertical axes, one per quarter on the same scale (Viktor's chart portfolio: two-period comparison) */
 R.mix=el=>{const w=el.clientWidth,q=Object.keys(D.mix),key=['Health','Energy'],order=['Life','Home loans','Energy','Health'];
  /* two vertical axes on one shared scale, Apr to Jun 26 on the left and Jul to Sep 26 on the right; each product joins its two quarters */
  const narrow=w<520,xa=narrow?Math.max(86,w*.3):w*.32,xb=w-xa,top=34,bot=14,H=narrow?280:310,lo=0,hi=50,Y=v=>top+(H-top-bot)*(1-(v-lo)/(hi-lo));
